@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "nac_ta",
+    "slug": "nac_ta",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./app/assets/pictures/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./app/assets/pictures/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "buildNumber": "4",
+      "supportsTablet": true,
+      "bundleIdentifier": "com.vsolv.ta"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./app/assets/pictures/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "package": "com.vsolv.nac_ta"
+    },
+    "web": {
+      "favicon": "./app/assets/pictures/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "a3d68bde-a142-4ab4-840d-768bb66190a7"
+      }
+    }
+  }
+}
