@@ -125,6 +125,17 @@ export default function ExpenseListCard({
             from: from,
           });
           break;
+        case 6:
+          navigation.navigate("Incidential Expense", {
+            TourId: itemData.item.tour_id,
+            FromDate: itemData.item.fromdate,
+            ToDate: itemData.item.todate,
+            ReqDate: itemData.item.Req,
+            Comments: reason,
+            IncidentialExpenseId: itemData.item.id,
+            from: from,
+          });
+          break;
       }
     }
     function expensecall() {
@@ -149,7 +160,6 @@ export default function ExpenseListCard({
     return (
       <View style={styles.item}>
         <Pressable onPress={List}>
-          
           <View style={styles.mainrow}>
             <View style={styles.row}>
               <Text style={styles.label}>Travel No : </Text>
@@ -166,19 +176,54 @@ export default function ExpenseListCard({
               <Text style={styles.label}>Claimed Amount : </Text>
               <Text style={styles.text}>{itemData.item.claimedamount}</Text>
             </View>
-            
+          </View>
+          <View style={styles.mainrow}>
+            <View style={styles.row}>
+              <Text style={styles.label}>Eligible Amount : </Text>
+              <Text style={styles.text}>{itemData.item.eligibleamount}</Text>
+            </View>
+            <View style={styles.row}>
+              {/* WhichExpense != 1 && */
+                data.length > 1 &&
+                itemData.item.from != "Approver" && (
+                  <MaterialIcons
+                    name="delete"
+                    size={24}
+                    color="red"
+                    onPress={() => {
+                      setid(itemData.item.id);
+                    }}
+                    onPressIn={deletedialogcall}
+                  />
+                )}
+            </View>
           </View>
 
-          {WhichExpense == 1 && (
+          {/*    {WhichExpense == 1 && (
             <View style={styles.mainrow}>
               <View style={styles.row}>
                 <Text style={styles.label}>Date : </Text>
                 <Text style={styles.text}>{itemData.item.Date}</Text>
               </View>
+              <View style={styles.row}>
+              {WhichExpense != 1 &&
+                data.length > 1 &&
+                itemData.item.from != "Approver" && (
+                  <MaterialIcons
+                    name="delete"
+                    size={24}
+                    color="red"
+                    onPress={() => {
+                      setid(itemData.item.id);
+                    }}
+                    onPressIn={deletedialogcall}
+                  />
+                )}
             </View>
-          )}
+            </View>
+          )} */}
 
-          <View style={styles.mainrow}>
+          {/* <View style={styles.mainrow}>
             <View style={styles.row}>
               <Text style={styles.label}>Remarks : </Text>
               <Text style={styles.text}>{itemData.item.remarks}</Text>
@@ -198,7 +243,7 @@ export default function ExpenseListCard({
                   />
                 )}
             </View>
-          </View>
+          </View> */}
         </Pressable>
         {dialogstatus && (
           <ReasonDialog

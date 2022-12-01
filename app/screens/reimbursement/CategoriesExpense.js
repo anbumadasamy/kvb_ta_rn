@@ -62,7 +62,7 @@ export default function CategoriesExpense({ route }) {
       if (some.length > 0) {
         switch (position) {
           case 1:
-            navigation.navigate("ExpenseList", {
+            navigation.navigate("Daily Diem", {
               TourId: TourId,
               FromDate: FromDate,
               ToDate: ToDate,
@@ -70,7 +70,7 @@ export default function CategoriesExpense({ route }) {
               tourreasonid: tourreasonid,
               max_applevel: max_applevel,
               claim_status_id: claim_status_id,
-              Tittle: "Daily Reimbursement List",
+              // Tittle: "Daily Reimbursement List",
               Comments: some[0].requestercomment,
               Position: 1,
             });
@@ -190,7 +190,7 @@ export default function CategoriesExpense({ route }) {
           colour: "#DE3FFD",
           list: "list",
         },
-       /*  {
+        /*  {
           text: "Associated Expenses",
           position: 5,
           icon: "emoji-flags",
@@ -277,8 +277,8 @@ export default function CategoriesExpense({ route }) {
       let json = await response.json();
 
       if ("detail" in json) {
-        if(json.detail == "Invalid credentials/token."){
-        AlertCredentialError(json.detail, navigation);
+        if (json.detail == "Invalid credentials/token.") {
+          AlertCredentialError(json.detail, navigation);
         }
       } else {
         for (let i = 0; i < json.data.length; i++) {
@@ -363,7 +363,7 @@ export default function CategoriesExpense({ route }) {
       setdialogstatus(!dialogstatus);
       switch (position) {
         case 1:
-          navigation.navigate("ExpenseList", {
+          navigation.navigate("Daily Diem", {
             TourId: TourId,
             FromDate: FromDate,
             ToDate: ToDate,
@@ -371,7 +371,8 @@ export default function CategoriesExpense({ route }) {
             tourreasonid: tourreasonid,
             max_applevel: max_applevel,
             claim_status_id: claim_status_id,
-            Tittle: "Daily Reimbursement List",
+            // Tittle: "Daily Reimbursement List",
+            DailyDiemId: "",
             Comments: reason,
             Position: 1,
           });
@@ -426,6 +427,19 @@ export default function CategoriesExpense({ route }) {
             max_applevel: max_applevel,
             claim_status_id: claim_status_id,
             AssociatedExpensesId: "",
+          });
+          break;
+        case 6:
+          navigation.navigate("Incidential Expense", {
+            TourId: TourId,
+            FromDate: FromDate,
+            ToDate: ToDate,
+            ReqDate: ReqDate,
+            Comments: reason,
+            tourreasonid: tourreasonid,
+            max_applevel: max_applevel,
+            claim_status_id: claim_status_id,
+            IncidentialExpenseId: "",
           });
           break;
       }

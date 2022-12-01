@@ -37,10 +37,11 @@ const styles = StyleSheet.create({
   },
   textInput: {
     width: "100%",
-    height: 45,
+    height: 40,
+    marginTop:5,
     borderRadius: 5,
     borderWidth: 1,
-    padding: 8,
+    padding: 10,
     fontSize: 14,
     borderColor: CustomColors.primary_gray,
     color: CustomColors.primary_dark,

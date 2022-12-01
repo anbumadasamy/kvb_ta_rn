@@ -2,27 +2,23 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { View, Text, StyleSheet, Pressable, TextInput, Alert } from "react-native";
 import { CustomColors } from "../../utilities/CustomColors";
 
-export default function Datepicker({ onPressStart, startDate, initial }) {
+export default function Datepicker({ onPressStart, startDate, hint }) {
   return (
     <View style={styles.inputTextContainer}>
       <Text style={styles.label}>Date* : </Text>
       <Pressable onPress={onPressStart}>
         <View style={styles.container}>
-          {startDate == initial ? (
+          {startDate ? (
             <Text
-              style={{ color: CustomColors.text_gray, textAlign: "center" }}
+              style={styles.value}
             >
               {startDate}
             </Text>
           ) : (
             <Text
-              style={{
-                color: CustomColors.primary_dark,
-                textAlign: "center",
-                justifyContent: "center",
-              }}
+              style={styles.hintText}
             >
-              {startDate}
+              {hint}
             </Text>
           )}
           <MaterialIcons name={"calendar-today"} size={24} color="#FFBB4F" />
@@ -56,5 +52,14 @@ const styles = StyleSheet.create({
     padding: 8,
 
     flexDirection: "row",
+  },
+  value: {
+    fontSize: 14,
+    color: CustomColors.primary_dark,
+    
+  },
+  hintText: {
+    fontSize: 14,
+    color: CustomColors.primary_gray,
   },
 });

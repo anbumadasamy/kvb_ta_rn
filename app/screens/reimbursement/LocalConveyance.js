@@ -25,6 +25,7 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { CustomColors } from "../../utilities/CustomColors";
 import AlertCredentialError from "../../components/toast/AlertCredentialError";
 import ToastMessage from "../../components/toast/ToastMessage";
+import LabelTextColumnView from "../../components/ui/LabelTextColumnView";
 
 export default function LocalConveyance({ route }) {
   const TourId = route.params.TourId;
@@ -118,8 +119,8 @@ export default function LocalConveyance({ route }) {
 
       console.log(JSON.stringify(json) + "Local COnveyance");
       if ("detail" in json) {
-        if(json.detail == "Invalid credentials/token."){
-        AlertCredentialError(json.detail, navigation);
+        if (json.detail == "Invalid credentials/token.") {
+          AlertCredentialError(json.detail, navigation);
         }
       } else {
         for (let i = 0; i < json.data.length; i++) {
@@ -168,8 +169,8 @@ export default function LocalConveyance({ route }) {
       });
       let json = await response.json();
       if ("detail" in json) {
-        if(json.detail == "Invalid credentials/token."){
-        AlertCredentialError(json.detail, navigation);
+        if (json.detail == "Invalid credentials/token.") {
+          AlertCredentialError(json.detail, navigation);
         }
       } else {
         for (let i = 0; i < json.length; i++) {
@@ -236,8 +237,8 @@ export default function LocalConveyance({ route }) {
 
       let json = await response.json();
       if ("detail" in json) {
-        if(json.detail == "Invalid credentials/token."){
-        AlertCredentialError(json.detail, navigation);
+        if (json.detail == "Invalid credentials/token.") {
+          AlertCredentialError(json.detail, navigation);
         }
       } else {
         seteligibleamount(json.Eligible_amount);
@@ -294,8 +295,8 @@ export default function LocalConveyance({ route }) {
       if (json) {
         setProgressBar(false);
         if ("detail" in json) {
-          if(json.detail == "Invalid credentials/token."){
-          AlertCredentialError(json.detail, navigation);
+          if (json.detail == "Invalid credentials/token.") {
+            AlertCredentialError(json.detail, navigation);
           }
         }
         if (json.message) {
@@ -378,7 +379,7 @@ export default function LocalConveyance({ route }) {
               settoplace(updated);
             }}
           ></Inputtextrow>
-          <Datepicker
+          {/* <Datepicker
             onPressStart={() => {
               if (editable) {
                 setpickerstatus(!pickerstatus);
@@ -398,7 +399,17 @@ export default function LocalConveyance({ route }) {
             maximumDate={new Date(ToDate)}
             minimumDate={new Date(FromDate)}
           />
-
+ */}
+          <DropDown
+            label="Mode of Travel*"
+            hint="Mode of Travel"
+            indata={subcategory}
+            ontouch={() => {
+              if (editable) {
+                setdialogstatus(!dialogstatus);
+              }
+            }}
+          ></DropDown>
           <DropDown
             label="Sub category *"
             hint="Mode of Travel"
@@ -409,6 +420,27 @@ export default function LocalConveyance({ route }) {
               }
             }}
           ></DropDown>
+          <DropDown
+            label="Center*"
+            hint="Mode of Travel"
+            indata={subcategory}
+            ontouch={() => {
+              if (editable) {
+                setdialogstatus(!dialogstatus);
+              }
+            }}
+          ></DropDown>
+          <DropDown
+            label="Onward/Return*"
+            hint="Onward/Return"
+            indata={subcategory}
+            ontouch={() => {
+              if (editable) {
+                setdialogstatus(!dialogstatus);
+              }
+            }}
+          ></DropDown>
+
           {dialogstatus && (
             <DropDownDialog
               dialogstatus={dialogstatus}
@@ -421,7 +453,7 @@ export default function LocalConveyance({ route }) {
               }}
             ></DropDownDialog>
           )}
-          <InputNumberrow
+          {/*  <InputNumberrow
             label="Distance in KM* : "
             hint="Distance in KM"
             value={distance}
@@ -439,7 +471,12 @@ export default function LocalConveyance({ route }) {
             onChangeEvent={(updated) => {
               setbillno(updated);
             }}
-          ></Inputtextrow>
+          ></Inputtextrow> */}
+          <LabelTextColumnView
+            label="Eligible Amount:"
+            hint="Eligible Amount"
+            value={claimamount}
+          ></LabelTextColumnView>
           <InputNumberrow
             label="Claim Amount* :"
             hint="Claim Amount"

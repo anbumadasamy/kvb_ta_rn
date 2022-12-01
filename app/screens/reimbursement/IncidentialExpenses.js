@@ -26,17 +26,30 @@ import AlertCredentialError from "../../components/toast/AlertCredentialError";
 import ToastMessage from "../../components/toast/ToastMessage";
 import DateTimeSelector from "../../components/ui/DateTimeSelector";
 
-export default function DailyDiem({ route }) {
+import DropDownDialog from "../../components/dialog/DropDownDialog";
+
+
+export default function IncidentialExpenses({ route }) {
   const TourId = route.params.TourId;
   const ReqDate = route.params.ReqDate;
   const FromDate = route.params.FromDate;
   const ToDate = route.params.ToDate;
-  let DailyDiemId = route.params.DailyDiemId;
-  let customid = route.params.customid;
+  let IncidentialExpenseId = route.params.IncidentialExpenseId;
+ 
   // let list = route.params.Data;
   let jsonobject;
   let obj;
   let eligible;
+  const [sdreturn, setsdreturn] = useState(false);
+  const [motravel, setmotravel] = useState("");
+  const [traveltime, settraveltime] = useState("");
+  const [single_fare, setsingle_fare] = useState("");
+  const [incidentialexpense, setincidentialexpense] = useState("");
+  const [dialogstatus, setdialogstatus] = useState(false);
+  const [modeoftraveldata, setmodeoftraveldata] = useState("");
+
+
+
   const [boarding, setboarding] = useState(false);
   const [accomodation, setaccomodation] = useState(false);
   const [declaration, setdeclaration] = useState(false);
@@ -66,7 +79,10 @@ export default function DailyDiem({ route }) {
   const [nooghourseditable, setnoofhourseditable] = useState(false);
   const [first, setfirst] = useState(true);
 
-  console.log(city + " city");
+
+  const onPressdreturn = (radioButtonsArray) => {
+    setsdreturn(radioButtonsArray[0].selected);
+  };
 
   const onPressboarding = (radioButtonsArray) => {
     setboarding(radioButtonsArray[0].selected);
@@ -79,11 +95,9 @@ export default function DailyDiem({ route }) {
   };
 
   useEffect(() => {
-    navigation.setOptions({
-      title: "Daily Diem",
-    });
+    
     getdata();
-    getTourGrade();
+    
   }, []);
 
   useEffect(() => {
@@ -116,31 +130,29 @@ export default function DailyDiem({ route }) {
 
   useEffect(() => {
     // return () => {
-      console.log(first+ "Yenda inga vanthaaaa")
+      
     if (!first) {
+      console.log(single_fare+" single_fare")
+      console.log(traveltime+" traveltime")
+      console.log(motravel+" motravel")
+
       if (
-        city != "" &&
-        checkoutTime != "" &&
-        checkingTime != "" &&
-        checkingDate != "" &&
-        checkoutDate != ""
+        single_fare != "" &&
+        traveltime != "" &&
+        motravel != "" 
       ) {
         EligibleAmountCalculation();
       }
     } /* else {
       setfirst(false);
     } */
-    console.log("Eligible Calculation");
+   
     // };
   }, [
-    checkingTime,
-    checkoutTime,
-    city,
-    boarding,
-    checkingDate,
-    checkoutDate,
-    accomodation,
-    declaration,
+    single_fare,
+    traveltime,
+    motravel,
+    sdreturn,
     first,
   ]);
   /* 
@@ -157,41 +169,23 @@ export default function DailyDiem({ route }) {
   } */
 
   async function EligibleAmountCalculation() {
+    
     eligible = {
-      city: city,
-      fromdate:
-        moment(dailydiemdatems).format("YYYY-MM-DD") +
-        " " +
-        checkingTime +
-        ":00",
-      todate:
-        moment(dailydiemdatems).format("YYYY-MM-DD") +
-        " " +
-        checkoutTime +
-        ":00",
-      tourgid: TourId,
-      isleave: 0,
-      // expensegid: 2,
+      expenseid:3,
+      travel_mode: motravel,
+      travel_hours:traveltime,
+      single_fare:single_fare,
     };
 
-    if (boarding) {
-      eligible["boardingbybank"] = 1;
+    if (sdreturn) {
+      eligible["same_day_return"] = 1;
     } else {
-      eligible["boardingbybank"] = 0;
+      eligible["same_day_return"] = 0;
     }
-    if (accomodation) {
-      eligible["accbybank"] = 1;
-    } else {
-      eligible["accbybank"] = 0;
-    }
-    if (declaration) {
-      eligible["declaration"] = 1;
-    } else {
-      eligible["declaration"] = 0;
-    }
+   
 
     try {
-      const response = await fetch(URL.DAILY_DIEM_ElIGIBLE, {
+      const response = await fetch(URL.INCIDENTIAL_ElIGIBLE, {
         method: "POST",
         body: JSON.stringify(eligible),
         headers: {
@@ -202,6 +196,7 @@ export default function DailyDiem({ route }) {
       let json = await response.json();
 
       console.log(JSON.stringify(json) + " Eligible Amount Data");
+
       if ("detail" in json) {
         if (json.detail == "Invalid credentials/token.") {
           AlertCredentialError(json.detail, navigation);
@@ -209,44 +204,26 @@ export default function DailyDiem({ route }) {
         }
       }
 
-      seteligibleamount(json.Eligible_amount + "");
-      setnoofhour(json.sys_hours + "");
-      setenternoofhour("");
+      setincidentialexpense(json.elgibleamount + "");
+      
     } catch (error) {}
   }
 
-  async function getTourGrade() {
-    try {
-      let subcategoryarray = [];
-      const response = await fetch(URL.TOUR_GRADE + route.params.TourId, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: authCtx.auth_token,
-        },
-      });
-      let json = await response.json();
-
-      console.log(JSON.stringify(json) + " Tour Grade");
-      if ("detail" in json) {
-        if (json.detail == "Invalid credentials/token.") {
-          AlertCredentialError(json.detail, navigation);
-          return;
-        }
-      }
-      settourgrade(json.employee_grade);
-    } catch (error) {}
-  }
+  
 
   async function getdata() {
     try {
       let subcategoryarray = [];
-      const response = await fetch(URL.COMMON_DROPDOWN + "dailydiem", {
+      const response = await fetch(URL.COMMON_DROPDOWN + "incidental_travelmode", {
         headers: {
           "Content-Type": "application/json",
           Authorization: authCtx.auth_token,
         },
       });
       let json = await response.json();
+
+      console.log(JSON.stringify(json)+ " Travel Mode Json Response")
+
       if ("detail" in json) {
         if (json.detail == "Invalid credentials/token.") {
           AlertCredentialError(json.detail, navigation);
@@ -259,12 +236,14 @@ export default function DailyDiem({ route }) {
           };
           subcategoryarray.push(obj);
         }
-        setsubcategorydata(subcategoryarray);
+        setmodeoftraveldata(subcategoryarray);
       }
-    } catch (error) {}
+    } catch (error) {
+
+    }
   }
   useEffect(() => {
-    if (DailyDiemId != "") {
+    if (IncidentialExpenseId != "") {
       get();
     } else {
       // setremarks(route.params.Remarks);
@@ -273,91 +252,52 @@ export default function DailyDiem({ route }) {
       setrequestercomment(route.params.Comments);
       setProgressBar(false);
     }
-  }, [DailyDiemId]);
+  }, [IncidentialExpenseId]);
 
   function validation() {
-    if (checkingDate == "") {
-      Alert.alert("Enter From Date");
+    if (motravel == "") {
+      Alert.alert("Choose Mode of Travel");
       return;
     }
-    if (checkoutDate == "") {
-      Alert.alert("Enter To Date");
+    if (traveltime == "") {
+      Alert.alert("Enter Travel Time");
       return;
     }
-    if (checkingTime == "") {
-      Alert.alert("Enter From Time");
+    if (single_fare == "") {
+      Alert.alert("Enter Single Fare");
       return;
     }
-    if (checkoutTime == "") {
-      Alert.alert("Enter To Time");
-      return;
-    }
-    if (enternoofhour == "") {
-      Alert.alert("Enter No of Hour");
-      return;
-    }
-    /*  if (leavedays == "") {
-      Alert.alert("Enter Leave Days");
-      return;
-    } */
-    if (city == "") {
-      Alert.alert("Choose City");
-      return;
-    }
-    if (claimamount == "") {
-      Alert.alert("Claim Amount Can't be empty");
+    if (incidentialexpense == "") {
+      Alert.alert("Incidential Expense Can't be empty");
       return;
     }
 
-    DailyDiemExpensePost();
+    IncidentialExpensePost();
   }
 
-  function DailyDiemExpensePost() {
+  function IncidentialExpensePost() {
     obj = {
-      tourgid: TourId,
-      expenseid: 2,
-      fromdate:
-        moment(dailydiemdatems).format("YYYY-MM-DD") +
-        " " +
-        checkingTime +
-        ":00",
-      todate:
-        moment(dailydiemtodatems).format("YYYY-MM-DD") +
-        " " +
-        checkoutTime +
-        ":00",
-      syshours: noofhour,
-      noofhours: enternoofhour,
-      city: city,
-      mobile: 1,
-      isleave: 0,
+      tourid: TourId,
+      expenseid: 3,
       requestercomment: requestercomment,
+      travel_mode:motravel,
+      single_fare:parseInt(single_fare),
+      travel_hours:parseInt(traveltime),
+      amount:parseInt(incidentialexpense),
+      mobile: 1,
     };
 
-    if (claimamount != "") {
-      obj["claimedamount"] = parseInt(claimamount);
-    } else {
-      obj["claimedamount"] = 0;
-    }
+   
 
-    if (boarding) {
-      obj["boardingbybank"] = 1;
+    if (sdreturn) {
+      obj["same_day_return"] = 1;
     } else {
-      obj["boardingbybank"] = 0;
+      obj["same_day_return"] = 0;
     }
-    if (accomodation) {
-      obj["accbybank"] = 1;
-    } else {
-      obj["accbybank"] = 0;
-    }
-    if (declaration) {
-      obj["declaration"] = 1;
-    } else {
-      obj["declaration"] = 0;
-    }
+  
 
-    if (DailyDiemId != "") {
-      obj["id"] = DailyDiemId;
+    if (IncidentialExpenseId != "") {
+      obj["id"] = IncidentialExpenseId;
       jsonobject = JSON.stringify({
         data: [obj],
       });
@@ -371,7 +311,7 @@ export default function DailyDiem({ route }) {
   async function APICall() {
     setProgressBar(true);
     try {
-      const response = await fetch(URL.DAILY_DIEM, {
+      const response = await fetch(URL.INCIDENTIAL, {
         method: "POST",
         body: jsonobject,
         headers: {
@@ -382,7 +322,7 @@ export default function DailyDiem({ route }) {
 
       let json = await response.json();
 
-      console.log(JSON.stringify(jsonobject) + " Daily Diem Object");
+      console.log(JSON.stringify(jsonobject) + " Inciedential Expense Object");
 
       if (json) {
         setProgressBar(false);
@@ -424,7 +364,7 @@ export default function DailyDiem({ route }) {
       }  */
 
       for (let i = 0; i < json.data.length; i++) {
-        if (json.data[i].id == DailyDiemId) {
+        if (json.data[i].id == IncidentialExpenseId) {
           let datewithtime = json.data[i].fromdate.split(" ");
           let uniqdate = datewithtime[0].split("-");
           let uniqtime = datewithtime[1];
@@ -539,8 +479,8 @@ export default function DailyDiem({ route }) {
           } else {
             setdeclaration(false);
           }
-          if(editable){
-            setnoofhourseditable(true)
+          if (editable) {
+            setnoofhourseditable(true);
           }
 
           setProgressBar(false);
@@ -613,194 +553,61 @@ export default function DailyDiem({ route }) {
             </View>
             <Dateview date={ReqDate}></Dateview>
           </View>
+          <CustomizedRadioButton
+            label="Onward and Return journey on same Day :"
+            status={sdreturn}
+            buttonpressed={onPressdreturn}
+          ></CustomizedRadioButton>
           <DropDown
-            label="City*"
-            hint="City"
-            indata={city}
+            label="Mode of Travel*"
+            hint="Mode of Travel"
+            indata={motravel}
             ontouch={() => {
               if (editable) {
-                setcitydialogstatus(!citydialogstatus);
+                setdialogstatus(!dialogstatus);
                 setfirst(false);
               }
             }}
           ></DropDown>
 
-          {citydialogstatus && (
-            <SearchDialog
-              dialogstatus={citydialogstatus}
-              setValue={setcity}
-              setdialogstatus={setcitydialogstatus}
-              from="DailyDiemCitySearch"
-              grade={tourgrade}
+          {dialogstatus && (
+            <DropDownDialog
+              dialogstatus={dialogstatus}
+              data={modeoftraveldata}
+              Tittle="Mode Of Travel"
+              setdata={setmotravel}
+              setdialogstatus={setdialogstatus}
+              clicked={() => setfirst(false)}
             />
           )}
+         
 
-          <DateTimeSelector
-            inDate={checkingDate}
-            inDateLabel={"From Date:* "}
-            outDateLabel={"To Date:*"}
-            inTimeLabel={"From Time:*"}
-            outTimeLabel={"To Time:*"}
-            inDateLabelhint={"From Date:"}
-            outDateLabelhint={"To Date:"}
-            inTimeLabelhint={"From Time:"}
-            outTimeLabelhint={"To Time:"}
-            outDate={checkoutDate}
-            inTime={checkingTime}
-            outTime={checkoutTime}
-            inDateOnPress={() => {
-              if (editable) {
-                setcheckingDateStatus(!checkingdateStatus);
-                setcheckoutDate("");
-                setfirst(false)
-              }
-            }}
-            outDateOnPress={() => {
-              if (editable) {
-                if (checkingDate != "") {
-                  setcheckoutDateStatus(!checkoutDateStatus);
-                  setfirst(false)
-                } else {
-                  Alert.alert("First Fill Start Date");
-                }
-              }
-            }}
-            inTimeOnPress={() => {
-              if (editable) {
-                setcheckingTimeStatus(!checkingTimeStatus);
-                setfirst(false)
-              }
-            }}
-            outTimeOnPress={() => {
-              if (editable) {
-                if (checkingTime != "") {
-                  setcheckoutTimeStatus(!checkoutTimeStatus);
-                  setfirst(false)
-                } else {
-                  Alert.alert("First Fill Start time");
-                }
-              }
-            }}
-          ></DateTimeSelector>
-          <DateTimePickerModal
-            isVisible={checkingdateStatus}
-            mode="date"
-            onConfirm={onStartDate}
-            onCancel={() => {
-              setcheckingDateStatus(false);
-            }}
-            display={Platform.OS == "ios" ? "inline" : "default"}
-            maximumDate={new Date(ToDate)}
-            minimumDate={new Date(FromDate)}
-          />
-          <DateTimePickerModal
-            isVisible={checkoutDateStatus}
-            mode="date"
-            onConfirm={onEndDate}
-            onCancel={() => {
-              setcheckoutDateStatus(false);
-            }}
-            display={Platform.OS == "ios" ? "inline" : "default"}
-            maximumDate={new Date(ToDate)}
-            minimumDate={new Date(FromDate)}
-          />
-
-          <DateTimePickerModal
-            isVisible={checkingTimeStatus}
-            mode="time"
-            locale="en_GB"
-            date={new Date()}
-            display={Platform.OS == "ios" ? "spinner" : "default"}
-            is24Hour={true}
-            minuteInterval={15}
-            onConfirm={onStartTime}
-            onCancel={() => {
-              setcheckingTimeStatus(false);
-            }}
-          />
-          <DateTimePickerModal
-            isVisible={checkoutTimeStatus}
-            mode="time"
-            locale="en_GB"
-            date={new Date()}
-            display={Platform.OS == "ios" ? "spinner" : "default"}
-            is24Hour={true}
-            minuteInterval={15}
-            onConfirm={onEndTime}
-            onCancel={() => {
-              setcheckoutTimeStatus(false);
-            }}
-          />
-          <View style={{ flexDirection: "row" }}>
-            <View style={styles.inputTextContainerLeft}>
-              <LabelTextColumnView
-                label="No of Hours(System):"
-                hint="System No of Hours"
-                value={noofhour}
-              ></LabelTextColumnView>
-            </View>
-            <View style={styles.inputTextContainerRight}>
-              <InputNumberrow
-                label="No of Hours :*"
-                hint="No of Hours"
-                value={enternoofhour}
-                editable={nooghourseditable}
-                onChangeEvent={(updated) => {
-                  console.log(nooghourseditable + " no of hour editable");
-                  if (noofhour != "") {
-                    if (
-                      parseFloat(noofhour.split(":")[0]) >= parseFloat(updated)
-                    ) {
-                      setenternoofhour(updated);
-                    } else {
-                      setenternoofhour("");
-                    }
-                  } else {
-                    setenternoofhour("");
-                  }
-                }}
-              ></InputNumberrow>
-            </View>
-          </View>
-          {/*  <InputNumberrow
-            label="No of Leave Days:*"
-            hint="Leave Days"
-            value={leavedays}
-            editable={editable}
-            onChangeEvent={(updated) => {
-              setleavedays(updated);
-            }}
-          ></InputNumberrow> */}
-          <LabelTextColumnView
-            label="Eligible Amount:"
-            hint=""
-            value={eligibleamount}
-          ></LabelTextColumnView>
           <InputNumberrow
-            label="Claim Amount:*"
-            hint=""
-            value={claimamount}
+            label="Travel Time in Hours* :"
+            hint="Travel Time in Hours"
+            value={traveltime}
             editable={editable}
             onChangeEvent={(updated) => {
-              setclaimamount(updated);
+              settraveltime(updated);
+              setfirst(false);
+            }}
+          ></InputNumberrow>
+          <InputNumberrow
+            label="Single Fare* :"
+            hint="Single Fare"
+            value={single_fare}
+            editable={editable}
+            onChangeEvent={(updated) => {
+              setsingle_fare(updated);
+              setfirst(false);
             }}
           ></InputNumberrow>
 
-          <CustomizedRadioButton
-            label="Accommodation Provided by bank* :"
-            status={accomodation}
-            buttonpressed={onPressaccomodation}
-          ></CustomizedRadioButton>
-          <CustomizedRadioButton
-            label="Boarding Provided by Organizer* :"
-            status={boarding}
-            buttonpressed={onPressboarding}
-          ></CustomizedRadioButton>
-          <CustomizedRadioButton
-            label="Declaration for boarding submitted* :"
-            status={declaration}
-            buttonpressed={onPressdeclaration}
-          ></CustomizedRadioButton>
+          <LabelTextColumnView
+            label="Incidential Expense* :"
+            hint="Incidential Expense"
+            value={incidentialexpense}
+          ></LabelTextColumnView>
         </ScrollView>
       )}
 
