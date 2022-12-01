@@ -63,6 +63,8 @@ export const URL = {
   DAILY_DIEM: TA_SERVER + "dailydeim",
   LOCAL_CONVEYANCE: TA_SERVER + "localconv",
   LODGING: TA_SERVER + "lodging",
+  INCIDENTIAL: TA_SERVER + "incidental",
+
   TRAVELING_EXPENSES: TA_SERVER + "travel",
   ASSOCIATED_EXPENSES: TA_SERVER + "associate",
   EXPENSE_DELETE: TA_SERVER + "expense_delete/",
@@ -74,9 +76,12 @@ export const URL = {
   LOCAL_CONVEYANCE_ELIGIBLE_AMOUNT: TA_SERVER + "localconv/logic",
   DAILY_DIEM_ElIGIBLE: TA_SERVER + "dailydeim/logic",
   LODGING_ElIGIBLE: TA_SERVER + "lodging/logic",
+  INCIDENTIAL_ElIGIBLE: TA_SERVER + "incidental/logic",
+
 
   TRAVEL_APPROVEL_SUMMARY: TA_SERVER + "nac_tourapprove/tour?",
   APPROVAL_FLOW_SUMMARY: TA_SERVER + "approval_flow_get?type=all&tourid=",
+
 
   // on behalf of api
   ON_BEHALF_OF_SUMMARY: TA_SERVER + "nac_tourdata?onbehalf=",
@@ -101,4 +106,8 @@ export const URL = {
   DOCUMENT_DOWNLOAD: TA_SERVER + "document_view?",
   CHECK_ADMIN: USER_SERVER + "user_modules",
   REQUIREMENT_USER_CANCEL: TA_SERVER + "cancel_booking_request?booking_type=",
+
+  TOUR_GRADE: TA_SERVER + "tourno_grade_get/",
+  DAILY_DIEM_CITY:TA_SERVER+"allowance?city=",
+  
 };

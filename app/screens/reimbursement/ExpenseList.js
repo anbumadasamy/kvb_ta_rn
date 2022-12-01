@@ -1,12 +1,6 @@
 import { useEffect, useState, useContext } from "react";
 import { useNavigation } from "@react-navigation/native";
-import {
-  View,
-  StyleSheet,
-  Text,
-  Alert,
-  Image,
-} from "react-native";
+import { View, StyleSheet, Text, Alert, Image } from "react-native";
 import { AuthContext } from "../../data/Auth-Context";
 import { URL } from "../../utilities/UrlBase";
 import moment from "moment";
@@ -32,46 +26,6 @@ export default function ExpenseList({ route }) {
   const authCtx = useContext(AuthContext);
 
 
-  function DailydeimCustomflatlist() {
-    let tempFromDate = new Date(FromDate);
-    let tempToDate = new Date(ToDate);
-    let fDate = tempFromDate.getTime();
-    let tdate = tempToDate.getTime();
-
-    for (let i = fDate; i <= tdate; i += 86400000) {
-      const obj = {
-        id: i,
-        CustomData: true,
-        tour_id: TourId,
-        expensegid: 2,
-        citytype: "Domestic",
-        visitcity: "",
-        fromdatewithtime: `${moment(i).format("YYYY-MM-DD")} 00:00:00`,
-        todatewithtime: `${moment(i).format("YYYY-MM-DD")} 00:00:00`,
-        noofhours: 0,
-        billno: "",
-        boardingbyorganiser: "NO",
-        foodallowance: 0,
-        claimedamount: 0,
-        medicalexpense: 0,
-        remarks: "",
-        requestercomment: "",
-        fromdate: FromDate,
-        todate: ToDate,
-        eligibleamount: 0,
-        Req: ReqDate,
-        Date: moment(i).format("DD-MM-YYYY"),
-        remarks: "",
-      };
-      if ("Comments" in route.params) {
-        obj["Comments"] = route.params.Comments;
-      }
-      tourdates.push(obj);
-    }
-    setlist(tourdates);
-    setProgressBar(false);
-    
-  }
 
   useEffect(() => {
     navigation.setOptions({
@@ -101,9 +55,12 @@ export default function ExpenseList({ route }) {
         case 5:
           deleteurl = URL.ASSOCIATED_EXPENSES;
           break;
+        case 6:
+          deleteurl = URL.INCIDENTIAL;
+          break;
       }
 
-      console.log(deleteurl+ "/tour/" + getselectedid+"Delete Url")
+      console.log(deleteurl + "/tour/" + getselectedid + "Delete Url");
 
       const response = await fetch(deleteurl + "/tour/" + getselectedid, {
         method: "DELETE",
@@ -115,17 +72,16 @@ export default function ExpenseList({ route }) {
 
       let json = await response.json();
 
-      console.log(JSON.stringify(json)+"Delete Api Response")
+      console.log(JSON.stringify(json) + "Delete Api Response");
 
-     
       if (json) {
         if ("detail" in json) {
-          if(json.detail == "Invalid credentials/token."){
-          AlertCredentialError(json.detail, navigation);
+          if (json.detail == "Invalid credentials/token.") {
+            AlertCredentialError(json.detail, navigation);
           }
         }
         if (json.status) {
-          ToastMessage(json.status)  
+          ToastMessage(json.status);
           // Alert.alert(json.status);
           navigation.goBack();
         } else {
@@ -134,7 +90,6 @@ export default function ExpenseList({ route }) {
       }
     } catch (error) {
       // setProgressBar(false);
-      
     }
   }
 
@@ -145,7 +100,7 @@ export default function ExpenseList({ route }) {
       switch (Position) {
         case 1:
           url = URL.DAILY_DIEM;
-          break;  
+          break;
         case 2:
           url = URL.LOCAL_CONVEYANCE;
           break;
@@ -158,36 +113,56 @@ export default function ExpenseList({ route }) {
         case 5:
           url = URL.ASSOCIATED_EXPENSES;
           break;
+        case 6:
+          url = URL.INCIDENTIAL;
+          break;
       }
+      console.log(url + "/tour/" + TourId + " Expense List API ");
+
+
+
       const response = await fetch(url + "/tour/" + TourId, {
         headers: {
           "Content-Type": "application/json",
           Authorization: authCtx.auth_token,
         },
       });
+      console.log(response.status + " status");
       let json = await response.json();
-      if ("detail" in json) {
-        if(json.detail == "Invalid credentials/token."){
+      if (response.status == 403) {
         AlertCredentialError(json.detail, navigation);
-        }
+        return;
       }
-      else if (json.data.length != 0) {
+
+      console.log(JSON.stringify(json) + " Expense List Data");
+
+
+
+      if (json.data.length != 0) {
         for (let i = 0; i < json.data.length; i++) {
-          let datewithtime = json.data[i].fromdate.split(" ");
+
+       /*    let datewithtime = json.data[i].fromdate.split(" ");
           let uniqdate = datewithtime[0];
-          let uniqtime = datewithtime[1];
+          let uniqtime = datewithtime[1]; */
 
           const obj = {
             id: json.data[i].id,
-            tour_id: json.data[i].tour_id,
             claimedamount: json.data[i].claimedamount,
-            Date: uniqdate,
+            eligibleamount:json.data[i].eligibleamount,
+            // Date: uniqdate,
             fromdate: FromDate,
             todate: ToDate,
             CustomData: false,
-            remarks: json.data[i].remarks,
+            // remarks: json.data[i].remarks,
             Req: ReqDate,
           };
+
+          if ("tourid" in json.data[i]) {
+            obj["tour_id"] = json.data[i].tourid;
+          }
+          else{
+            obj["tour_id"] = json.data[i].tourgid;
+          }
           if ("from" in route.params) {
             obj["from"] = route.params.from;
           }
@@ -196,16 +171,12 @@ export default function ExpenseList({ route }) {
         }
         setlist(tourdates);
         setProgressBar(false);
-      } else if (json.data.length == 0 && Position == 1) {
-        DailydeimCustomflatlist();
       }
     } catch (error) {
+      console.log(error + " error");
       setProgressBar(false);
-     
     }
   }
-
- 
 
   return (
     <View style={styles.screenContainer}>

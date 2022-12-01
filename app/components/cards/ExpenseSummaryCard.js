@@ -1,4 +1,11 @@
-import { View, Text, StyleSheet, FlatList, Alert,Pressable } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Alert,
+  Pressable,
+} from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { CustomColors } from "../../utilities/CustomColors";
@@ -39,6 +46,10 @@ export default function ExpenseSummaryCard({
           Position = 1;
           title = "Daily Reimbursement List";
           break;
+        case 3:
+          Position = 6;
+          title = "Incidential Expense List";
+          break;
         case 4:
           Position = 2;
           title = "Local Conveyance List";
@@ -55,8 +66,8 @@ export default function ExpenseSummaryCard({
       navigation.navigate("ExpenseList", {
         TourId: itemData.item.TourId,
         ReqDate: itemData.item.reqdate,
-        FromDate:itemData.item.FromDate,
-        ToDate:itemData.item.ToDate,
+        FromDate: itemData.item.FromDate,
+        ToDate: itemData.item.ToDate,
         Tittle: title,
         Position: Position,
         from: from,
@@ -66,25 +77,25 @@ export default function ExpenseSummaryCard({
     return (
       <View style={styles.item}>
         <Pressable onPress={expensecall}>
-        <View style={styles.mainrow}>
-          <View style={styles.row}>
-            <Text style={styles.label}>Expense Type: </Text>
-            <Text style={styles.text}>{itemData.item.expenseType}</Text>
-          </View>
+          <View style={styles.mainrow}>
+            <View style={styles.row}>
+              <Text style={styles.label}>Expense Type: </Text>
+              <Text style={styles.text}>{itemData.item.expenseType}</Text>
+            </View>
           </View>
 
           <View style={styles.mainrow}>
-          <View style={styles.row}>
-            <Text style={styles.label}>Approved Amount: </Text>
-            <Text style={styles.text}>{itemData.item.approvedAmount}</Text>
-          </View>
+            <View style={styles.row}>
+              <Text style={styles.label}>Approved Amount: </Text>
+              <Text style={styles.text}>{itemData.item.approvedAmount}</Text>
+            </View>
           </View>
 
           <View style={styles.mainrow}>
-          <View style={styles.row}>
-            <Text style={styles.label}>Claim Amount: </Text>
-            <Text style={styles.text}>{itemData.item.claimAmount}</Text>
-          </View>
+            <View style={styles.row}>
+              <Text style={styles.label}>Claim Amount: </Text>
+              <Text style={styles.text}>{itemData.item.claimAmount}</Text>
+            </View>
           </View>
 
           <View style={styles.mainrow}>

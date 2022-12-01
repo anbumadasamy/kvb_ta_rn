@@ -24,6 +24,7 @@ export default function SearchDialog({
   setId,
   setfirst,
   apicall,
+  grade,
 }) {
   const [isModalVisible, setModalVisible] = useState(dialogstatus);
   const authCtx = useContext(AuthContext);
@@ -100,6 +101,15 @@ export default function SearchDialog({
         break;
       case "entity":
         url = URL.ENTITY_LIST;
+        break;
+      case "DailyDiemCitySearch":
+        url =
+          URL.DAILY_DIEM_CITY +
+          search +
+          "&employeegrade=" +
+          grade +
+          "&expensename=Daily Diem&page=" +
+          count;
         break;
     }
 
@@ -207,6 +217,15 @@ export default function SearchDialog({
           for (let i = 0; i < json.data.length; i++) {
             obj = {
               name: json.data[i].name,
+              id: json.data[i].id,
+            };
+            dataArray.push(obj);
+          }
+          break;
+        case "DailyDiemCitySearch":
+          for (let i = 0; i < json.data.length; i++) {
+            obj = {
+              name: json.data[i].city,
               id: json.data[i].id,
             };
             dataArray.push(obj);

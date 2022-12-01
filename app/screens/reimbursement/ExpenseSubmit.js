@@ -272,7 +272,6 @@ export default function ExpenseSubmit({ route }) {
       tourreasonid: reason_id,
       claim_status_id: claim_status_id,
       max_applevel: max_applevel,
-
       previous: previous,
       expenseSummary: expenseSummary,
       onbehalf: onbehalf,

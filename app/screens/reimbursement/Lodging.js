@@ -135,8 +135,8 @@ export default function Lodging({ route }) {
 
       let json = await response.json();
       if ("detail" in json) {
-        if(json.detail == "Invalid credentials/token."){
-        AlertCredentialError(json.detail, navigation);
+        if (json.detail == "Invalid credentials/token.") {
+          AlertCredentialError(json.detail, navigation);
         }
       } else {
         seteligibleamount(json.Eligible_amount + "");
@@ -154,8 +154,8 @@ export default function Lodging({ route }) {
       });
       let json = await response.json();
       if ("detail" in json) {
-        if(json.detail == "Invalid credentials/token."){
-        AlertCredentialError(json.detail, navigation);
+        if (json.detail == "Invalid credentials/token.") {
+          AlertCredentialError(json.detail, navigation);
         }
       } else {
         for (let i = 0; i < json.length; i++) {
@@ -189,8 +189,8 @@ export default function Lodging({ route }) {
       });
       let json = await response.json();
       if ("detail" in json) {
-        if(json.detail == "Invalid credentials/token."){
-        AlertCredentialError(json.detail, navigation);
+        if (json.detail == "Invalid credentials/token.") {
+          AlertCredentialError(json.detail, navigation);
         }
       } else {
         for (let i = 0; i < json.data.length; i++) {
@@ -405,13 +405,13 @@ export default function Lodging({ route }) {
 
       if (json) {
         if ("detail" in json) {
-          if(json.detail == "Invalid credentials/token."){
-          AlertCredentialError(json.detail, navigation);
+          if (json.detail == "Invalid credentials/token.") {
+            AlertCredentialError(json.detail, navigation);
           }
         }
         setProgressBar(false);
         if (json.message) {
-          ToastMessage(json.message)  
+          ToastMessage(json.message);
           // Alert.alert(json.message);
           navigation.goBack();
           navigation.goBack();
@@ -466,9 +466,9 @@ export default function Lodging({ route }) {
             outDateLabel={"Checkout Date:*"}
             inTimeLabel={"Checkin Time:*"}
             outTimeLabel={"Checkout Time:*"}
-            inDateLabelhint={"Checking Date:"}
+            inDateLabelhint={"Checkin Date:"}
             outDateLabelhint={"Checkout Date:"}
-            inTimeLabelhint={"Checking Time:"}
+            inTimeLabelhint={"Checkin Time:"}
             outTimeLabelhint={"Checkout Time:"}
             outDate={checkoutDate}
             inTime={checkingTime}
@@ -549,6 +549,26 @@ export default function Lodging({ route }) {
             }}
           />
           <DropDown
+            label="City*"
+            hint="City"
+            indata={subcategory}
+            ontouch={() => {
+              if (editable) {
+                setdialogstatus(!dialogstatus);
+              }
+            }}
+          ></DropDown>
+          <DropDown
+            label="Center Classification"
+            hint="Center Classification"
+            indata={subcategory}
+            ontouch={() => {
+              if (editable) {
+                setdialogstatus(!dialogstatus);
+              }
+            }}
+          ></DropDown>
+          {/*    <DropDown
             label="Sub category*"
             hint="Sub category"
             indata={subcategory}
@@ -557,7 +577,7 @@ export default function Lodging({ route }) {
                 setdialogstatus(!dialogstatus);
               }
             }}
-          ></DropDown>
+          ></DropDown> */}
           {dialogstatus && (
             <DropDownDialog
               dialogstatus={dialogstatus}

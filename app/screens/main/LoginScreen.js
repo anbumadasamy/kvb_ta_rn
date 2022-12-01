@@ -26,7 +26,7 @@ export default function LoginScreen({ navigation }) {
   const [passwordStatus, setPasswordStatus] = useState(true);
 
   const [getCredential, setCredential] = useState({
-    username: "ta_tester3",
+    username: "ta_tester1",
     password: "MTIzNA==",
     // entity_id: "1",
   });
