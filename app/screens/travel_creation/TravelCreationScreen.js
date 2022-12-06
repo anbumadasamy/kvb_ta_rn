@@ -18,7 +18,6 @@ import moment from "moment";
 import { CustomColors } from "../../utilities/CustomColors";
 import { AuthContext } from "../../data/Auth-Context";
 import { URL } from "../../utilities/UrlBase";
-import InputText from "../../components/ui/InputText";
 import InputSelect from "../../components/ui/InputSelect";
 import CommentBox from "../../components/ui/CommentBox";
 import DeleteDialog from "../../components/dialog/DeleteDialog";
@@ -39,16 +38,20 @@ import DocumentBox from "../../components/ui/DocumentBox";
 let itineraryArray = [];
 let attachmentArray = [];
 
-let requirementsJsonArray = [];
 let itineraryJsonArray = [];
 
 export default function TravelCreationScreen({ route }) {
+  const [status] = useState(route.params.status);
+  const [travelNo] = useState(route.params.travelNo);
+
   const navigation = useNavigation();
   const authCtx = useContext(AuthContext);
+  const [editable] = useState(status == 101 || status == 2 || status == 4);
   const [minimumDate, setMinimumDate] = useState("");
   const [onBehalfofDialog, setOnbehalfOfDialog] = useState(false);
   const [onBehalfOf, setOnBehalfOf] = useState(false);
   const [self, setSelf] = useState(true);
+  const [fundsTransfer, setFundsTransfer] = useState(false);
   const [onBehalfOfId, setOnbehalfOfId] = useState(null);
   const [onBehalfOfName, setOnBehalfOfName] = useState("");
   const [onBehalfOfDesigination, setOnBehalfOfDesigination] = useState("");
@@ -56,36 +59,35 @@ export default function TravelCreationScreen({ route }) {
   const [documentDeleteDialog, setDocumentDeleteDialog] = useState(false);
   const [randomDocumentId, setRandomDocumentId] = useState(null);
   const [randomItineraryId, setRandomItineraryId] = useState(null);
-  const [startDateHoliday, setStartDateHoliday] = useState();
-  const [endDateHoliday, setEndDateHoliday] = useState();
   const [itineraryEligible, setItineraryEligible] = useState(true);
   const [progressBar, setProgressBar] = useState(false);
-  const [holiday, setHoliday] = useState();
-  const [nonBaseLocation, setNonBaseLocation] = useState(false);
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
   const [startDateStatus, setStartDateStatus] = useState(false);
   const [endDateStatus, setEndDateStatus] = useState(false);
   const [attachmentDialogStatus, setAttachmentDialogStatus] = useState(false);
   const [attachment, setAttachment] = useState([]);
-  const [nonBaseReason, setNonBaseReason] = useState([]);
   const [travelReason, setTravelReason] = useState([]);
+
+  const [startDateMs, setStartDateMs] = useState("");
+  const [endDateMs, setEndDateMs] = useState("");
+
+  const [permittedByDialogStatus, setPermittedByDialogStatus] = useState(false);
+  const [approverBranchDialogStatus, setApproverBranchDialogStatus] =
+    useState(false);
+  const [approverNameDialogStatus, setApproverNameDialogStatus] =
+    useState(false);
+
   const [travelData, setTravelData] = useState({
     startDate: "Start Date",
     endDate: "End Date",
     startDateJson: "",
     endDateJson: "",
-    reqDate: moment(new Date()).format("DD-MM-YYYY"),
-    reqDateJson: moment(new Date()).format("YYYY-MM-DD"),
+    reqDate: status == 101 ? moment(new Date()).format("DD-MM-YYYY") : "",
+    reqDateJson: status == 101 ? moment(new Date()).format("YYYY-MM-DD") : "",
     noOfDays: "",
     travelReason: "",
     travelReasonId: "",
-    airCost: "",
-    accommodationCost: "",
-    otherCost: "",
-    weekEndExplaination: "",
-    nonBaseReason: "",
-    nonBaseReasonId: "",
     comments: "",
     onBehalfOfName: "",
     onBehalfOfDesigination: "",
@@ -93,19 +95,42 @@ export default function TravelCreationScreen({ route }) {
     onBehalfOfCode: "",
     onBehalfOfBranch: "",
     onBehalfOfBranchCode: "",
+    permittedByName: "",
+    approverBranch: "",
+    approverName: "",
+    permittedById: "",
+    approverBranchId: null,
+    approverId: "",
+    quantumOfFunds: "0",
+    openingBalance: "0",
+    transferOnPromotion: "0",
     itinerary_details: [],
   });
 
-  let nonBaseReasonArray = [];
   let tarvelReasonArray = [];
 
   useEffect(() => {
     minimumDateValidation();
+    if (status != 101) {
+      TravelDetail();
+    }
   }, []);
 
   useEffect(() => {
+    let title = "";
+
+    if (route.params.summaryFrom == "travel_maker_summary") {
+      if (status == 2 || status == 4) {
+        title = "Travel Update";
+      } else if (status == 3) {
+        title = "Travel Detail";
+      }
+    } else {
+      title = "eClaim Travel Creation";
+    }
+
     navigation.setOptions({
-      title: "eClaim Travel Creation",
+      title: title,
     });
     LogBox.ignoreLogs([
       "VirtualizedLists should never be nested inside plain ScrollViews with the same orientation because it can break windowing and other functionality - use another VirtualizedList-backed container instead.",
@@ -129,12 +154,6 @@ export default function TravelCreationScreen({ route }) {
   });
 
   useEffect(() => {
-    if (travelData.itinerary_details.length == 1) {
-      NonBaseLocationCheck();
-    }
-  }, [travelData]);
-
-  useEffect(() => {
     if (onBehalfOfId != null) {
       GetOnBehalfOfEmpDetail(onBehalfOfId);
     }
@@ -151,8 +170,9 @@ export default function TravelCreationScreen({ route }) {
     }
   }, [self]);
 
+  useEffect(() => {});
+
   useEffect(() => {
-    GetNonBaseReason();
     GetTravelReason();
   }, [route]);
 
@@ -161,12 +181,6 @@ export default function TravelCreationScreen({ route }) {
       NoOfDays(startDate, endDate);
     }
   }, [endDate]);
-
-  useEffect(() => {
-    if (endDateHoliday) {
-      HolidayCheck(startDateHoliday, endDateHoliday);
-    }
-  }, [endDateHoliday]);
 
   useEffect(() => {
     itineraryArray = [];
@@ -201,42 +215,121 @@ export default function TravelCreationScreen({ route }) {
     }
   }, [route]);
 
+  console.log("Start Date Ms :>> " + startDateMs);
+  console.log("End Date Ms :>> " + endDateMs);
+
   function minimumDateValidation() {
     const miniDate = new Date().getTime() - 150 * 24 * 60 * 60 * 1000;
     setMinimumDate(new Date(miniDate));
-    console.log("miniDate" + miniDate);
   }
 
-  async function NonBaseLocationCheck() {
+  async function TravelDetail() {
+    const url = URL.TRAVEL_DETAILS_GET + travelNo;
+
     try {
-      const response = await fetch(URL.EMPLOYEE_BASE_LOCATION, {
+      const response = await fetch(url, {
         headers: {
           "Content-Type": "application/json",
           Authorization: authCtx.auth_token,
         },
       });
-
       let json = await response.json();
 
+      //    console.log("Travel update details :>> " + JSON.stringify(json));
+
       if ("detail" in json) {
-        if(json.detail == "Invalid credentials/token."){
-        AlertCredentialError(json.detail, navigation);
+        if (json.detail == "Invalid token.") {
+          AlertCredentialError(json.detail, navigation);
+          return;
         }
       }
 
-      if (
-        json.name !=
-        travelData.itinerary_details[travelData.itinerary_details.length - 1]
-          .startPlace
-      ) {
-        setNonBaseLocation(true);
-      } else {
-        setNonBaseLocation(false);
-        inputChangedHandler("nonBaseReason", "");
-        inputChangedHandler("nonBaseReasonId", "");
+      let itinerary_count = 0;
+
+      setStartDateMs(new Date(json.startdate));
+      setEndDateMs(new Date(json.enddate));
+      inputChangedHandler(
+        "startDate",
+        moment(json.startdate).format("DD-MM-YYYY")
+      );
+      inputChangedHandler("endDate", moment(json.enddate).format("DD-MM-YYYY"));
+      inputChangedHandler(
+        "startDateJson",
+        moment(json.startdate).format("YYYY-MM-DD")
+      );
+      inputChangedHandler(
+        "endDateJson",
+        moment(json.enddate).format("YYYY-MM-DD")
+      );
+      inputChangedHandler(
+        "reqDate",
+        moment(json.requestdate).format("DD-MM-YYYY")
+      );
+      inputChangedHandler(
+        "reqDateJson",
+        moment(json.requestdate).format("YYYY-MM-DD")
+      );
+      inputChangedHandler("travelReason", json.reason_data.name);
+      inputChangedHandler("travelReasonId", json.reason_data.id);
+      inputChangedHandler("comments", json.ordernoremarks);
+      inputChangedHandler("travelId", json.id.toString());
+      inputChangedHandler("travelStatus", json.tour_status_id);
+      inputChangedHandler("permittedByName", json.permittedby);
+      inputChangedHandler("permittedById", json.permittedby_id);
+
+      inputChangedHandler("quantumOfFunds", json.quantum_of_funds);
+      inputChangedHandler("openingBalance", json.opening_balance);
+
+      inputChangedHandler(
+        "approverBranch",
+        json.approver_branch_data.branch_name
+      );
+      inputChangedHandler(
+        "approverBranchId",
+        json.approver_branch_data.branch_code
+      );
+      inputChangedHandler("approverName", json.approver_branch_data.full_name);
+      inputChangedHandler("approverId", json.approver_branch_data.id);
+
+      const s = new Date(json.startdate);
+      const e = new Date(json.enddate);
+
+      const start = `${s.getMonth() + 1}/${s.getDate()}/${s.getFullYear()}`;
+
+      const end = `${e.getMonth() + 1}/${e.getDate()}/${e.getFullYear()}`;
+
+      NoOfDays(start, end);
+
+      for (let i = 0; i < json.detail.length; i++) {
+        itinerary_count = itinerary_count + 1;
+
+        const itinerarylObj = {
+          randomItineraryId: itinerary_count,
+          from: "API",
+          id: json.detail[i].id,
+          startPlace: json.detail[i].startingpoint,
+          endPlace: json.detail[i].placeofvisit,
+          startDate: moment(json.detail[i].startdate).format("DD-MM-YYYY"),
+          endDate: moment(json.detail[i].enddate).format("DD-MM-YYYY"),
+          startDateMs: new Date(json.detail[i].startdate),
+          endDateMs: new Date(json.detail[i].enddate),
+          startDateJson: json.detail[i].startdate,
+          endDateJson: json.detail[i].enddate,
+          reason: json.detail[i].purposeofvisit,
+        };
+
+        itineraryArray.push(itinerarylObj);
       }
+
+      inputChangedHandler("itinerary_details", [
+        ...travelData.itinerary_details,
+        ...itineraryArray,
+      ]);
+      itineraryArray = [];
+      setProgressBar(false);
     } catch (error) {
-      console.error(error);
+      setProgressBar(false);
+      console.error("Error :>> " + error);
     }
   }
 
@@ -255,8 +348,8 @@ export default function TravelCreationScreen({ route }) {
       let json = await response.json();
 
       if ("detail" in json) {
-        if(json.detail == "Invalid credentials/token."){
-        AlertCredentialError(json.detail, navigation);
+        if (json.detail == "Invalid credentials/token.") {
+          AlertCredentialError(json.detail, navigation);
         }
       }
 
@@ -285,8 +378,8 @@ export default function TravelCreationScreen({ route }) {
       let json = await response.json();
 
       if ("detail" in json) {
-        if(json.detail == "Invalid credentials/token."){
-        AlertCredentialError(json.detail, navigation);
+        if (json.detail == "Invalid credentials/token.") {
+          AlertCredentialError(json.detail, navigation);
         }
       }
 
@@ -311,11 +404,9 @@ export default function TravelCreationScreen({ route }) {
 
       let json = await response.json();
 
-      console.log("Travel Reasons :>> " + JSON.stringify(json))
-
       if ("detail" in json) {
-        if(json.detail == "Invalid credentials/token."){
-        AlertCredentialError(json.detail, navigation);
+        if (json.detail == "Invalid credentials/token.") {
+          AlertCredentialError(json.detail, navigation);
         }
       }
 
@@ -391,75 +482,6 @@ export default function TravelCreationScreen({ route }) {
     }
   };
 
-  async function GetNonBaseReason() {
-    nonBaseReasonArray = [];
-    try {
-      const response = await fetch(URL.COMMON_DROPDOWN + "base_location", {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: authCtx.auth_token,
-        },
-      });
-
-      let json = await response.json();
-
-      if ("detail" in json) {
-        if(json.detail == "Invalid credentials/token."){
-        AlertCredentialError(json.detail, navigation);
-        }
-      }
-
-      for (let i = 0; i < json.length; i++) {
-        const obj = {
-          id: json[i].value,
-          name: json[i].name,
-        };
-        nonBaseReasonArray.push(obj);
-      }
-      setNonBaseReason(nonBaseReasonArray);
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  async function HolidayCheck(start, end) {
-    try {
-      const response = await fetch(
-        URL.HOLIDAY_CHECK + "start_date=" + start + "&end_date=" + end,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: authCtx.auth_token,
-          },
-        }
-      );
-
-      let json = await response.json();
-
-      if ("detail" in json) {
-        if(json.detail == "Invalid credentials/token."){
-        AlertCredentialError(json.detail, navigation);
-        }
-      }
-
-      if (json.data.length > 0) {
-        setHoliday(true);
-      } else {
-        setHoliday(false);
-      }
-
-      if (json.ongoing_tour) {
-        setItineraryEligible(false);
-        Alert.alert("Already you have a travel on these dates");
-      } else {
-        setItineraryEligible(true);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
   function inputChangedHandler(inputIdentifier, enteredValue) {
     setTravelData((currentInputValues) => {
       return {
@@ -470,6 +492,7 @@ export default function TravelCreationScreen({ route }) {
   }
 
   const handleConfirmStartDate = (selectedDate) => {
+    setStartDateMs(selectedDate);
     setStartDateStatus(false);
     setItineraryEligible(true);
     inputChangedHandler("startDate", moment(selectedDate).format("DD-MM-YYYY"));
@@ -481,13 +504,17 @@ export default function TravelCreationScreen({ route }) {
     }/${selectedDate.getDate()}/${selectedDate.getFullYear()}`;
 
     setStartDate(date);
-    setStartDateHoliday(moment(selectedDate).format("YYYY-MM-DD"));
-    inputChangedHandler("startDateJson", selectedDate);
+    inputChangedHandler(
+      "startDateJson",
+      moment(selectedDate).format("YYYY-MM-DD")
+    );
+    setms(selectedDate);
     inputChangedHandler("endDate", "End Date");
     inputChangedHandler("noOfDays", "");
   };
 
   const handleConfirmEndDate = (selectedDate) => {
+    setEndDateMs(selectedDate);
     setEndDateStatus(false);
     inputChangedHandler("endDate", moment(selectedDate).format("DD-MM-YYYY"));
     itineraryArray = [];
@@ -498,8 +525,10 @@ export default function TravelCreationScreen({ route }) {
     }/${selectedDate.getDate()}/${selectedDate.getFullYear()}`;
 
     setEndDate(date);
-    setEndDateHoliday(moment(selectedDate).format("YYYY-MM-DD"));
-    inputChangedHandler("endDateJson", selectedDate);
+    inputChangedHandler(
+      "endDateJson",
+      moment(selectedDate).format("YYYY-MM-DD")
+    );
   };
 
   function NoOfDays(date1, date2) {
@@ -516,18 +545,18 @@ export default function TravelCreationScreen({ route }) {
       if (travelData.travelReason != "") {
         if (travelData.itinerary_details.length > 0) {
           navigation.navigate("AddItineraryScreen", {
-            maxDate: travelData.endDateJson,
+            maxDate: endDateMs,
             minDate:
               travelData.itinerary_details[
                 travelData.itinerary_details.length - 1
-              ].endDateJson,
+              ].endDateMs,
             requirementsDetails: null,
             itineraryFrom: "create",
           });
         } else {
           navigation.navigate("AddItineraryScreen", {
-            maxDate: travelData.endDateJson,
-            minDate: travelData.startDateJson,
+            maxDate: endDateMs,
+            minDate: startDateMs,
             requirementsDetails: null,
             itineraryFrom: "create",
           });
@@ -558,52 +587,6 @@ export default function TravelCreationScreen({ route }) {
     setProgressBar(true);
     for (let i = 0; i < travelData.itinerary_details.length; i++) {
       const itineraryData = travelData.itinerary_details[i];
-      for (
-        let j = 0;
-        j < travelData.itinerary_details[i].requirement_details.length;
-        j++
-      ) {
-        const reqData = travelData.itinerary_details[i].requirement_details[j];
-        let reqObj;
-        if (reqData.bookingNeededId == 1) {
-          reqObj = {
-            booking_needed: reqData.bookingNeededId,
-            comments: reqData.comments,
-            checkin_time: `${moment(reqData.checkInDateJson).format(
-              "YYYY-MM-DD"
-            )} ${reqData.checkInTime}:00`,
-            checkout_time: `${moment(reqData.checkOutDateJson).format(
-              "YYYY-MM-DD"
-            )} ${reqData.checkOutTime}:00`,
-            place_of_stay: reqData.placeOfStay,
-            room_type: reqData.roomType,
-          };
-        } else if (reqData.bookingNeededId == 2) {
-          reqObj = {
-            booking_needed: reqData.bookingNeededId,
-            comments: reqData.comments,
-            cab_segment: reqData.cabSegment,
-            instructions: reqData.instructions,
-            travel_type_cab: reqData.travelTypeCabId,
-            from_time: `${moment(reqData.fromDateJson).format("YYYY-MM-DD")} ${
-              reqData.fromTime
-            }:00`,
-            from_place: reqData.fromPlace,
-            to_place: reqData.toPlace,
-          };
-        } else {
-          reqObj = {
-            booking_needed: reqData.bookingNeededId,
-            comments: reqData.comments,
-            from_time: `${moment(reqData.fromDateJson).format("YYYY-MM-DD")} ${
-              reqData.fromTime
-            }:00`,
-            from_place: reqData.fromPlace,
-            to_place: reqData.toPlace,
-          };
-        }
-        requirementsJsonArray.push(reqObj);
-      }
 
       let itineraryObj = {
         startdate: `${moment(itineraryData.startDateJson).format(
@@ -615,47 +598,47 @@ export default function TravelCreationScreen({ route }) {
         startingpoint: itineraryData.startPlace,
         placeofvisit: itineraryData.endPlace,
         purposeofvisit: itineraryData.reason,
-        client: parseInt(itineraryData.clientId),
-        other_client_name:
-          itineraryData.otherClient != "" ? itineraryData.otherClient : null,
-        official: parseInt(itineraryData.typeOfTravelId),
-        requirements: [...requirementsJsonArray],
       };
+
+      if (itineraryData.id != null) {
+        itineraryObj["id"] = itineraryData.id;
+      }
+
       itineraryJsonArray.push(itineraryObj);
-      requirementsJsonArray = [];
     }
 
     let travelObj = {
+      mobile: 1,
       requestno: "NEW",
       requestdate: `${travelData.reqDateJson} 00:00:00`,
       reason: travelData.travelReasonId,
-      startdate: `${startDateHoliday} 00:00:00`,
-      enddate: `${endDateHoliday} 00:00:00`,
+      startdate: `${travelData.startDateJson} 00:00:00`,
+      enddate: `${travelData.endDateJson} 00:00:00`,
       durationdays: travelData.noOfDays,
-      accommodation_cost:
-        travelData.accommodationCost != ""
-          ? parseInt(travelData.accommodationCost)
-          : 0,
-      other_cost:
-        travelData.otherCost != "" ? parseInt(travelData.otherCost) : 0,
-      air_cost: travelData.airCost != "" ? parseInt(travelData.airCost) : 0,
       ordernoremarks: travelData.comments,
-      week_end_travel:
-        travelData.weekEndExplaination != ""
-          ? travelData.weekEndExplaination
-          : null,
-      onbehalfof: 0,
-      non_base_location:
-        travelData.nonBaseReason != "" ? travelData.nonBaseReason : null,
+      permittedby: travelData.permittedById,
+      empbranchgid: `${travelData.approverBranchId} ${travelData.approverBranch}`,
+      transfer_on_promotion: travelData.transferOnPromotion,
+      quantum_of_funds:
+        travelData.quantumOfFunds == 0 ? null : travelData.quantumOfFunds,
+      opening_balance:
+        travelData.openingBalance == 0 ? null : travelData.openingBalance,
+      approval: parseInt(travelData.approverId),
       detail: [...itineraryJsonArray],
     };
 
-    if (travelData.onBehalfOfId != "") {
-      travelObj["onbehalfof"] = parseInt(travelData.onBehalfOfId);
-      travelObj["designation"] = travelData.onBehalfOfDesigination;
+    if (status != 101) {
+      travelObj["id"] = travelNo;
     }
 
+    /*  if (travelData.onBehalfOfId != "") {
+      travelObj["onbehalfof"] = parseInt(travelData.onBehalfOfId);
+      travelObj["designation"] = travelData.onBehalfOfDesigination;
+    } */
+
     itineraryJsonArray = [];
+
+    console.log("Travel creation post data :>> " + JSON.stringify(travelObj));
 
     const data = new FormData();
     data.append("data", JSON.stringify(travelObj));
@@ -684,9 +667,12 @@ export default function TravelCreationScreen({ route }) {
 
       let json = await response.json();
 
+      console.log("Response :>> " + JSON.stringify(json));
+
       if ("detail" in json) {
-        if(json.detail == "Invalid credentials/token."){
-        AlertCredentialError(json.detail, navigation);
+        if (json.detail == "Invalid token.") {
+          AlertCredentialError(json.detail, navigation);
+          return;
         }
       }
 
@@ -695,6 +681,9 @@ export default function TravelCreationScreen({ route }) {
         if (json.message) {
           ToastMessage(json.message);
           navigation.goBack();
+          if (status != 101) {
+            navigation.goBack();
+          }
           if (travelData.onBehalfOfId != "") {
             navigation.navigate("On Behalf Of");
           } else {
@@ -714,39 +703,18 @@ export default function TravelCreationScreen({ route }) {
     if (travelData.startDate != "Start Date") {
       if (travelData.endDate != "End Date") {
         if (travelData.travelReason != "") {
-          if (travelData.accommodationCost != "") {
-            if (travelData.airCost != "") {
-              if (travelData.otherCost != "") {
-                if (travelData.itinerary_details.length > 0) {
-                  if (
-                    travelData.itinerary_details[
-                      travelData.itinerary_details.length - 1
-                    ].endDate == travelData.endDate
-                  ) {
-                    TravelCreation();
-                    /*  if (holiday) {
-                    } else {
-                      Alert.alert("Enter reason for holiday travel");
-                    } */
-                    /*  if (nonBaseLocation) {
-                     
-                    } else {
-                      Alert.alert("Enter reason for non base location");
-                    } */
-                  } else {
-                    Alert.alert("Check itinerary end date");
-                  }
-                } else {
-                  Alert.alert("Add itinerary");
-                }
-              } else {
-                Alert.alert("Enter other cost");
-              }
+          if (travelData.itinerary_details.length > 0) {
+            if (
+              travelData.itinerary_details[
+                travelData.itinerary_details.length - 1
+              ].endDate == travelData.endDate
+            ) {
+              TravelCreation();
             } else {
-              Alert.alert("Enter air cost");
+              Alert.alert("Check itinerary end date");
             }
           } else {
-            Alert.alert("Enter accommodation cost");
+            Alert.alert("Add itinerary");
           }
         } else {
           Alert.alert("Choose travel reason");
@@ -811,13 +779,17 @@ export default function TravelCreationScreen({ route }) {
 
             <StartEndDatePicker
               onPressStart={() => {
-                setStartDateStatus(true);
+                if (editable) {
+                  setStartDateStatus(true);
+                }
               }}
               onPressEnd={() => {
-                if (travelData.startDate != "Start Date") {
-                  setEndDateStatus(true);
-                } else {
-                  Alert.alert("Select start date");
+                if (editable) {
+                  if (travelData.startDate != "Start Date") {
+                    setEndDateStatus(true);
+                  } else {
+                    Alert.alert("Select start date");
+                  }
                 }
               }}
               startDate={travelData.startDate}
@@ -837,7 +809,7 @@ export default function TravelCreationScreen({ route }) {
                 minimumDate={minimumDate}
               />
             )}
-            {travelData.startDateJson != "" && (
+            {startDateMs != "" && (
               <DateTimePickerModal
                 isVisible={endDateStatus}
                 mode="date"
@@ -846,7 +818,7 @@ export default function TravelCreationScreen({ route }) {
                   setEndDateStatus(false);
                 }}
                 display={Platform.OS == "ios" ? "inline" : "default"}
-                minimumDate={travelData.startDateJson}
+                minimumDate={startDateMs}
               />
             )}
 
@@ -861,11 +833,6 @@ export default function TravelCreationScreen({ route }) {
                   label="Designation"
                   value={onBehalfOfDesigination}
                   hint="Designation"
-                />
-                <LabelTextView
-                  label="Branch"
-                  value={`(${travelData.onBehalfOfBranchCode}) ${travelData.onBehalfOfBranch}`}
-                  hint="Branch"
                 />
               </View>
             )}
@@ -885,19 +852,16 @@ export default function TravelCreationScreen({ route }) {
                       label="Employee Name:*"
                       hint="Choose Employee"
                       selected={`${travelData.onBehalfOfName}`}
-                      onPressEvent={() =>
-                        setOnbehalfOfDialog(!onBehalfofDialog)
-                      }
+                      onPressEvent={() => {
+                        if (editable) {
+                          setOnbehalfOfDialog(!onBehalfofDialog);
+                        }
+                      }}
                     />
                     <LabelTextView
                       label="Designation"
                       value={travelData.onBehalfOfDesigination}
                       hint="Designation"
-                    />
-                    <LabelTextView
-                      label="Branch"
-                      value={`(${travelData.onBehalfOfBranchCode}) ${travelData.onBehalfOfBranch}`}
-                      hint="Branch"
                     />
                   </View>
                 ) : (
@@ -911,11 +875,6 @@ export default function TravelCreationScreen({ route }) {
                       label="Designation"
                       value={onBehalfOfDesigination}
                       hint="Designation"
-                    />
-                    <LabelTextView
-                      label="Branch"
-                      value={`(${travelData.onBehalfOfBranchCode}) ${travelData.onBehalfOfBranch}`}
-                      hint="Branch"
                     />
                   </View>
                 )}
@@ -940,71 +899,130 @@ export default function TravelCreationScreen({ route }) {
               label="Travel Reason:*"
               hint="Choose reason"
               title="Choose travel reason"
-              pickerId="travel_reason"
+              pickerId={editable ? "travel_reason" : null}
               selectedName={travelData.travelReason}
               setSelectedName={inputChangedHandler.bind(this, "travelReason")}
               setSelectedId={(id) => {
+                if (id == 2) {
+                  setFundsTransfer(true);
+                } else {
+                  setFundsTransfer(false);
+                  inputChangedHandler("openingBalance", "0");
+                  inputChangedHandler("quantumOfFunds", "0");
+                }
                 inputChangedHandler("travelReasonId", id);
                 authCtx.SetTravelReason(id);
               }}
             />
 
-            <InputNumber
-              label="Accommodation Cost:*"
-              hint="Approx Amount"
-              value={travelData.accommodationCost}
-              onChangeEvent={inputChangedHandler.bind(
-                this,
-                "accommodationCost"
-              )}
-            ></InputNumber>
+            {fundsTransfer && (
+              <View>
+                <InputNumber
+                  label="Quantum Of Funds:"
+                  value={travelData.quantumOfFunds}
+                  onChangeEvent={inputChangedHandler.bind(
+                    this,
+                    "quantumOfFunds"
+                  )}
+                  editable={editable ? true : false}
+                ></InputNumber>
 
-            <InputNumber
-              label="Flight Cost:*"
-              hint="Approx Amount"
-              value={travelData.airCost}
-              onChangeEvent={inputChangedHandler.bind(this, "airCost")}
-            ></InputNumber>
-            <InputNumber
-              label="Other Cost:*"
-              hint="Approx Amount"
-              value={travelData.otherCost}
-              onChangeEvent={inputChangedHandler.bind(this, "otherCost")}
+                <InputNumber
+                  label="Opening Balance:"
+                  value={travelData.openingBalance}
+                  onChangeEvent={inputChangedHandler.bind(
+                    this,
+                    "openingBalance"
+                  )}
+                  editable={editable ? true : false}
+                ></InputNumber>
+              </View>
+            )}
+
+            <InputSelect
+              label="Permitted By:*"
+              hint="Choose Employee"
+              selected={`${travelData.permittedByName}`}
+              onPressEvent={() => {
+                if (editable) {
+                  setPermittedByDialogStatus(true);
+                }
+              }}
             />
-            {holiday && (
-              <InputText
-                label="Explaination for weekend travel:*"
-                hint="Choose explaination"
-                value={travelData.weekEndExplaination}
-                onChangeEvent={inputChangedHandler.bind(
-                  this,
-                  "weekEndExplaination"
-                )}
+
+            <InputSelect
+              label="Approver Branch:*"
+              hint="Choose Branch"
+              selected={`${travelData.approverBranch}`}
+              onPressEvent={() => {
+                if (editable) {
+                  setApproverBranchDialogStatus(true);
+                }
+              }}
+            />
+            <InputSelect
+              label="Approver Name:*"
+              hint="Choose Employee"
+              selected={`${travelData.approverName}`}
+              onPressEvent={() => {
+                if (editable) {
+                  if (travelData.approverBranchId != null) {
+                    setApproverNameDialogStatus(true);
+                  } else {
+                    Alert.alert("Choose Approver Branch");
+                  }
+                }
+              }}
+            />
+
+            {permittedByDialogStatus && (
+              <SearchDialog
+                dialogstatus={permittedByDialogStatus}
+                setdialogstatus={setPermittedByDialogStatus}
+                empId={authCtx.user_id}
+                onBehalOfId={onBehalfOfId}
+                from="permitted_by"
+                setValue={inputChangedHandler.bind(this, "permittedByName")}
+                setId={(id) => {
+                  inputChangedHandler("permittedById", id);
+                  setOnbehalfOfId(id);
+                }}
               />
             )}
-            {nonBaseLocation && (
-              <PopUpPicker
-                listData={nonBaseReason}
-                label="Reason for non base location travel:*"
-                hint="Choose reason"
-                title="Choose reason"
-                pickerId="non_base_reason"
-                selectedName={travelData.nonBaseReason}
-                setSelectedName={inputChangedHandler.bind(
-                  this,
-                  "nonBaseReason"
-                )}
-                setSelectedId={inputChangedHandler.bind(
-                  this,
-                  "nonBaseReasonId"
-                )}
+
+            {approverBranchDialogStatus && (
+              <SearchDialog
+                dialogstatus={approverBranchDialogStatus}
+                setdialogstatus={setApproverBranchDialogStatus}
+                from="approver_branch"
+                setValue={inputChangedHandler.bind(this, "approverBranch")}
+                setId={(id) => {
+                  inputChangedHandler("approverBranchId", id);
+                  //   setOnbehalfOfId(id);
+                }}
               />
             )}
+
+            {approverNameDialogStatus && (
+              <SearchDialog
+                dialogstatus={approverNameDialogStatus}
+                setdialogstatus={setApproverNameDialogStatus}
+                branchId={travelData.approverBranchId}
+                from="approver_name"
+                setValue={inputChangedHandler.bind(this, "approverName")}
+                setId={(id) => {
+                  inputChangedHandler("approverId", id);
+                  //   setOnbehalfOfId(id);
+                }}
+              />
+            )}
+
             <CommentBox
               label="Comments:"
               hint="Leave Your Comments..."
               inputComment={travelData.comments}
               onInputCommentChanged={inputChangedHandler.bind(this, "comments")}
+              editable={editable ? true : false}
             />
             <DocumentBox
               documentData={attachment}
@@ -1066,7 +1084,11 @@ export default function TravelCreationScreen({ route }) {
             )}
           </ScrollView>
           <View>
-            <SubmitButton onPressEvent={Create}>Submit</SubmitButton>
+            {editable && (
+              <SubmitButton onPressEvent={Create}>
+                {status == 101 ? "Submit" : "Update"}
+              </SubmitButton>
+            )}
           </View>
         </KeyboardAvoidingView>
       )}

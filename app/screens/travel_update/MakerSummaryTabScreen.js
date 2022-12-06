@@ -2,8 +2,8 @@ import * as React from "react";
 import { useLayoutEffect, useContext, useState } from "react";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { useNavigation } from "@react-navigation/native";
-import MakerCancelSummaryScreen from "./MakerCancelSummaryScreen";
 import TravelMakerSummaryScreen from "./TravelMakerSummaryScreen";
+import MakerAdvanceSummaryScreen from "./MakerAdvanceSummaryScreen";
 import { AuthContext } from "../../data/Auth-Context";
 import { MaterialIcons } from "@expo/vector-icons";
 import { onOpen } from "react-native-actions-sheet-picker";
@@ -14,8 +14,8 @@ const Tab = createMaterialTopTabNavigator();
 function Tabs({
   travelDialogStatus,
   setTravelDialogStatus,
-  cancelDialogStatus,
-  setCancelDialogStatus,
+  advanceDialogStatus,
+  setAdvanceDialogStatus,
 }) {
   return (
     <Tab.Navigator
@@ -39,16 +39,16 @@ function Tabs({
         options={{ tabBarLabel: "Travel Summary" }}
       />
       <Tab.Screen
-        name="Cancel Summary"
+        name="Advance Summary"
         children={() => {
           return (
-            <MakerCancelSummaryScreen
-              cancelDialogStatus={cancelDialogStatus}
-              setCancelDialogStatus={setCancelDialogStatus}
+            <MakerAdvanceSummaryScreen
+            advanceDialogStatus={advanceDialogStatus}
+            setAdvanceDialogStatus={setAdvanceDialogStatus}
             />
           );
         }}
-        options={{ tabBarLabel: "Cancel Summary" }}
+        options={{ tabBarLabel: "Advance Summary" }}
       />
     </Tab.Navigator>
   );
@@ -57,7 +57,7 @@ export default function MakerSummaryTabScreen() {
   const authCtx = useContext(AuthContext);
   const navigation = useNavigation();
 
-  const [cancelDialogStatus, setCancelDialogStatus] = useState(false);
+  const [advanceDialogStatus, setAdvanceDialogStatus] = useState(false);
   const [travelDialogStatus, setTravelDialogStatus] = useState(false);
 
   let MAKER_SUMMARY_TYPE = authCtx.makerSummaryType;
@@ -108,7 +108,7 @@ export default function MakerSummaryTabScreen() {
                   size={24}
                   color="white"
                   onPress={() => {
-                    setCancelDialogStatus(!cancelDialogStatus);
+                    setAdvanceDialogStatus(!advanceDialogStatus);
                   }}
                 />
               </View>
@@ -131,8 +131,8 @@ export default function MakerSummaryTabScreen() {
     <Tabs
       travelDialogStatus={travelDialogStatus}
       setTravelDialogStatus={setTravelDialogStatus}
-      cancelDialogStatus={cancelDialogStatus}
-      setCancelDialogStatus={setCancelDialogStatus}
+      advanceDialogStatus={advanceDialogStatus}
+      setAdvanceDialogStatus={setAdvanceDialogStatus}
       makerSummaryTypeAuthCtx={authCtx}
     />
   );

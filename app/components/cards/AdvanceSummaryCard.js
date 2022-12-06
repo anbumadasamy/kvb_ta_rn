@@ -1,9 +1,15 @@
 import { useNavigation } from "@react-navigation/native";
-import { View, Text, StyleSheet, FlatList, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Pressable,
+  Alert,
+} from "react-native";
 import { CustomColors } from "../../utilities/CustomColors";
-import ToastMessage from "../toast/ToastMessage";
 
-export default function TravelSummaryCard({
+export default function AdvanceSummaryCard({
   data,
   scroll,
   from,
@@ -27,28 +33,22 @@ export default function TravelSummaryCard({
       <Pressable
         style={styles.item}
         onPress={() => {
-          if (from == "travel_maker_summary") {
-            if (
-              itemData.item.travelStatusId == 3 &&
-              !itemData.item.isTourEnded
-            ) {
-              navigation.navigate("Advance Creation", {
-                travelNo: itemData.item.id,
-                status: itemData.item.advanceStatusId,
-                reqDate: itemData.item.requestdate,
-              });
-            } else if (
-              itemData.item.travelStatusId == 3 &&
-              itemData.item.isTourEnded
-            ) {
-              ToastMessage("Travel Ended");
-            } else {
-              navigation.navigate("Travel Creation", {
-                travelNo: itemData.item.id,
-                status: itemData.item.travelStatusId,
-                summaryFrom: from,
-              });
-            }
+          if (
+            from == "travel_update" &&
+            (itemData.item.travelStatusId == 2 ||
+              itemData.item.travelStatusId == 5)
+          ) {
+            navigation.navigate("Travel Update", {
+              travelNo: itemData.item.id,
+              status: itemData.item.tourStatusId,
+              summaryFrom: from,
+            });
+          } else {
+            navigation.navigate("TravelDetailScreen", {
+              travelNo: itemData.item.id,
+              status: itemData.item.tourStatusId,
+              from: from,
+            });
           }
         }}
       >
@@ -80,28 +80,26 @@ export default function TravelSummaryCard({
             <Text style={styles.text}>{itemData.item.approvedby}</Text>
           </View>
 
-          {(from == "travel_maker_summary" || from == "on_going") && (
+          {(from == "travel_update" || from == "on_going") && (
             <View style={{ flexDirection: "row" }}>
-              {from == "travel_maker_summary" &&
-                !itemData.item.isTourEnded &&
-                itemData.item.travelStatusId == 3 && (
-                  <Pressable
-                    onPress={() => {
-                      travelCancelRequest(itemData.item.id);
+              {itemData.item.advanceCancelEnable != "0" && (
+                <Pressable
+                  onPress={() => {
+                    travelCancelRequest(itemData.item.id);
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 12.5,
+                      fontWeight: "bold",
+                      marginRight: 10,
+                      color: "#FE5886",
                     }}
                   >
-                    <Text
-                      style={{
-                        fontSize: 12.5,
-                        fontWeight: "bold",
-                        marginRight: 10,
-                        color: "#FE5886",
-                      }}
-                    >
-                      CANCEL
-                    </Text>
-                  </Pressable>
-                )}
+                    CANCEL
+                  </Text>
+                </Pressable>
+              )}
               {
                 <Text
                   style={{
@@ -124,12 +122,10 @@ export default function TravelSummaryCard({
                   fontSize: 12.5,
                   fontWeight: "bold",
                   color:
-                    itemData.item.tourCancelStatusId == 3
-                      ? "#8ACAC0"
-                      : "#FE5886",
+                    itemData.item.advanceStatusId == 3 ? "#8ACAC0" : "#FE5886",
                 }}
               >
-                {itemData.item.tourCancelStatus}
+                {itemData.item.advanceStatus}
               </Text>
             </View>
           )}
@@ -137,7 +133,7 @@ export default function TravelSummaryCard({
 
         <View style={styles.row}>
           <View style={styles.innerRow}>
-            <Text style={styles.label}>Reason: </Text>
+            <Text style={styles.label}>Advance Amount: </Text>
             <Text
               style={{
                 color: CustomColors.primary_dark,
@@ -147,7 +143,7 @@ export default function TravelSummaryCard({
                 ellipsizeMode:'tail' */
               }}
             >
-              {itemData.item.reason}
+              {itemData.item.advanceAmount}
             </Text>
           </View>
         </View>

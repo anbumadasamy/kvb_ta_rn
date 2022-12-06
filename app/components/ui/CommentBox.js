@@ -1,13 +1,25 @@
-import { View, TextInput, Text, StyleSheet, Alert } from "react-native";
+import { View, TextInput, Text, StyleSheet } from "react-native";
 import { CustomColors } from "../../utilities/CustomColors";
 
-export default function CommentBox({inputComment, onInputCommentChanged, label,
-  hint,}) {
+export default function CommentBox({
+  inputComment,
+  onInputCommentChanged,
+  label,
+  hint,
+  editable,
+}) {
   return (
     <View style={styles.commentBoxContainer}>
       <Text style={styles.commentLabel}>{label}</Text>
       <View style={styles.commentInput}>
-        <TextInput style={styles.inputText} multiline={true} placeholder={hint} value={inputComment} onChangeText={onInputCommentChanged} />
+        <TextInput
+          editable={editable ? editable : false}
+          style={styles.inputText}
+          multiline={true}
+          placeholder={hint}
+          value={inputComment}
+          onChangeText={onInputCommentChanged}
+        />
       </View>
     </View>
   );
@@ -16,7 +28,7 @@ export default function CommentBox({inputComment, onInputCommentChanged, label,
 const styles = StyleSheet.create({
   commentBoxContainer: {
     flexDirection: "column",
-    marginBottom:20,
+    marginBottom: 20,
   },
   commentLabel: {
     color: CustomColors.primary_dark,
@@ -31,8 +43,8 @@ const styles = StyleSheet.create({
     padding: 6,
     borderColor: CustomColors.primary_gray,
   },
-  inputText:{
-    fontSize:14,
-    color: CustomColors.primary_dark
-  }
+  inputText: {
+    fontSize: 14,
+    color: CustomColors.primary_dark,
+  },
 });

@@ -1,11 +1,12 @@
-import { View, Text, TextInput, StyleSheet, Alert } from "react-native";
+import { View, Text, TextInput, StyleSheet } from "react-native";
 import { CustomColors } from "../../utilities/CustomColors";
 
-export default function InputText({ label, value, onChangeEvent, hint,keyboard }) {
+export default function InputText({ label, value, onChangeEvent, hint,keyboard, editable }) {
   return (
     <View style={styles.inputTextContainer}>
       <Text style={styles.label}>{label}</Text>
       <TextInput
+       editable={editable ? editable : false}
         style={styles.textInput}
         placeholder={hint}
         keyboardType={keyboard ? keyboard : "default"}

@@ -25,6 +25,9 @@ export default function SearchDialog({
   setfirst,
   apicall,
   grade,
+  empId,
+  onBehalOfId,
+  branchId,
 }) {
   const [isModalVisible, setModalVisible] = useState(dialogstatus);
   const authCtx = useContext(AuthContext);
@@ -125,6 +128,29 @@ export default function SearchDialog({
         break;
       case "Bank_GST":
         url = URL.GST + search + "&page=" + count;
+        break;
+        case "permitted_by":
+        url =
+          URL.PERMITTED_BY_EMP_LIST +
+          empId +
+          "&name=" +
+          search +
+          "&page=" +
+          count +
+          "&onbehalfof=" +
+          onBehalOfId;
+        break;
+      case "approver_branch":
+        url = URL.APPROVER_BRANCH_LIST + "?query=" + search + "&page=" + count;
+        break;
+      case "approver_name":
+        url =
+          URL.APPROVER_EMP_LIST +
+          branchId +
+          "?name=" +
+          search +
+          "&page=" +
+          count;
         break;
     }
 
@@ -277,6 +303,37 @@ export default function SearchDialog({
               dataArray.push(obj);
             }
             break;
+            case "permitted_by":
+          for (let i = 0; i < json.data.length; i++) {
+            obj = {
+              name: json.data[i].full_name,
+              id: json.data[i].id,
+            };
+            dataArray.push(obj);
+          }
+          break;
+
+        case "approver_branch":
+          for (let i = 0; i < json.data.length; i++) {
+            obj = {
+              name: json.data[i].name,
+              id: json.data[i].id,
+            };
+            dataArray.push(obj);
+          }
+          break;
+
+        case "approver_name":
+          setPagination(false);
+          for (let i = 0; i < json.length; i++) {
+            obj = {
+              name: json[i].full_name,
+              id: json[i].id,
+            };
+            dataArray.push(obj);
+           
+          }
+          break;
       }
 
       setData([...data, ...dataArray]);
@@ -359,7 +416,10 @@ export default function SearchDialog({
                       from == "client" ||
                       from == "OnBehalfOfEmp" ||
                       from == "OnBehalfOfEmpclaim" ||
-                      from == "entity"
+                      from == "entity" ||
+                      from == "permitted_by" ||
+                      from == "approver_branch" ||
+                      from == "approver_name"
                     ) {
                       setId("");
                     }
@@ -400,7 +460,10 @@ export default function SearchDialog({
         from == "BS" ||
         from == "CeoTeam" ||
         from == "OnBehalfOfEmp" ||
-        from == "entity"
+        from == "entity" ||
+        from == "permitted_by" ||
+        from == "approver_branch" ||
+        from == "approver_name"
       ) {
         setId(itemData.item.id);
       }

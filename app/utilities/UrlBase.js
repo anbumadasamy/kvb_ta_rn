@@ -23,7 +23,7 @@ export const URL = {
   APPROVAL_SUMMARY: TA_SERVER + "tourapprove/claim",
   COMMON_DROPDOWN: TA_SERVER + "common_dropdown_get/",
   ONGOING_TOUR_SUMMARY: TA_SERVER + "ongoing_tour",
-  TRAVEL_MAKER_SUMMARY: TA_SERVER + "nac_tourdata",
+  TRAVEL_MAKER_SUMMARY: TA_SERVER + "tourdata",
   EXPENSE_SUMMARY: TA_SERVER + "claimreq/tour/",
   TRAVEL_DETAILS_GET: TA_SERVER + "tourdata/",
   CITY_LIST: TA_SERVER + "insert_ta_city",
@@ -113,5 +113,8 @@ export const URL = {
   HSN:MASTER_SERVER+"search_hsn?query=",
   GST:USER_SERVER+"bank_gst_get?gst=",
 
-  
+  // kvb travel creation
+  PERMITTED_BY_EMP_LIST: USER_SERVER + "branchwise_employee_get/0?maker=",
+  APPROVER_BRANCH_LIST: USER_SERVER + "search_employeebranch",
+  APPROVER_EMP_LIST: TA_SERVER + "branch_approver_get/tour/branch/"
 };
