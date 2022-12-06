@@ -25,8 +25,6 @@ export default function ExpenseList({ route }) {
   const navigation = useNavigation();
   const authCtx = useContext(AuthContext);
 
-
-
   useEffect(() => {
     navigation.setOptions({
       title: Tittle,
@@ -57,6 +55,9 @@ export default function ExpenseList({ route }) {
           break;
         case 6:
           deleteurl = URL.INCIDENTIAL;
+          break;
+        case 8:
+          deleteurl = URL.MISC;
           break;
       }
 
@@ -97,6 +98,7 @@ export default function ExpenseList({ route }) {
     setProgressBar(true);
     try {
       let url;
+      console.log(Position);
       switch (Position) {
         case 1:
           url = URL.DAILY_DIEM;
@@ -116,10 +118,11 @@ export default function ExpenseList({ route }) {
         case 6:
           url = URL.INCIDENTIAL;
           break;
+        case 8:
+          url = URL.MISC;
+          break;
       }
       console.log(url + "/tour/" + TourId + " Expense List API ");
-
-
 
       const response = await fetch(url + "/tour/" + TourId, {
         headers: {
@@ -136,19 +139,16 @@ export default function ExpenseList({ route }) {
 
       console.log(JSON.stringify(json) + " Expense List Data");
 
-
-
       if (json.data.length != 0) {
         for (let i = 0; i < json.data.length; i++) {
-
-       /*    let datewithtime = json.data[i].fromdate.split(" ");
+          /*    let datewithtime = json.data[i].fromdate.split(" ");
           let uniqdate = datewithtime[0];
           let uniqtime = datewithtime[1]; */
 
           const obj = {
             id: json.data[i].id,
             claimedamount: json.data[i].claimedamount,
-            eligibleamount:json.data[i].eligibleamount,
+            eligibleamount: json.data[i].eligibleamount,
             // Date: uniqdate,
             fromdate: FromDate,
             todate: ToDate,
@@ -159,8 +159,7 @@ export default function ExpenseList({ route }) {
 
           if ("tourid" in json.data[i]) {
             obj["tour_id"] = json.data[i].tourid;
-          }
-          else{
+          } else {
             obj["tour_id"] = json.data[i].tourgid;
           }
           if ("from" in route.params) {

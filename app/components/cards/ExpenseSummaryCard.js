@@ -58,6 +58,10 @@ export default function ExpenseSummaryCard({
           Position = 3;
           title = "Lodging Expenses List";
           break;
+        case 6:
+          Position = 8;
+          title = "Miscellaneous List";
+          break;
         case 9:
           Position = 5;
           title = "Associated Expenses List";

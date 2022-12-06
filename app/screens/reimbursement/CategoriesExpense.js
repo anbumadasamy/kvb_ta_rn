@@ -54,6 +54,12 @@ export default function CategoriesExpense({ route }) {
       case 5:
         expenseid = 9;
         break;
+      case 6:
+        expenseid = 3;
+        break;
+      case 8:
+        expenseid = 6;
+        break;
     }
 
     if (clicked) {
@@ -70,6 +76,7 @@ export default function CategoriesExpense({ route }) {
               tourreasonid: tourreasonid,
               max_applevel: max_applevel,
               claim_status_id: claim_status_id,
+              DailyDiemId: "",
               // Tittle: "Daily Reimbursement List",
               Comments: some[0].requestercomment,
               Position: 1,
@@ -94,7 +101,6 @@ export default function CategoriesExpense({ route }) {
               FromDate: FromDate,
               ToDate: ToDate,
               ReqDate: ReqDate,
-
               tourreasonid: tourreasonid,
               max_applevel: max_applevel,
               claim_status_id: claim_status_id,
@@ -127,6 +133,32 @@ export default function CategoriesExpense({ route }) {
               claim_status_id: claim_status_id,
               Comments: some[0].requestercomment,
               AssociatedExpensesId: "",
+            });
+            break;
+          case 6:
+            navigation.navigate("Incidential Expense", {
+              TourId: TourId,
+              FromDate: FromDate,
+              ToDate: ToDate,
+              ReqDate: ReqDate,
+              tourreasonid: tourreasonid,
+              max_applevel: max_applevel,
+              claim_status_id: claim_status_id,
+              Comments: some[0].requestercomment,
+              IncidentialExpenseId: "",
+            });
+            break;
+          case 8:
+            navigation.navigate("Miscellaneous Expense", {
+              TourId: TourId,
+              FromDate: FromDate,
+              ToDate: ToDate,
+              ReqDate: ReqDate,
+              tourreasonid: tourreasonid,
+              max_applevel: max_applevel,
+              claim_status_id: claim_status_id,
+              Comments: some[0].requestercomment,
+              MiscId: "",
             });
             break;
         }
@@ -440,6 +472,32 @@ export default function CategoriesExpense({ route }) {
             max_applevel: max_applevel,
             claim_status_id: claim_status_id,
             IncidentialExpenseId: "",
+          });
+          break;
+        case 7:
+          navigation.navigate("Packing Expense", {
+            TourId: TourId,
+            FromDate: FromDate,
+            ToDate: ToDate,
+            ReqDate: ReqDate,
+            Comments: reason,
+            tourreasonid: tourreasonid,
+            max_applevel: max_applevel,
+            claim_status_id: claim_status_id,
+            PackingExpenseId: "",
+          });
+          break;
+        case 8:
+          navigation.navigate("Miscellaneous Expense", {
+            TourId: TourId,
+            FromDate: FromDate,
+            ToDate: ToDate,
+            ReqDate: ReqDate,
+            Comments: reason,
+            tourreasonid: tourreasonid,
+            max_applevel: max_applevel,
+            claim_status_id: claim_status_id,
+            MiscId: "",
           });
           break;
       }

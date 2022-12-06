@@ -12,47 +12,40 @@ import {
 import Dateview from "../../components/ui/Dateview";
 import SubmitButton from "../../components/ui/SubmitButton";
 import InputNumberrow from "../../components/ui/InputNumberrow";
-import CustomizedRadioButton from "../../components/ui/CustomizedRadiobutton";
 import DropDown from "../../components/ui/DropDown";
 import { AuthContext } from "../../data/Auth-Context";
 import { URL } from "../../utilities/UrlBase";
 import { CustomColors } from "../../utilities/CustomColors";
-import moment from "moment";
-import LabelTextColumnView from "../../components/ui/LabelTextColumnView";
 import AlertCredentialError from "../../components/toast/AlertCredentialError";
 import ToastMessage from "../../components/toast/ToastMessage";
 import DropDownDialog from "../../components/dialog/DropDownDialog";
+import Inputtextrow from "../../components/ui/inputtextrow";
 
-export default function IncidentialExpenses({ route }) {
+export default function MiscExpenses({ route }) {
   const TourId = route.params.TourId;
   const ReqDate = route.params.ReqDate;
   const FromDate = route.params.FromDate;
   const ToDate = route.params.ToDate;
-  let IncidentialExpenseId = route.params.IncidentialExpenseId;
+  let MiscId = route.params.MiscId;
 
   // let list = route.params.Data;
   let jsonobject;
   let obj;
-  let eligible;
-  const [sdreturn, setsdreturn] = useState(false);
-  const [motravel, setmotravel] = useState("");
-  const [traveltime, settraveltime] = useState("");
-  const [single_fare, setsingle_fare] = useState("");
-  const [incidentialexpense, setincidentialexpense] = useState("");
+
+  const [description, setdescription] = useState("");
+  const [expensereason, setexpensereason] = useState("");
+  const [expensereasondata, setexpensereasondata] = useState("");
+  const [amount, setamount] = useState("");
+  const [expensereasonvalue, setexpensereasonvalue] = useState("");
   const [dialogstatus, setdialogstatus] = useState(false);
-  const [modeoftraveldata, setmodeoftraveldata] = useState("");
   const [requestercomment, setrequestercomment] = useState("");
   const navigation = useNavigation();
   const authCtx = useContext(AuthContext);
   const [progressBar, setProgressBar] = useState(true);
   const [editable, seteditable] = useState(true);
-  const [first, setfirst] = useState(true);
 
-  const onPressdreturn = (radioButtonsArray) => {
-    setsdreturn(radioButtonsArray[0].selected);
-  };
 
-  
+ 
 
   useEffect(() => {
     getdata();
@@ -66,74 +59,19 @@ export default function IncidentialExpenses({ route }) {
     }
   }, [route]);
 
-  
-
-  useEffect(() => {
-
-
-    if (!first) {
-
-      if (single_fare != "" && traveltime != "" && motravel != "") {
-        EligibleAmountCalculation();
-      }
-    } 
-
-  }, [single_fare, traveltime, motravel, sdreturn, first]);
  
-
-  async function EligibleAmountCalculation() {
-    eligible = {
-      expenseid: 3,
-      travel_mode: motravel,
-      travel_hours: traveltime,
-      single_fare: single_fare,
-    };
-
-    if (sdreturn) {
-      eligible["same_day_return"] = 1;
-    } else {
-      eligible["same_day_return"] = 0;
-    }
-
+  async function getdata() {
     try {
-      const response = await fetch(URL.INCIDENTIAL_ElIGIBLE, {
-        method: "POST",
-        body: JSON.stringify(eligible),
+      let subcategoryarray = [];
+      const response = await fetch(URL.COMMON_DROPDOWN + "misc_res", {
         headers: {
-          "Content-type": "application/json",
+          "Content-Type": "application/json",
           Authorization: authCtx.auth_token,
         },
       });
       let json = await response.json();
 
-      console.log(JSON.stringify(json) + " Eligible Amount Data");
-
-      if ("detail" in json) {
-        if (json.detail == "Invalid credentials/token.") {
-          AlertCredentialError(json.detail, navigation);
-          return;
-        }
-      }
-
-      setincidentialexpense(json.elgibleamount + "");
-    } catch (error) {}
-  }
-
-  async function getdata() {
-    try {
-      let subcategoryarray = [];
-      const response = await fetch(
-        URL.COMMON_DROPDOWN + "incidental_travelmode",
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: authCtx.auth_token,
-          },
-        }
-      );
-      let json = await response.json();
-
-      console.log(JSON.stringify(json) + " Travel Mode Json Response");
+      console.log(JSON.stringify(json) + " Expense Response");
 
       if ("detail" in json) {
         if (json.detail == "Invalid credentials/token.") {
@@ -147,60 +85,52 @@ export default function IncidentialExpenses({ route }) {
           };
           subcategoryarray.push(obj);
         }
-        setmodeoftraveldata(subcategoryarray);
+        setexpensereasondata(subcategoryarray);
       }
     } catch (error) {}
   }
   useEffect(() => {
-    if (IncidentialExpenseId != "") {
+    if (MiscId != "") {
       get();
     } else {
       setrequestercomment(route.params.Comments);
       setProgressBar(false);
     }
-  }, [IncidentialExpenseId]);
+  }, [MiscId]);
 
   function validation() {
-    if (motravel == "") {
-      Alert.alert("Choose Mode of Travel");
+    if (description == "") {
+      Alert.alert("Enter Description");
       return;
     }
-    if (traveltime == "") {
-      Alert.alert("Enter Travel Time");
+    if (expensereason == "") {
+      Alert.alert("Choose Expense Reason");
       return;
     }
-    if (single_fare == "") {
-      Alert.alert("Enter Single Fare");
-      return;
-    }
-    if (incidentialexpense == "") {
-      Alert.alert("Incidential Expense Can't be empty");
+    if (amount == "") {
+      Alert.alert("Enter Total Billed Amount");
       return;
     }
 
-    IncidentialExpensePost();
+    MiscExpensePost();
   }
 
-  function IncidentialExpensePost() {
+  function MiscExpensePost() {
     obj = {
-      tourid: TourId,
-      expenseid: 3,
+      tourgid: TourId,
+      expense_id: 6,
       requestercomment: requestercomment,
-      travel_mode: motravel,
-      single_fare: parseInt(single_fare),
-      travel_hours: parseInt(traveltime),
-      amount: parseInt(incidentialexpense),
+      description: description,
+      expreason: expensereasonvalue,
+      approvedamount: parseInt(amount),
+      claimedamount: parseInt(amount),
       mobile: 1,
     };
 
-    if (sdreturn) {
-      obj["same_day_return"] = 1;
-    } else {
-      obj["same_day_return"] = 0;
-    }
+    console.log(JSON.stringify(obj) + " object");
 
-    if (IncidentialExpenseId != "") {
-      obj["id"] = IncidentialExpenseId;
+    if (MiscId != "") {
+      obj["id"] = MiscId;
       jsonobject = JSON.stringify({
         data: [obj],
       });
@@ -213,8 +143,9 @@ export default function IncidentialExpenses({ route }) {
   }
   async function APICall() {
     setProgressBar(true);
+    console.log(URL.MISC + " miscelleneous Url");
     try {
-      const response = await fetch(URL.INCIDENTIAL, {
+      const response = await fetch(URL.MISC, {
         method: "POST",
         body: jsonobject,
         headers: {
@@ -251,38 +182,28 @@ export default function IncidentialExpenses({ route }) {
   async function get() {
     setProgressBar(true);
     try {
-      const response = await fetch(URL.INCIDENTIAL + "/tour/" + TourId, {
+      const response = await fetch(URL.MISC + "/tour/" + TourId, {
         headers: {
           "Content-Type": "application/json",
           Authorization: authCtx.auth_token,
         },
       });
       let json = await response.json();
-      console.log(JSON.stringify(json) + " Incidential Expense Data");
+      console.log(JSON.stringify(json) + " Misc Expense Data");
 
       if (response.status == 403) {
         AlertCredentialError(json.detail, navigation);
         return;
       }
-     
 
       for (let i = 0; i < json.data.length; i++) {
-        if (json.data[i].id == IncidentialExpenseId) {
-          setmotravel(json.data[i].travel_mode.name);
-          settraveltime(json.data[i].travel_hours + "");
-          setsingle_fare(json.data[i].single_fare + "");
-          setincidentialexpense(json.data[i].eligibleamount + "");
-          setrequestercomment(json.requestercomment);
-
-
-          if (json.data[i].same_day_return.value == 1) {
-            setsdreturn(true);
-          } else {
-            setsdreturn(false);
-          }
-
+        if (json.data[i].id == MiscId) {
+          setdescription(json.data[i].description);
+          setexpensereason(json.data[i].expreason.name);
+          setexpensereasonvalue(json.data[i].expreason.value);
+          setamount(json.data[i].claimedamount + "");
+          setrequestercomment(json.requestercomment)
           setProgressBar(false);
-
           break;
         }
       }
@@ -290,7 +211,6 @@ export default function IncidentialExpenses({ route }) {
       setProgressBar(false);
     }
   }
-
 
   return (
     <KeyboardAvoidingView
@@ -327,19 +247,26 @@ export default function IncidentialExpenses({ route }) {
             </View>
             <Dateview date={ReqDate}></Dateview>
           </View>
-          <CustomizedRadioButton
-            label="Onward and Return journey on same Day :"
-            status={sdreturn}
-            buttonpressed={onPressdreturn}
-          ></CustomizedRadioButton>
+          <Inputtextrow
+            label="Description* :"
+            hint="Description"
+            editable={editable}
+            value={description}
+            onChangeEvent={(updated) => {
+              if (editable) {
+                setdescription(updated);
+              }
+            }}
+          ></Inputtextrow>
+
           <DropDown
-            label="Mode of Travel*"
-            hint="Mode of Travel"
-            indata={motravel}
+            label="Expense Reason*"
+            hint="Expense Reason"
+            indata={expensereason}
             ontouch={() => {
               if (editable) {
                 setdialogstatus(!dialogstatus);
-                setfirst(false);
+               
               }
             }}
           ></DropDown>
@@ -347,40 +274,27 @@ export default function IncidentialExpenses({ route }) {
           {dialogstatus && (
             <DropDownDialog
               dialogstatus={dialogstatus}
-              data={modeoftraveldata}
-              Tittle="Mode Of Travel"
-              setdata={setmotravel}
+              data={expensereasondata}
+              Tittle="Expense Reason"
+              setdata={setexpensereason}
+              setid={setexpensereasonvalue}
               setdialogstatus={setdialogstatus}
-              clicked={() => setfirst(false)}
+              from="Misc"
+              
             />
           )}
 
           <InputNumberrow
-            label="Travel Time in Hours* :"
-            hint="Travel Time in Hours"
-            value={traveltime}
+            label="Total Billed Amount* :"
+            hint="Total Billed Amount"
+            value={amount}
             editable={editable}
             onChangeEvent={(updated) => {
-              settraveltime(updated);
-              setfirst(false);
+              if (editable) {
+                setamount(updated);
+              }
             }}
           ></InputNumberrow>
-          <InputNumberrow
-            label="Single Fare* :"
-            hint="Single Fare"
-            value={single_fare}
-            editable={editable}
-            onChangeEvent={(updated) => {
-              setsingle_fare(updated);
-              setfirst(false);
-            }}
-          ></InputNumberrow>
-
-          <LabelTextColumnView
-            label="Incidential Expense* :"
-            hint="Incidential Expense"
-            value={incidentialexpense}
-          ></LabelTextColumnView>
         </ScrollView>
       )}
 

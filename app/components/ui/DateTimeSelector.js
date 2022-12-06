@@ -19,7 +19,17 @@ export default function DateTimeSelector({
   inTime,
   outTimeOnPress,
   outTime,
+  from,
+  LodgingoutDateLabelhint,
+  LodgingoutTimeLabelhint,
+  LodgingoutDateLabel,
+  LodgingoutTimeLabel,
+  lodgingOutDate,
+  lodingOutTime,
+  LoutDateOnPress,
+  LoutTimeOnPress,
 }) {
+  console.log(from + " From Where");
   return (
     <View>
       <View style={{ flexDirection: "row" }}>
@@ -81,6 +91,42 @@ export default function DateTimeSelector({
           </Pressable>
         </View>
       </View>
+
+      {
+        (from == "Lodging" ? ( 
+          <View style={{ flexDirection: "row" }}>
+            <View style={styles.inputTextContainerLeft}>
+              <Text style={styles.label}>{LodgingoutDateLabel}</Text>
+              <Pressable style={styles.pressable} onPress={LoutDateOnPress}>
+                {lodgingOutDate ? (
+                  <Text style={styles.text}>{lodgingOutDate}</Text>
+                ) : (
+                  <Text style={styles.textHint}>{LodgingoutDateLabelhint}</Text>
+                )}
+                <View style={{ paddingRight: 4 }}>
+                  <MaterialIcons name="date-range" size={22} color="#A2A2A2" />
+                </View>
+              </Pressable>
+            </View>
+
+            <View style={styles.inputTextContainerRight}>
+              <Text style={styles.label}>{LodgingoutTimeLabel}</Text>
+              <Pressable style={styles.pressable} onPress={LoutTimeOnPress}>
+                {lodingOutTime ? (
+                  <Text style={styles.text}>{lodingOutTime}</Text>
+                ) : (
+                  <Text style={styles.textHint}>{LodgingoutTimeLabelhint}</Text>
+                )}
+                <View style={{ paddingRight: 4 }}>
+                  <MaterialIcons name="access-time" size={22} color="#A2A2A2" />
+                </View>
+              </Pressable>
+            </View>
+          </View>
+        ) : (
+          <View></View>
+        ))
+      }
     </View>
   );
 }

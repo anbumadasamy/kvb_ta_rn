@@ -64,6 +64,7 @@ export const URL = {
   LOCAL_CONVEYANCE: TA_SERVER + "localconv",
   LODGING: TA_SERVER + "lodging",
   INCIDENTIAL: TA_SERVER + "incidental",
+  MISC:TA_SERVER + "misc",
 
   TRAVELING_EXPENSES: TA_SERVER + "travel",
   ASSOCIATED_EXPENSES: TA_SERVER + "associate",
@@ -109,5 +110,8 @@ export const URL = {
 
   TOUR_GRADE: TA_SERVER + "tourno_grade_get/",
   DAILY_DIEM_CITY:TA_SERVER+"allowance?city=",
+  HSN:MASTER_SERVER+"search_hsn?query=",
+  GST:USER_SERVER+"bank_gst_get?gst=",
+
   
 };
