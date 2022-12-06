@@ -8,40 +8,28 @@ import DailyDiem from "../screens/reimbursement/DailyDiem";
 import LoginScreen from "../screens/main/LoginScreen";
 import TravelCreationScreen from "../screens/travel_creation/TravelCreationScreen";
 import AddItineraryScreen from "../screens/travel_creation/AddItineraryScreen";
-import AddRequirementsScreen from "../screens/travel_creation/AddRequirementsScreen";
+
 import SearchList from "../components/ui/SearchList";
 import TravelHistoryScreen from "../screens/history/TravelHistoryScreen";
 import OnGoingTravelScreen from "../screens/history/OnGoingTravelScreen";
 import ExpenseDetailScreen from "../screens/reimbursement/ExpenseDetailScreen";
-import TravelDetailScreen from "../screens/travel_creation/TravelDetailScreen";
 import ExpenseSubmit from "../screens/reimbursement/ExpenseSubmit";
 import CategoriesExpense from "../screens/reimbursement/CategoriesExpense";
 import ReimbursementScreen from "../screens/reimbursement/ReimbursementScreen";
 import LocalConveyance from "../screens/reimbursement/LocalConveyance";
 import AssociatedExpenses from "../screens/reimbursement/AssociatedExpense";
-import ItineraryDetailScreen from "../screens/travel_creation/ItineraryDetailScreen";
 import MemberTravelApprovalScreen from "../screens/travel_approvel/MemberTravelApprovalScreen";
 import ApprovalFlowScreen from "../screens/others/ApprovalFlowScreen";
-import AdminSummaryScreen from "../screens/admin/AdminSummaryScreen";
-import BookingScreen from "../screens/admin/BookingScreen";
-import RequirementsCancelScreen from "../screens/admin/RequirementsCancelScreen";
-import RequirementsDetailScreen from "../screens/travel_creation/RequirementsDetailScreen";
 import ExpenseList from "../screens/reimbursement/ExpenseList";
-import TravelUpdateScreen from "../screens/travel_update/TravelUpdateScreen";
-import ItineraryUpdateScreen from "../screens/travel_update/ItineraryUpdateScreen";
-import RequirementsUpdateScreen from "../screens/travel_update/RequirementsUpdateScreen";
 import MemberApprovalTabScreen from "../screens/reimbursement/MemberApprovalTabScreen";
 import AddCCBS from "../screens/reimbursement/AddCCBS";
 import ExpenseAddCCbs from "../screens/reimbursement/ExpenseAddCCBS";
 import OnBehalfOfTabScreen from "../screens/on_behalf_of/OnBehalfOfTabScreen";
-import BookingDetailScreen from "../screens/admin/BookingDetailScreen";
 import MakerSummaryTabScreen from "../screens/travel_update/MakerSummaryTabScreen";
-import BookingRequirementsScreen from "../screens/travel_update/BookingRequirementsScreen";
-import ChatboxScreen from "../screens/chat/ChatboxScreen";
-import ChatSummaryScreen from "../screens/chat/ChatSummaryScreen";
 import AddDocuments from "../screens/reimbursement/AddDocuments";
-import DateRelaxationScreen from "../screens/others/DateRelaxationScreen"
+import DateRelaxationScreen from "../screens/others/DateRelaxationScreen";
 import TravelManagmentScreen from "../screens/main/TravelManagmentScreen";
+import AdvanceCreationScreen from "../screens/advance_creation/AdvanceCreationScreen";
 import IncidentialExpenses from "../screens/reimbursement/IncidentialExpenses";
 import MiscExpenses from "../screens/reimbursement/MiscExpenses";
 import PackingExpenses from "../screens/reimbursement/PackingExpenses";
@@ -61,7 +49,6 @@ export default function Navigator() {
             contentStyle: { backgroundColor: CustomColors.primary_white },
           }}
         >
-         
           <Stack.Screen
             name="LoginScreen"
             component={LoginScreen}
@@ -77,26 +64,19 @@ export default function Navigator() {
             component={TravelCreationScreen}
           />
           <Stack.Screen
+            name="Advance Creation"
+            component={AdvanceCreationScreen}
+          />
+          <Stack.Screen
             name="Date Relaxation"
             component={DateRelaxationScreen}
           />
-          <Stack.Screen name="Booking Detail" component={BookingDetailScreen} />
-          <Stack.Screen
-            name="Itinerary Detail"
-            component={ItineraryDetailScreen}
-          />
-          <Stack.Screen
-            name="My Booking"
-            component={BookingRequirementsScreen}
-          />
+
           <Stack.Screen
             name="AddItineraryScreen"
             component={AddItineraryScreen}
           />
-          <Stack.Screen
-            name="AddRequirementsScreen"
-            component={AddRequirementsScreen}
-          />
+
           <Stack.Screen
             name="TravelHistoryScreen"
             component={TravelHistoryScreen}
@@ -111,35 +91,12 @@ export default function Navigator() {
             name="ExpenseDetailScreen"
             component={ExpenseDetailScreen}
           />
-          <Stack.Screen
-            name="TravelDetailScreen"
-            component={TravelDetailScreen}
-          />
-          <Stack.Screen name="Admin Screen" component={AdminSummaryScreen} />
-          <Stack.Screen
-            name="Requirements Cancel"
-            component={RequirementsCancelScreen}
-          />
-          <Stack.Screen
-            name="Requirement Detail"
-            component={RequirementsDetailScreen}
-          />
-          <Stack.Screen name="Booking" component={BookingScreen} />
 
           <Stack.Screen name="Approval Flow" component={ApprovalFlowScreen} />
           <Stack.Screen
             name="SearchList"
             component={SearchList}
             options={{ headerShown: false }}
-          />
-          <Stack.Screen name="Travel Update" component={TravelUpdateScreen} />
-          <Stack.Screen
-            name="Itinerary Update"
-            component={ItineraryUpdateScreen}
-          />
-          <Stack.Screen
-            name="Requirement Update"
-            component={RequirementsUpdateScreen}
           />
           <Stack.Screen name="ExpenseSubmit" component={ExpenseSubmit} />
           <Stack.Screen
@@ -160,15 +117,7 @@ export default function Navigator() {
           <Stack.Screen name="ExpenseList" component={ExpenseList} />
           <Stack.Screen name="Daily Diem" component={DailyDiem} />
           <Stack.Screen
-            name="Chat box"
-            component={ChatboxScreen}
-          ></Stack.Screen>
-          <Stack.Screen
-            name="Recent Comments"
-            component={ChatSummaryScreen}
-          ></Stack.Screen>
-          <Stack.Screen
-            name="Travel Approval"
+            name="Checker Summary"
             component={MemberTravelApprovalScreen}
           ></Stack.Screen>
           <Stack.Screen
@@ -187,15 +136,15 @@ export default function Navigator() {
             name="On Behalf Of"
             component={OnBehalfOfTabScreen}
           ></Stack.Screen>
-           <Stack.Screen
+          <Stack.Screen
             name="Incidential Expense"
             component={IncidentialExpenses}
           ></Stack.Screen>
-           <Stack.Screen
+          <Stack.Screen
             name="Miscellaneous Expense"
             component={MiscExpenses}
           ></Stack.Screen>
-            <Stack.Screen
+          <Stack.Screen
             name="Packing Expense"
             component={PackingExpenses}
           ></Stack.Screen>

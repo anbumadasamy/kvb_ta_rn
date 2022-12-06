@@ -49,8 +49,6 @@ export default function TravelMakerSummaryScreen({
     }
   }, [isFocused]);
 
-  console.log("Tab :>> " + authCtx.makerSummaryType);
-
   useEffect(() => {
     if (pagination) {
       makerSummaryArray = [];
@@ -98,8 +96,6 @@ export default function TravelMakerSummaryScreen({
     setReqDate(moment(selectedDate).format("DD-MM-YYYY"));
     setJsonDate(moment(selectedDate).format("DD-MMM-YYYY"));
   };
-
-  console.log("Filter Status :>> " + JSON.stringify(filStatus));
 
   async function GetMakerSummary() {
     let url;
@@ -178,13 +174,13 @@ export default function TravelMakerSummaryScreen({
       });
       let json = await response.json();
 
-      if ("detail" in json) {
-        if(json.detail == "Invalid credentials/token."){
-        AlertCredentialError(json.detail, navigation);
-        }
-      }
+      console.log("Travel maker summary :>> " + JSON.stringify(json));
 
-      if (json.data) {
+      if ("detail" in json) {
+        if (json.detail == "Invalid token.") {
+          AlertCredentialError(json.detail, navigation);
+        }
+      } else if (json.data) {
         if ("pagination" in json) {
           setPagination(json.pagination.has_next);
         } else {
@@ -194,21 +190,19 @@ export default function TravelMakerSummaryScreen({
         for (let i = 0; i < json.data.length; i++) {
           const obj = {
             id: json.data[i].id,
-            requestdate: moment(json.data[i].requestdate).format("DD-MM-YYYY"),
-            startdate: moment(json.data[i].startdate).format("DD-MM-YYYY"),
-            enddate: moment(json.data[i].enddate).format("DD-MM-YYYY"),
+            requestdate: json.data[i].requestdate,
+            startdate: json.data[i].startdate,
+            enddate: json.data[i].enddate,
             approvedby: json.data[i].approver_data.name,
             reason: json.data[i].reason,
             travelStatus: json.data[i].tour_status,
             travelStatusId: json.data[i].tour_status_id,
-            tourCancelStatus: json.data[i].tour_cancel_status,
-            tourCancelStatusId: json.data[i].tour_cancel_status_id,
+            tourCancelStatusId: json.data[i].tour_cancel_enable,
             isTourEnded: json.data[i].is_tour_ended,
+            advanceStatusId: json.data[i].advance_status_id,
           };
 
-          if (obj.tourCancelStatusId == -1) {
-            makerSummaryArray.push(obj);
-          }
+          makerSummaryArray.push(obj);
         }
         setMakerSummary([...makerSummary, ...makerSummaryArray]);
       }
@@ -239,8 +233,8 @@ export default function TravelMakerSummaryScreen({
       let json = await response.json();
 
       if ("detail" in json) {
-        if(json.detail == "Invalid credentials/token."){
-        AlertCredentialError(json.detail, navigation);
+        if (json.detail == "Invalid credentials/token.") {
+          AlertCredentialError(json.detail, navigation);
         }
       }
 
@@ -294,7 +288,7 @@ export default function TravelMakerSummaryScreen({
                     setPageNo(pageNo + 1);
                   }}
                   data={makerSummary}
-                  from="travel_update"
+                  from="travel_maker_summary"
                   travelCancelRequest={(value) => {
                     setTravelNo(value);
                     setReasonDialogStatus(!reasonDialogStatus);

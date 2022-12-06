@@ -7,7 +7,6 @@ import {
   FlatList,
   Text,
   Pressable,
-  Alert,
 } from "react-native";
 
 export default function ItineraryListCard({

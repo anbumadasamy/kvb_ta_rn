@@ -36,14 +36,14 @@ export default function TravelManagmentScreen() {
       id: 2,
       icon: "reader",
       iconColor: "#3498db",
-      title: "Travel Status",
+      title: "Maker Summary",
       flag: authCtx.travelMaker,
     },
     {
       id: 3,
       icon: "thumbs-up-sharp",
       iconColor: "#8e44ad",
-      title: "RM Approval",
+      title: "Checker Summary",
       flag: authCtx.travelApprover,
     },
     {
@@ -74,20 +74,13 @@ export default function TravelManagmentScreen() {
       title: "On Behalf Of",
       flag: authCtx.travelOnBehalfOf && authCtx.travelMaker ? true : false,
     },
-    {
-      id: 8,
-      icon: "people",
-      iconColor: "#2980B9",
-      title: "Admin",
-      flag: authCtx.admin,
-    },
-    {
+    /* {
       id: 9,
       icon: "rocket",
       iconColor: "#95A5A6",
       title: "Date Relaxation",
       flag: authCtx.travelApprover,
-    },
+    }, */
   ];
 
   useEffect(() => {
@@ -159,13 +152,15 @@ export default function TravelManagmentScreen() {
         navigation.navigate("Travel Creation", {
           itineraryDetails: null,
           onBehalfOf: authCtx.travelOnBehalfOf,
+          from: "Travel_Managment",
+          status: 101
         });
         break;
       case 2:
         navigation.navigate("Maker Summary");
         break;
       case 3:
-        navigation.navigate("Travel Approval");
+        navigation.navigate("Checker Summary");
         break;
       case 4:
         navigation.navigate("ReimbursementScreen");
@@ -179,12 +174,9 @@ export default function TravelManagmentScreen() {
       case 7:
         navigation.navigate("On Behalf Of");
         break;
-      case 8:
-        navigation.navigate("Admin Screen");
-        break;
-      case 9:
+    /*   case 9:
         navigation.navigate("Date Relaxation");
-        break;
+        break; */
     }
   }
 

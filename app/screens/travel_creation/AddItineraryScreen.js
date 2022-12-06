@@ -1,6 +1,6 @@
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import moment from "moment";
-import { useEffect, useLayoutEffect, useState, useContext } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import {
   View,
@@ -11,36 +11,19 @@ import {
   Platform,
   KeyboardAvoidingView,
 } from "react-native";
-import SearchDialog from "../../components/dialog/SearchDialog";
 import InputTextC from "../../components/ui/InputTextC";
-import { AuthContext } from "../../data/Auth-Context";
-import { URL } from "../../utilities/UrlBase";
-import InputSelectColumn from "../../components/ui/InputSelectColumn";
-import PopUpPickerColumn from "../../components/ui/PopUpPickerColumn";
-import DeleteDialog from "../../components/dialog/DeleteDialog";
-import AlertCredentialError from "../../components/toast/AlertCredentialError";
 import SubmitButton from "../../components/ui/SubmitButton";
 import DateSelector from "../../components/ui/DateSelector";
-import HeaderBox from "../../components/ui/HeaderBox";
-import RequirementsListCard from "../../components/cards/RequirementsListCard";
 
 let requirementsDetailsArray = [];
 
 export default function AddItineraryScreen({ route }) {
   const navigation = useNavigation();
-  const authCtx = useContext(AuthContext);
   const itineraryFrom = route.params.itineraryFrom;
-  const [deleteDialogStatus, setDeleteDialogStatus] = useState(false);
-  const [randomReqId, setRandomReqId] = useState(null);
   const [startDatePicker, setStartDatePicker] = useState(false);
   const [endDatePicker, setEndDatePicker] = useState(false);
-  const [startPlaceDialog, setStartPlaceDialog] = useState(false);
-  const [endPlaceDialog, setEndPlaceDialog] = useState(false);
-  const [clientDialog, setClientDialog] = useState(false);
-  const [typeOfTravel, setTypeOfTravel] = useState([]);
   const [maxDate, setMaxDate] = useState();
   const [minDate, setMinDate] = useState();
-  const [reqEligible, setReqEligible] = useState(false);
   const [itineraryData, setItineraryData] = useState({
     randomItineraryId:
       Math.floor(Math.random() * 100) +
@@ -50,21 +33,16 @@ export default function AddItineraryScreen({ route }) {
       1,
     startDate: "",
     endDate: "",
+    startDateMs: "",
+    endDateMs: "",
     startDateJson: "",
     endDateJson: "",
-    typeOfTravel: "Official",
-    typeOfTravelId: "1",
     startPlace: "",
     endPlace: "",
     reason: "",
-    client: "",
-    clientId: "",
-    otherClient: "",
-    requirement_details: [],
     from: "Create",
+    id: null,
   });
-
-  let typeOfTravelList = [];
 
   useEffect(() => {
     LogBox.ignoreLogs([
@@ -76,6 +54,9 @@ export default function AddItineraryScreen({ route }) {
     setMaxDate(route.params.maxDate);
     setMinDate(route.params.minDate);
   }, [route]);
+
+  console.log("Max Date :>> " + maxDate);
+  console.log("Min Date :>> " + minDate);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -104,12 +85,10 @@ export default function AddItineraryScreen({ route }) {
         "randomItineraryId",
         route.params.itineraryDetail.randomItineraryId
       );
+      inputChangedHandler("id", route.params.itineraryDetail.id);
       inputChangedHandler(
         "startDateJson",
         route.params.itineraryDetail.startDateJson
-      );
-      dateCompare(
-        moment(route.params.itineraryDetail.startDateJson).format("YYYY-MM-DD")
       );
       inputChangedHandler(
         "endDateJson",
@@ -117,6 +96,11 @@ export default function AddItineraryScreen({ route }) {
       );
       inputChangedHandler("startDate", route.params.itineraryDetail.startDate);
       inputChangedHandler("endDate", route.params.itineraryDetail.endDate);
+      inputChangedHandler(
+        "startDateMs",
+        route.params.itineraryDetail.startDateMs
+      );
+      inputChangedHandler("endDateMs", route.params.itineraryDetail.endDateMs);
       inputChangedHandler(
         "startPlace",
         route.params.itineraryDetail.startPlace
@@ -140,68 +124,7 @@ export default function AddItineraryScreen({ route }) {
         );
       }
     }
-
-    if (route.params.requirementsDetails != null) {
-      let position = "NEW";
-      if (itineraryData.requirement_details.length != 0) {
-        for (let i = 0; i < itineraryData.requirement_details.length; i++) {
-          if (
-            itineraryData.requirement_details[i].randomReqId ==
-            route.params.requirementsDetails.randomReqId
-          ) {
-            position = i;
-          }
-        }
-      } else {
-        position = "NEW";
-      }
-
-      if (position == "NEW") {
-        requirementsDetailsArray.push(route.params.requirementsDetails);
-        inputChangedHandler("requirement_details", [
-          ...itineraryData.requirement_details,
-          ...requirementsDetailsArray,
-        ]);
-      } else {
-        itineraryData.requirement_details[position] =
-          route.params.requirementsDetails;
-      }
-    }
   }, [route]);
-
-  useEffect(() => {
-    GetTypeOfTravel();
-  }, [route]);
-
-  async function GetTypeOfTravel() {
-    try {
-      const response = await fetch(URL.COMMON_DROPDOWN + "official", {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: authCtx.auth_token,
-        },
-      });
-
-      let json = await response.json();
-
-      if ("detail" in json) {
-        if (json.detail == "Invalid credentials/token.") {
-          AlertCredentialError(json.detail, navigation);
-        }
-      }
-
-      for (let i = 0; i < json.length; i++) {
-        const obj = {
-          id: json[i].value,
-          name: json[i].name,
-        };
-        typeOfTravelList.push(obj);
-      }
-      setTypeOfTravel(typeOfTravelList);
-    } catch (error) {
-      console.error(error);
-    }
-  }
 
   function inputChangedHandler(inputIdentifier, enteredValue) {
     setItineraryData((currentInputValues) => {
@@ -217,7 +140,6 @@ export default function AddItineraryScreen({ route }) {
     setStartDatePicker(false);
     inputChangedHandler("startDate", currentDate);
     inputChangedHandler("startDateJson", selectedDate);
-    dateCompare(moment(selectedDate).format("YYYY-MM-DD"));
   };
 
   const handleConfirmEndDate = (selectedDate) => {
@@ -227,79 +149,23 @@ export default function AddItineraryScreen({ route }) {
     inputChangedHandler("endDateJson", selectedDate);
   };
 
-  function AddRequirements() {
-    if (itineraryData.endDate != "") {
-      navigation.navigate("AddRequirementsScreen", {
-        reqFrom: "create",
-        requirementsDetail: null,
-        maxDate: itineraryData.endDateJson,
-        minDate: itineraryData.startDateJson,
-      });
-    } else {
-      Alert.alert("Select date");
-    }
-  }
-
-  function DeleteRequirementItem() {
-    const position = itineraryData.requirement_details.filter(
-      (item) => {
-        console.log("item.randomReqId :>> " + JSON.stringify(item.randomReqId))
-        console.log("randomReqId :>> " + JSON.stringify(item.randomReqId))
-        item.randomReqId !== randomReqId}
-    );
-
-    inputChangedHandler("requirement_details", position);
-  }
-
-  function dateCompare(date2) {
-    const date = moment(new Date()).format("YYYY-MM-DD");
-    var d1 = Date.parse(new Date(date));
-    var d2 = Date.parse(new Date(date2));
-
-    if (d2 == d1) {
-      setReqEligible(true);
-    }
-
-    if (d2 > d1) {
-      setReqEligible(true);
-    }
-  }
-
   function AddItinerary() {
     if (itineraryData.startDate != "") {
       if (itineraryData.endDate != "") {
-        if (itineraryData.typeOfTravel != "") {
-          if (itineraryData.startPlace != "") {
-            if (itineraryData.endPlace != "") {
-              if (itineraryData.reason != "") {
-                if (itineraryData.client != "") {
-                  if (itineraryData.client != "OTHERS") {
-                    navigation.navigate("Travel Creation", {
-                      itineraryDetails: itineraryData,
-                    });
-                  } else {
-                    if (itineraryData.otherClient != "") {
-                      navigation.navigate("Travel Creation", {
-                        itineraryDetails: itineraryData,
-                      });
-                    } else {
-                      Alert.alert("Enter client name");
-                    }
-                  }
-                } else {
-                  Alert.alert("Select client");
-                }
-              } else {
-                Alert.alert("Enter purpose of visit");
-              }
+        if (itineraryData.startPlace != "") {
+          if (itineraryData.endPlace != "") {
+            if (itineraryData.reason != "") {
+              navigation.navigate("Travel Creation", {
+                itineraryDetails: itineraryData,
+              });
             } else {
-              Alert.alert("choose end place");
+              Alert.alert("Enter purpose of visit");
             }
           } else {
-            Alert.alert("Choose start place");
+            Alert.alert("choose end place");
           }
         } else {
-          Alert.alert("Choose type of travel");
+          Alert.alert("Choose start place");
         }
       } else {
         Alert.alert("Select end date");
@@ -363,106 +229,24 @@ export default function AddItineraryScreen({ route }) {
               minimumDate={minDate}
             />
           )}
-          <PopUpPickerColumn
-            listData={typeOfTravel}
-            label="Type of Travel:*"
-            title="Type of Travel"
-            hint="Type of Travel"
-            pickerId="type_of_travel"
-            selectedName={itineraryData.typeOfTravel}
-            setSelectedName={inputChangedHandler.bind(this, "typeOfTravel")}
-            setSelectedId={inputChangedHandler.bind(this, "typeOfTravelId")}
+          <InputTextC
+            label="Starting Point:*"
+            hint="Enter Starting Point"
+            value={itineraryData.startPlace}
+            onChangeValue={inputChangedHandler.bind(this, "startPlace")}
           />
-          <InputSelectColumn
-            label="Start Place:*"
-            hint="Choose place"
-            selected={itineraryData.startPlace}
-            onPressEvent={() => setStartPlaceDialog(!startPlaceDialog)}
+          <InputTextC
+            label="Place Of Visit:*"
+            hint="Enter Place Of Visit"
+            value={itineraryData.endPlace}
+            onChangeValue={inputChangedHandler.bind(this, "endPlace")}
           />
-          {startPlaceDialog && (
-            <SearchDialog
-              dialogstatus={startPlaceDialog}
-              setdialogstatus={setStartPlaceDialog}
-              from="startPlace"
-              setValue={inputChangedHandler.bind(this, "startPlace")}
-            />
-          )}
-          <InputSelectColumn
-            label="End Place:*"
-            hint="Choose place"
-            selected={itineraryData.endPlace}
-            onPressEvent={() => setEndPlaceDialog(!endPlaceDialog)}
-          />
-          {endPlaceDialog && (
-            <SearchDialog
-              dialogstatus={endPlaceDialog}
-              setdialogstatus={setEndPlaceDialog}
-              from="toPlace"
-              setValue={inputChangedHandler.bind(this, "endPlace")}
-            />
-          )}
           <InputTextC
             label="Purpose Of Visit:*"
-            hint="Purpose"
+            hint="Enter Purpose"
             value={itineraryData.reason}
             onChangeValue={inputChangedHandler.bind(this, "reason")}
           />
-          <InputSelectColumn
-            label="Client:*"
-            hint="Choose Client"
-            selected={itineraryData.client}
-            onPressEvent={() => {
-              setClientDialog(!clientDialog);
-            }}
-          />
-          {clientDialog && (
-            <SearchDialog
-              dialogstatus={clientDialog}
-              setdialogstatus={setClientDialog}
-              from="client"
-              setId={inputChangedHandler.bind(this, "clientId")}
-              setValue={(value) => {
-                if (value != "OTHERS") {
-                  inputChangedHandler("otherClient", "");
-                }
-                inputChangedHandler("client", value);
-              }}
-            />
-          )}
-          {itineraryData.client == "OTHERS" && (
-            <InputTextC
-              label="Client Name:*"
-              hint="Client Name"
-              value={itineraryData.otherClient}
-              onChangeValue={inputChangedHandler.bind(this, "otherClient")}
-            />
-          )}
-          {reqEligible && (
-            <HeaderBox
-              onPressEvent={AddRequirements}
-              label="Requirements"
-              icon="add-circle-outline"
-            />
-          )}
-          <RequirementsListCard
-            deleteCreatedReq={(value) => {
-              // setRandomReqId(value);
-              setDeleteDialogStatus(!deleteDialogStatus);
-            }}
-            data={itineraryData.requirement_details}
-            from="travel_creation"
-          />
-          {deleteDialogStatus && (
-            <DeleteDialog
-              dialogstatus={deleteDialogStatus}
-              setDialogstatus={() => {
-                setDeleteDialogStatus(!deleteDialogStatus);
-              }}
-              onPressDelete={() => {
-                DeleteRequirementItem();
-              }}
-            />
-          )}
         </ScrollView>
         <View>
           <SubmitButton onPressEvent={AddItinerary}>Submit</SubmitButton>
