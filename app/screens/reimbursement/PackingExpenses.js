@@ -30,12 +30,48 @@ import ToastMessage from "../../components/toast/ToastMessage";
 import LabelTextColumnView from "../../components/ui/LabelTextColumnView";
 import SearchDialog from "../../components/dialog/SearchDialog";
 
-export default function TravelingExpenses({ route }) {
+export default function PackingExpenses({ route }) {
   const TourId = route.params.TourId;
   const FromDate = route.params.FromDate;
   const ToDate = route.params.ToDate;
   const ReqDate = route.params.ReqDate;
-  let TravelingExpenseId = route.params.TravelingExpenseId;
+  let PackingExpenseId = route.params.PackingExpenseId;
+
+  const [progressBar, setProgressBar] = useState(true);
+  const [is_twowheeler, setis_twowheeler] = useState(false);
+  const [is_household, setis_household] = useState(false);
+  const [twowheelerby, settwowheelerby] = useState();
+  const [twowheelerdata, settwowheelerdata] = useState();
+  const [twowheelerstatus, settwowheelerstatus] = useState();
+  const [vendorname, setvendorname] = useState("");
+  const [vendorcode, setvendorcode] = useState("");
+  const [totaldistance, settotaldistance] = useState("");
+  const [hillyterraindistance, sethillyterraindistance] = useState("");
+  const [tonnageofhousehold, settonnageofhousehold] = useState("");
+  const [eligibletonnage, seteligibletonnage] = useState("");
+  const [householdbillamount, sethouseholdbillamount] = useState("");
+  const [eligibletransportation, seteligibletransportation] = useState("");
+  const [transportationcharge, settransportationcharge] = useState("");
+  const [is_driver, setis_driver] = useState(false);
+  const [traveltime, settraveltime] = useState("");
+  const [noofdriver, setnoofdriver] = useState("");
+  const [eligibledriverbattas, seteligibledriverbattas] = useState("");
+  const [diverbattas, setdriverbattas] = useState("");
+  const [octroicharges, setoctroicharges] = useState("");
+  const [breakupcharges, setbreakupcharges] = useState("");
+  const [have_receipt, sethave_receipt] = useState(false);
+  const [eligiblebreakupcharges, seteligiblebreakupcharges] = useState("");
+  const [totaleligibleamount, settotaleligibleamount] = useState("");
+  const [HSN_number, setHSN_number] = useState("");
+  const [Hsn_dialogstatus, setHsn_dialogstatus] = useState(false);
+  const [bank_gstno, setbank_gstno] = useState("");
+  const [bank_dialogstatus, setbank_dialogststus] = useState(false);
+  const [vendor_gstno, setvendor_gstno] = useState("");
+  const [requestercomment, setrequestercomment] = useState("");
+  const [editable, seteditable] = useState(true);
+  const authCtx = useContext(AuthContext);
+  const navigation = useNavigation();
+
 
   const [checkingDate, setCheckingDate] = useState("");
   const [checkoutDate, setcheckoutDate] = useState("");
@@ -47,7 +83,6 @@ export default function TravelingExpenses({ route }) {
   const [checkoutDateStatus, setcheckoutDateStatus] = useState(false);
   const [checkingTimeStatus, setcheckingTimeStatus] = useState(false);
   const [checkoutTimeStatus, setcheckoutTimeStatus] = useState(false);
-  const [progressBar, setProgressBar] = useState(true);
   const [departureplace, setdepartureplace] = useState("");
   const [placeofvisit, setplaceofvisit] = useState("");
   const [totaltkttamt, settotaltkttamt] = useState("");
@@ -66,20 +101,6 @@ export default function TravelingExpenses({ route }) {
   const [no_of_dependent, setno_of_dependent] = useState("");
   const [dependent, setdependent] = useState("");
   const [dependentstatus, setdependentstatus] = useState(false);
-  const [claimamount, setclaimamount] = useState("");
-  const [vendorname, setvendorname] = useState("");
-  const [vendorcode, setvendorcode] = useState("");
-  const [HSN_number, setHSN_number] = useState("");
-  const [Hsn_dialogstatus, setHsn_dialogstatus] = useState(false);
-  const [bank_gstno, setbank_gstno] = useState("");
-  const [bank_dialogstatus, setbank_dialogststus] = useState(false);
-  const [vendor_gstno, setvendor_gstno] = useState("");
-  const [requestercomment, setrequestercomment] = useState("");
-  const [editable, seteditable] = useState(true);
-  const authCtx = useContext(AuthContext);
-  const navigation = useNavigation();
-
-
   const [billno, setbillno] = useState("");
   const [remarks, setremarks] = useState("");
   const [traveltype, settraveltype] = useState("");
@@ -101,11 +122,22 @@ export default function TravelingExpenses({ route }) {
   function isbank(radioButtonsArray) {
     settkt_bybank(radioButtonsArray[0].selected);
   }
-
+  function istwowheelertransport(radioButtonsArray) {
+    is_twowheeler(radioButtonsArray[0].selected);
+  }
+  function ishouseholdtransport(radioButtonsArray) {
+    is_household(radioButtonsArray[0].selected);
+  }
+  function isdrivertransport(radioButtonsArray) {
+    setis_driver(radioButtonsArray[0].selected);
+  }
+  function havingreceipt(radioButtonsArray) {
+    have_receipt(radioButtonsArray[0].selected);
+  }
 
   useEffect(() => {
     navigation.setOptions({
-      title: "Traveling Expenses",
+      title: "Packing and Moving ",
     });
   });
   useEffect(() => {
@@ -222,13 +254,13 @@ export default function TravelingExpenses({ route }) {
     } catch (error) {}
   }
   useEffect(() => {
-    if (TravelingExpenseId != "") {
+    if (PackingExpenseId != "") {
       get();
     } else {
       setrequestercomment(route.params.Comments);
       setProgressBar(false);
     }
-  }, [TravelingExpenseId]);
+  }, [PackingExpenseId]);
 
   useEffect(() => {
     traveltypemethod();
@@ -253,7 +285,7 @@ export default function TravelingExpenses({ route }) {
         }
       } else {
         for (let i = 0; i < json.data.length; i++) {
-          if (json.data[i].id == TravelingExpenseId) {
+          if (json.data[i].id == PackingExpenseId) {
             let datewithtime = json.data[i].fromdate.split(" ");
             let uniqdate = datewithtime[0].split("-");
             let uniqtime = datewithtime[1];
@@ -386,9 +418,6 @@ export default function TravelingExpenses({ route }) {
     setcheckoutTime(moment(selectedDate).format("HH:mm"));
   };
 
- 
- 
-
   function validation() {
     if (jsoncheckingDate != "") {
       if (jsoncheckoutDate != "") {
@@ -472,8 +501,8 @@ export default function TravelingExpenses({ route }) {
       obj["prior_permission"] = "NO";
     }
 
-    if (TravelingExpenseId != "") {
-      obj["id"] = TravelingExpenseId;
+    if (PackingExpenseId != "") {
+      obj["id"] = PackingExpenseId;
       jsonobject = {
         data: [obj],
       };
@@ -553,246 +582,36 @@ export default function TravelingExpenses({ route }) {
             </View>
             <Dateview date={ReqDate}></Dateview>
           </View>
-          <DateTimeSelector
-            inDate={checkingDate}
-            inDateLabel={"Departure Date:*"}
-            outDateLabel={"Arrival Date:*"}
-            inTimeLabel={"Departure Time:*"}
-            outTimeLabel={"Arrival Time:*"}
-            inDateLabelhint={"Departure Date:"}
-            outDateLabelhint={"Arrival Date:"}
-            inTimeLabelhint={"Departure Time:"}
-            outTimeLabelhint={"Arrival Time:"}
-            outDate={checkoutDate}
-            inTime={checkingTime}
-            outTime={checkoutTime}
-            inDateOnPress={() => {
-              if (editable) {
-                setcheckingDateStatus(!checkingdateStatus);
-                setcheckoutDate("");
-              }
-            }}
-            outDateOnPress={() => {
-              if (editable) {
-                if (checkingDate != "") {
-                  setcheckoutDateStatus(!checkoutDateStatus);
-                } else {
-                  Alert.alert("First Fill Departure Date");
-                }
-              }
-            }}
-            inTimeOnPress={() => {
-              if (editable) {
-                setcheckingTimeStatus(!checkingTimeStatus);
-              }
-            }}
-            outTimeOnPress={() => {
-              if (editable) {
-                setcheckoutTimeStatus(!checkoutTimeStatus);
-              }
-            }}
-          ></DateTimeSelector>
-          <DateTimePickerModal
-            isVisible={checkingdateStatus}
-            mode="date"
-            onConfirm={onStartDate}
-            onCancel={() => {
-              setcheckingDateStatus(false);
-            }}
-            display={Platform.OS == "ios" ? "inline" : "default"}
-            maximumDate={new Date(ToDate)}
-            minimumDate={new Date(FromDate)}
-          />
-          <DateTimePickerModal
-            isVisible={checkoutDateStatus}
-            mode="date"
-            onConfirm={onEndDate}
-            onCancel={() => {
-              setcheckoutDateStatus(false);
-            }}
-            display={Platform.OS == "ios" ? "inline" : "default"}
-            maximumDate={new Date(ToDate)}
-            minimumDate={new Date(FromDate)}
-          />
-
-          <DateTimePickerModal
-            isVisible={checkingTimeStatus}
-            mode="time"
-            locale="en_GB"
-            date={new Date()}
-            display={Platform.OS == "ios" ? "spinner" : "default"}
-            is24Hour={true}
-            minuteInterval={15}
-            onConfirm={onStartTime}
-            onCancel={() => {
-              setcheckingTimeStatus(false);
-            }}
-          />
-          <DateTimePickerModal
-            isVisible={checkoutTimeStatus}
-            mode="time"
-            locale="en_GB"
-            date={new Date()}
-            display={Platform.OS == "ios" ? "spinner" : "default"}
-            is24Hour={true}
-            minuteInterval={15}
-            onConfirm={onEndTime}
-            onCancel={() => {
-              setcheckoutTimeStatus(false);
-            }}
-          />
-          <Inputtextrow
-            label="Departure Place* :"
-            hint="Departure Place"
-            editable={editable}
-            value={departureplace}
-            onChangeEvent={(updated) => {
-              setdepartureplace(updated);
-            }}
-          ></Inputtextrow>
-          <Inputtextrow
-            label="Place of Visit* :"
-            hint="Place of Visit"
-            editable={editable}
-            value={placeofvisit}
-            onChangeEvent={(updated) => {
-              setplaceofvisit(updated);
-            }}
-          ></Inputtextrow>
-          <InputNumberrow
-            label="Total Ticket Amount* :"
-            hint="Total Ticket Amount "
-            editable={editable}
-            value={totaltkttamt}
-            onChangeEvent={(updated) => {
-              settotaltkttamt(updated);
-            }}
-          ></InputNumberrow>
           <CustomizedRadioButton
-            label="Ticket By Bank:"
-            status={tkt_bybank}
-            buttonpressed={isbank}
+            label="Two Wheeler Transport:"
+            status={is_twowheeler}
+            buttonpressed={istwowheelertransport}
           ></CustomizedRadioButton>
-          <InputNumberrow
-            label="Ticket Reference Number* :"
-            hint="Ticket Reference Number "
-            editable={editable}
-            value={tkt_refno}
-            onChangeEvent={(updated) => {
-              settkt_refno(updated);
-            }}
-          ></InputNumberrow>
+          <CustomizedRadioButton
+            label="Household Goods Transport:"
+            status={is_household}
+            buttonpressed={ishouseholdtransport}
+          ></CustomizedRadioButton>
+          
           <DropDown
-            label="Actual Mode of Travel*"
-            hint="Actual Mode of Travel"
-            indata={actualmodeoftravel}
+            label="Transport of Two Wheeler by*"
+            hint="Transport of Two Wheeler by"
+            indata={twowheelerby}
             ontouch={() => {
               if (editable) {
-                setactualmodestatus(!actualmodestatus);
+                settwowheelerstatus(!twowheelerstatus);
               }
             }}
           ></DropDown>
-          {actualmodestatus && (
+          {twowheelerstatus && (
             <DropDownDialog
-              dialogstatus={actualmodestatus}
-              data={actualmodedata}
-              Tittle="Actual Mode of Travel"
-              setdata={setactualmodeoftravel}
-              setdialogstatus={setactualmodestatus}
+              dialogstatus={twowheelerstatus}
+              data={twowheelerdata}
+              Tittle="Transport of Two Wheeler by"
+              setdata={settwowheelerby}
+              setdialogstatus={settwowheelerstatus}
             ></DropDownDialog>
           )}
-          <DropDown
-            label="Class of Travel*"
-            hint="Class of Travel"
-            indata={classoftravel}
-            ontouch={() => {
-              if (editable) {
-                setclassoftravelstatus(!classoftravelstatus);
-              }
-            }}
-          ></DropDown>
-
-          {classoftravelstatus && (
-            <DropDownDialog
-              dialogstatus={classoftravelstatus}
-              data={classoftraveldata}
-              Tittle="Class of Travel"
-              setdata={setclassoftraveldata}
-              setdialogstatus={setclassoftravelstatus}
-            ></DropDownDialog>
-          )}
-
-          <LabelTextColumnView
-            label="Eligible Mode of Travel:"
-            hint="Eligible Mode of Travel"
-            value={eligiblemodeoftravel}
-          ></LabelTextColumnView>
-
-          <CustomizedRadioButton
-            label="Higher Mode Opted Due To Personal Reasons of Exigencies:"
-            status={highermode}
-            buttonpressed={Highermoderadiobutton}
-          ></CustomizedRadioButton>
-
-          <CustomizedRadioButton
-            label="Prior Permission Taken for higher mode of travel:"
-            status={priority}
-            buttonpressed={Priorpermission}
-          ></CustomizedRadioButton>
-
-          {priority && (
-            <Inputtextrow
-            label="Who has opted Higher mode* :"
-            hint="Higher Mode"
-            editable={editable}
-            value={who_higher}
-            onChangeEvent={(updated) => {
-              setwho_higher(updated);
-            }}
-          ></Inputtextrow>
-          )}
-
-          <InputNumberrow
-            label="No of Tickets/No of dependent Traveling* :"
-            hint="No of Tickets/No of dependent Traveling "
-            editable={editable}
-            value={no_of_dependent}
-            onChangeEvent={(updated) => {
-              setno_of_dependent(updated);
-            }}
-          ></InputNumberrow>
-
-          <DropDown
-            label="Dependent On Traveling*"
-            hint="Dependent On Traveling"
-            indata={dependent}
-            ontouch={() => {
-              if (editable) {
-                setdependentstatus(!dependentstatus);
-              }
-            }}
-          ></DropDown>
-
-          {dependentstatus && (
-            <SearchDialog
-              dialogstatus={dependentstatus}
-              setValue={setdependent}
-              setdialogstatus={setdependentstatus}
-              from="Dependent"
-              setfirst={setfirst}
-            />
-          )}
-
-          <InputNumberrow
-            label="Claim Amount* :"
-            hint="Claim Amount"
-            editable={editable}
-            value={claimamount}
-            onChangeEvent={(updated) => {
-              setclaimamount(updated);
-            }}
-          ></InputNumberrow>
-
           <InputNumberrow
             label="Vendor Name* :"
             hint="Vendor Name "
@@ -812,8 +631,136 @@ export default function TravelingExpenses({ route }) {
               setvendorcode(updated);
             }}
           ></Inputtextrow>
+          <InputNumberrow
+            label="Total Distance(KM) (Including Hilly Terrain)* :"
+            hint="Total Distance(KM)"
+            editable={editable}
+            value={totaldistance}
+            onChangeEvent={(updated) => {
+              settotaldistance(updated);
+            }}
+          ></InputNumberrow>
+          <InputNumberrow
+            label="Distance in Hilly Terrain* :"
+            hint="Distance(KM)"
+            editable={editable}
+            value={hillyterraindistance}
+            onChangeEvent={(updated) => {
+              sethillyterraindistance(updated);
+            }}
+          ></InputNumberrow>
+          <InputNumberrow
+            label="Tonnage of Household Goods* :"
+            hint="Tonnage of Household Goods"
+            editable={editable}
+            value={tonnageofhousehold}
+            onChangeEvent={(updated) => {
+              settonnageofhousehold(updated);
+            }}
+          ></InputNumberrow>
+          <LabelTextColumnView
+            label="Max Eligible Tonnage:"
+            hint="Max Eligible Tonnage"
+            value={eligibletonnage}
+          ></LabelTextColumnView>
+          <InputNumberrow
+            label="Billed Amount of Household Goods Transport* :"
+            hint="Billed Amount of Household Goods Transport"
+            editable={editable}
+            value={householdbillamount}
+            onChangeEvent={(updated) => {
+              sethouseholdbillamount(updated);
+            }}
+          ></InputNumberrow>
 
-        
+           <LabelTextColumnView
+            label="Eligible Transportation Amount:"
+            hint="Eligible Transportation Amount"
+            value={eligibletonnage}
+          ></LabelTextColumnView>
+
+           <InputNumberrow
+            label="Transport Charges for Vehicle* :"
+            hint="Transport Charges for Vehicle"
+            editable={editable}
+            value={transportationcharge}
+            onChangeEvent={(updated) => {
+              settransportationcharge(updated);
+            }}
+          ></InputNumberrow>
+            <CustomizedRadioButton
+            label="Vehicle Transport By Driver:"
+            status={is_driver}
+            buttonpressed={isdrivertransport}
+          ></CustomizedRadioButton>
+
+           <InputNumberrow
+            label="Travel Time in Hours(HH)* :"
+            hint="Travel Time in Hours(HH)"
+            editable={editable}
+            value={traveltime}
+            onChangeEvent={(updated) => {
+              settraveltime(updated);
+            }}
+          ></InputNumberrow>
+           <InputNumberrow
+            label="No of Days Driver Engaged* :"
+            hint="No of Days Driver Engaged"
+            editable={editable}
+            value={noofdriver}
+            onChangeEvent={(updated) => {
+              setnoofdriver(updated);
+            }}
+          ></InputNumberrow>
+
+             <LabelTextColumnView
+            label="Driver Battas:"
+            hint="Driver Battas"
+            value={eligibledriverbattas}
+          ></LabelTextColumnView>
+           <InputNumberrow
+            label="Octroi Charges for Transport Vehicle* :"
+            hint="Octroi Charges for Transport Vehicle"
+            editable={editable}
+            value={octroicharges}
+            onChangeEvent={(updated) => {
+              setoctroicharges(updated);
+            }}
+          ></InputNumberrow>
+          <InputNumberrow
+            label="Breakage Charges* :"
+            hint="Breakage Charges"
+            editable={editable}
+            value={breakupcharges}
+            onChangeEvent={(updated) => {
+              setbreakupcharges(updated);
+            }}
+          ></InputNumberrow>
+           <CustomizedRadioButton
+            label="Recipt for Losses Due to Damage Produced:"
+            status={have_receipt}
+            buttonpressed={havingreceipt}
+          ></CustomizedRadioButton>
+          <LabelTextColumnView
+            label="Eligible Breakage/Lumpsum Charge:"
+            hint="Eligible Breakage/Lumpsum Charge"
+            value={eligiblebreakupcharges}
+          ></LabelTextColumnView>
+          <LabelTextColumnView
+            label="Eligible Amount:"
+            hint="Eligible Amount:"
+            value={totaleligibleamount}
+          ></LabelTextColumnView>
+            <InputNumberrow
+            label="Claim Amount* :"
+            hint="Claim Amount"
+            editable={editable}
+            value={claimamount}
+            onChangeEvent={(updated) => {
+              setclaimamount(updated);
+            }}
+          ></InputNumberrow>
+
           <DropDown
             label="HSN Code*"
             hint="HSN Code"
@@ -863,6 +810,9 @@ export default function TravelingExpenses({ route }) {
               setvendor_gstno(updated);
             }}
           ></Inputtextrow>
+
+
+        
         </ScrollView>
       )}
       {editable && !progressBar && (

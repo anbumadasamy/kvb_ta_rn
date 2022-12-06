@@ -43,6 +43,8 @@ import AddDocuments from "../screens/reimbursement/AddDocuments";
 import DateRelaxationScreen from "../screens/others/DateRelaxationScreen"
 import TravelManagmentScreen from "../screens/main/TravelManagmentScreen";
 import IncidentialExpenses from "../screens/reimbursement/IncidentialExpenses";
+import MiscExpenses from "../screens/reimbursement/MiscExpenses";
+import PackingExpenses from "../screens/reimbursement/PackingExpenses";
 
 const Stack = createNativeStackNavigator();
 
@@ -188,6 +190,14 @@ export default function Navigator() {
            <Stack.Screen
             name="Incidential Expense"
             component={IncidentialExpenses}
+          ></Stack.Screen>
+           <Stack.Screen
+            name="Miscellaneous Expense"
+            component={MiscExpenses}
+          ></Stack.Screen>
+            <Stack.Screen
+            name="Packing Expense"
+            component={PackingExpenses}
           ></Stack.Screen>
         </Stack.Navigator>
       </NavigationContainer>

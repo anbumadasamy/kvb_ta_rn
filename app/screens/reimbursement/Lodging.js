@@ -20,10 +20,11 @@ import { AuthContext } from "../../data/Auth-Context";
 import { URL } from "../../utilities/UrlBase";
 import DateTimeSelector from "../../components/ui/DateTimeSelector";
 import moment from "moment";
-import ReimbursementCommentBox from "../../components/ui/ReimbursementCommentBox";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { CustomColors } from "../../utilities/CustomColors";
 import SearchDialog from "../../components/dialog/SearchDialog";
+import CustomizedRadioButton from "../../components/ui/CustomizedRadiobutton";
+import LabelTextColumnView from "../../components/ui/LabelTextColumnView";
 import AlertCredentialError from "../../components/toast/AlertCredentialError";
 import ToastMessage from "../../components/toast/ToastMessage";
 
@@ -33,44 +34,72 @@ export default function Lodging({ route }) {
   const ToDate = route.params.ToDate;
   const ReqDate = route.params.ReqDate;
   let LodgingId = route.params.LodgingId;
-  const [subcategory, setsubcategory] = useState("Lodging");
-  const [city, setcity] = useState("");
-  const [subcategorydata, setsubcategorydata] = useState();
-  const authCtx = useContext(AuthContext);
-  const [dialogstatus, setdialogstatus] = useState(false);
-  const [citydialogstatus, setcitydialogstatus] = useState(false);
-  const [progressBar, setProgressBar] = useState(true);
+
+  const [first, setfirst] = useState(true);
   const [checkingDate, setCheckingDate] = useState("");
   const [checkoutDate, setcheckoutDate] = useState("");
+  const [LcheckoutDate, setLcheckoutDate] = useState("");
   const [checkingTime, setCheckingTime] = useState("");
   const [checkoutTime, setcheckoutTime] = useState("");
-  const [first, setfirst] = useState(true);
-  const [jsoncheckingDate, setjsonCheckingDate] = useState("");
-  const [jsoncheckoutDate, setjsoncheckoutDate] = useState("");
+  const [LcheckoutTime, setLcheckoutTime] = useState("");
   const [checkingdateStatus, setcheckingDateStatus] = useState(false);
   const [checkoutDateStatus, setcheckoutDateStatus] = useState(false);
+  const [LcheckoutDateStatus, setLcheckoutDateStatus] = useState(false);
   const [checkingTimeStatus, setcheckingTimeStatus] = useState(false);
   const [checkoutTimeStatus, setcheckoutTimeStatus] = useState(false);
+  const [LcheckoutTimeStatus, setLcheckoutTimeStatus] = useState(false);
+  const [jsoncheckingDate, setjsonCheckingDate] = useState("");
+  const [jsoncheckoutDate, setjsoncheckoutDate] = useState("");
+  const [jsonLcheckoutDate, setLjsoncheckoutDate] = useState("");
+  const [city, setcity] = useState("");
+  const [citydialogstatus, setcitydialogstatus] = useState(false);
+  const [Center_Classification, setCenter_Classification] = useState("");
+  const [CC_dialogstatus, setCC_dialogstatus] = useState(false);
+  const [CC_data, setCC_data] = useState("");
+  const [actualplace, setactualplace] = useState("");
+  const [nodays, setnodays] = useState("");
+  const [accomodation, setaccomodation] = useState("");
+  const [accomodation_id, setaccomodation_id] = useState(0);
+  const [yesornodata, setyesornodata] = useState("");
+  const [accomodationdialogststus, setaccomodationdialogststus] =
+    useState(false);
+  const [tourgrade, settourgrade] = useState("");
+  const [is_bill, setis_bill] = useState("");
+  const [is_bill_id, setis_bill_id] = useState(0);
+  const [is_billdialogststus, setis_billdialogststus] = useState(false);
+  const [ac_refno, setac_refno] = useState("");
   const [billno, setbillno] = useState("");
-  const [remarks, setremarks] = useState("");
   const [totalbillamount, settotalbillamount] = useState("");
+  const [eligibleamount, seteligibleamount] = useState("");
   const [claimamount, setclaimamount] = useState("");
   const [taxamount, settaxamount] = useState("");
   const [vendorname, setvendorname] = useState("");
-  const [eligibleamount, seteligibleamount] = useState("");
   const [requestercomment, setrequestercomment] = useState("");
-  const [remarkslabel, setremarkslabel] = useState("Remarks :");
   const [editable, seteditable] = useState(true);
-
+  const [progressBar, setProgressBar] = useState(true);
+  const [HSN_number, setHSN_number] = useState("");
+  const [Hsn_dialogstatus, setHsn_dialogstatus] = useState(false);
+  const [bank_gstno, setbank_gstno] = useState("");
+  const [bank_dialogstatus, setbank_dialogststus] = useState(false);
+  const [lodge_gstno, setlodge_gstno] = useState("");
   const navigation = useNavigation();
+  const authCtx = useContext(AuthContext);
+
+  const [subcategory, setsubcategory] = useState("Lodging");
+  const [subcategorydata, setsubcategorydata] = useState();
+  const [dialogstatus, setdialogstatus] = useState(false);
+  const [remarks, setremarks] = useState("");
+  const [remarkslabel, setremarkslabel] = useState("Remarks :");
 
   useEffect(() => {
     navigation.setOptions({
       title: "Lodging",
     });
-    getdata();
+    getdata("lodging_center", 0);
+    getdata("yn", 1);
+    getTourGrade();
   }, []);
-  useEffect(() => {
+  /* useEffect(() => {
     if (parseInt(eligibleamount) < parseInt(claimamount)) {
       setremarkslabel("Remarks:*");
       if (!first) {
@@ -81,7 +110,7 @@ export default function Lodging({ route }) {
     } else {
       setremarkslabel("Remarks:");
     }
-  }, [claimamount, eligibleamount]);
+  }, [claimamount, eligibleamount]); */
 
   useEffect(() => {
     if (route.params.from == "Approver") {
@@ -92,15 +121,26 @@ export default function Lodging({ route }) {
   }, [route]);
 
   useEffect(() => {
-    eligibleamountvalidation();
+    if (!first) {
+      if (
+        checkoutTime != "" &&
+        checkingTime != "" &&
+        jsoncheckingDate != "" &&
+        jsoncheckoutDate != "" &&
+        city != ""
+      ) {
+        EligibleAmountCalculation();
+      }
+    }
   }, [
     jsoncheckingDate,
     jsoncheckoutDate,
     checkingTime,
     checkoutTime,
-    subcategory,
+    accomodation_id,
     city,
   ]);
+
   function eligibleamountvalidation() {
     if (
       subcategory != "" &&
@@ -116,7 +156,8 @@ export default function Lodging({ route }) {
   async function EligibleAmountCalculation() {
     let eligible;
     eligible = {
-      Lodge_Homestay: subcategory,
+      accbybank: accomodation_id,
+      tourgid: TourId,
       fromdate: jsoncheckingDate + " " + checkingTime + ":00",
       todate: jsoncheckingDate + " " + checkoutTime + ":00",
       city: city,
@@ -134,39 +175,65 @@ export default function Lodging({ route }) {
       });
 
       let json = await response.json();
-      if ("detail" in json) {
-        if (json.detail == "Invalid credentials/token.") {
-          AlertCredentialError(json.detail, navigation);
-        }
-      } else {
-        seteligibleamount(json.Eligible_amount + "");
+      console.log(JSON.stringify(json)+" Eligible Amount JSON response")
+      if (response.status == 403) {
+        AlertCredentialError(json.detail, navigation);
+        return;
       }
+
+      seteligibleamount(json.Eligible_amount + "");
     } catch (error) {}
   }
-  async function getdata() {
+  async function getdata(getparam, id) {
     try {
       let subcategoryarray = [];
-      const response = await fetch(URL.COMMON_DROPDOWN + "lodge_homestay", {
+      const response = await fetch(URL.COMMON_DROPDOWN + getparam, {
         headers: {
           "Content-Type": "application/json",
           Authorization: authCtx.auth_token,
         },
       });
       let json = await response.json();
-      if ("detail" in json) {
-        if (json.detail == "Invalid credentials/token.") {
-          AlertCredentialError(json.detail, navigation);
-        }
-      } else {
-        for (let i = 0; i < json.length; i++) {
-          const obj = {
-            id: json[i].value,
-            name: json[i].name,
-          };
-          subcategoryarray.push(obj);
-        }
-        setsubcategorydata(subcategoryarray);
+
+      if (response.status == 403) {
+        AlertCredentialError(json.detail, navigation);
+        return;
       }
+      for (let i = 0; i < json.length; i++) {
+        const obj = {
+          id: json[i].value,
+          name: json[i].name,
+        };
+        subcategoryarray.push(obj);
+      }
+      switch (id) {
+        case 0:
+          setCC_data(subcategoryarray);
+          break;
+        case 1:
+          setyesornodata(subcategoryarray);
+          break;
+      }
+    } catch (error) {}
+  }
+  async function getTourGrade() {
+    try {
+      const response = await fetch(URL.TOUR_GRADE + route.params.TourId, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: authCtx.auth_token,
+        },
+      });
+      let json = await response.json();
+
+      console.log(JSON.stringify(json) + " Tour Grade");
+
+      if (response.status == 403) {
+        AlertCredentialError(json.detail, navigation);
+        return;
+      }
+
+      settourgrade(json.employee_grade);
     } catch (error) {}
   }
   useEffect(() => {
@@ -299,6 +366,12 @@ export default function Lodging({ route }) {
     setcheckoutDate(moment(selectedDate).format("DD-MM-YYYY"));
     setfirst(false);
   };
+  const onLEndDate = (selectedDate) => {
+    setLcheckoutDateStatus(false);
+    setLjsoncheckoutDate(moment(selectedDate).format("YYYY-MM-DD"));
+    setLcheckoutDate(moment(selectedDate).format("DD-MM-YYYY"));
+    setfirst(false);
+  };
   const onStartTime = (selectedDate) => {
     setcheckingTimeStatus(false);
     setCheckingTime(moment(selectedDate).format("HH:mm"));
@@ -307,6 +380,11 @@ export default function Lodging({ route }) {
   const onEndTime = (selectedDate) => {
     setcheckoutTimeStatus(false);
     setcheckoutTime(moment(selectedDate).format("HH:mm"));
+    setfirst(false);
+  };
+  const onLEndTime = (selectedDate) => {
+    setLcheckoutTimeStatus(false);
+    setLcheckoutTime(moment(selectedDate).format("HH:mm"));
     setfirst(false);
   };
   function validation() {
@@ -470,6 +548,13 @@ export default function Lodging({ route }) {
             outDateLabelhint={"Checkout Date:"}
             inTimeLabelhint={"Checkin Time:"}
             outTimeLabelhint={"Checkout Time:"}
+            LodgingoutDateLabelhint={"Lodge out Date:"}
+            LodgingoutTimeLabelhint={"Lodge out Time:"}
+            LodgingoutDateLabel={"Lodge out Date:*"}
+            LodgingoutTimeLabel={"Lodge out Time:*"}
+            lodgingOutDate={LcheckoutDate}
+            lodingOutTime={LcheckoutTime}
+            from="Lodging"
             outDate={checkoutDate}
             inTime={checkingTime}
             outTime={checkoutTime}
@@ -477,25 +562,38 @@ export default function Lodging({ route }) {
               if (editable) {
                 setcheckingDateStatus(!checkingdateStatus);
                 setcheckoutDate("");
+                setfirst(false)
               }
             }}
             outDateOnPress={() => {
               if (editable) {
                 if (checkingDate != "") {
                   setcheckoutDateStatus(!checkoutDateStatus);
+                  setfirst(false)
                 } else {
                   Alert.alert("First Fill Departure Date");
                 }
               }
             }}
+            LoutDateOnPress={() => {
+              if (editable) setLcheckoutDateStatus(!LcheckoutDateStatus);
+            }}
             inTimeOnPress={() => {
               if (editable) {
                 setcheckingTimeStatus(!checkingTimeStatus);
+                setfirst(false)
               }
             }}
             outTimeOnPress={() => {
               if (editable) {
                 setcheckoutTimeStatus(!checkoutTimeStatus);
+                setfirst(false)
+              }
+            }}
+            LoutTimeOnPress={() => {
+              if (editable) {
+                console.log("Anbuuuuuuu");
+                setLcheckoutTimeStatus(!LcheckoutTimeStatus);
               }
             }}
           ></DateTimeSelector>
@@ -516,6 +614,17 @@ export default function Lodging({ route }) {
             onConfirm={onEndDate}
             onCancel={() => {
               setcheckoutDateStatus(false);
+            }}
+            display={Platform.OS == "ios" ? "inline" : "default"}
+            maximumDate={new Date(ToDate)}
+            minimumDate={new Date(FromDate)}
+          />
+          <DateTimePickerModal
+            isVisible={LcheckoutDateStatus}
+            mode="date"
+            onConfirm={onLEndDate}
+            onCancel={() => {
+              setLcheckoutDateStatus(false);
             }}
             display={Platform.OS == "ios" ? "inline" : "default"}
             maximumDate={new Date(ToDate)}
@@ -548,46 +657,19 @@ export default function Lodging({ route }) {
               setcheckoutTimeStatus(false);
             }}
           />
-          <DropDown
-            label="City*"
-            hint="City"
-            indata={subcategory}
-            ontouch={() => {
-              if (editable) {
-                setdialogstatus(!dialogstatus);
-              }
+          <DateTimePickerModal
+            isVisible={LcheckoutTimeStatus}
+            mode="time"
+            locale="en_GB"
+            date={new Date()}
+            display={Platform.OS == "ios" ? "spinner" : "default"}
+            is24Hour={true}
+            minuteInterval={15}
+            onConfirm={onLEndTime}
+            onCancel={() => {
+              setLcheckoutTimeStatus(false);
             }}
-          ></DropDown>
-          <DropDown
-            label="Center Classification"
-            hint="Center Classification"
-            indata={subcategory}
-            ontouch={() => {
-              if (editable) {
-                setdialogstatus(!dialogstatus);
-              }
-            }}
-          ></DropDown>
-          {/*    <DropDown
-            label="Sub category*"
-            hint="Sub category"
-            indata={subcategory}
-            ontouch={() => {
-              if (editable) {
-                setdialogstatus(!dialogstatus);
-              }
-            }}
-          ></DropDown> */}
-          {dialogstatus && (
-            <DropDownDialog
-              dialogstatus={dialogstatus}
-              data={subcategorydata}
-              Tittle="Sub category"
-              setdata={setsubcategory}
-              setdialogstatus={setdialogstatus}
-              clicked={() => setfirst(false)}
-            ></DropDownDialog>
-          )}
+          />
           <DropDown
             label="City*"
             hint="City"
@@ -595,6 +677,7 @@ export default function Lodging({ route }) {
             ontouch={() => {
               if (editable) {
                 setcitydialogstatus(!citydialogstatus);
+                setfirst(false)
               }
             }}
           ></DropDown>
@@ -603,22 +686,122 @@ export default function Lodging({ route }) {
               dialogstatus={citydialogstatus}
               setValue={setcity}
               setdialogstatus={setcitydialogstatus}
-              from="LODGING"
+              from="Lodging_City_search"
+              grade={tourgrade}
               setfirst={setfirst}
             />
           )}
 
+          <DropDown
+            label="Center Classification"
+            hint="Center Classification"
+            indata={Center_Classification}
+            ontouch={() => {
+              if (editable) {
+                setCC_dialogstatus(!CC_dialogstatus);
+              }
+            }}
+          ></DropDown>
+          {CC_dialogstatus && (
+            <DropDownDialog
+              dialogstatus={CC_dialogstatus}
+              data={CC_data}
+              Tittle="Center Classification"
+              setdata={setCenter_Classification}
+              setdialogstatus={setCC_dialogstatus}
+              clicked={() => setfirst(false)}
+            ></DropDownDialog>
+          )}
+
           <Inputtextrow
-            label="Bill Number :"
-            hint="Bill No"
+            label="Place of Actual stay* :"
+            hint="Place of Actual stay"
             editable={editable}
-            value={billno}
+            value={actualplace}
             onChangeEvent={(updated) => {
-              setbillno(updated);
+              setactualplace(updated);
             }}
           ></Inputtextrow>
           <InputNumberrow
-            label="Total Bill Amount (Excluding Tax):*"
+            label="No of Days* :"
+            hint="No of Days"
+            editable={editable}
+            value={nodays}
+            onChangeEvent={(updated) => {
+              setnodays(updated);
+            }}
+          ></InputNumberrow>
+
+          <DropDown
+            label="Accommodation provided by Bank"
+            hint="Accommodation provided by Bank"
+            indata={accomodation}
+            ontouch={() => {
+              if (editable) {
+                setaccomodationdialogststus(!accomodationdialogststus);
+                setfirst(false)
+              }
+            }}
+          ></DropDown>
+          {accomodationdialogststus && (
+            <DropDownDialog
+              dialogstatus={accomodationdialogststus}
+              data={yesornodata}
+              Tittle="Accommodation"
+              setdata={setaccomodation}
+              setdialogstatus={setaccomodationdialogststus}
+              setid={setaccomodation_id}
+              from="0"
+              clicked={() => setfirst(false)}
+            ></DropDownDialog>
+          )}
+          {accomodation_id == 1 && (
+            <Inputtextrow
+              label="Accommodation Ref No:*"
+              hint="Accommodation Ref No"
+              editable={editable}
+              value={ac_refno}
+              onChangeEvent={(updated) => {
+                setac_refno(updated);
+              }}
+            ></Inputtextrow>
+          )}
+
+          <DropDown
+            label="Bill Available"
+            hint="Bill Available"
+            indata={is_bill}
+            ontouch={() => {
+              if (editable) {
+                setis_billdialogststus(!is_billdialogststus);
+              }
+            }}
+          ></DropDown>
+          {is_billdialogststus && (
+            <DropDownDialog
+              dialogstatus={is_billdialogststus}
+              data={yesornodata}
+              Tittle="Bill Available"
+              setdata={setis_bill}
+              setid={setis_bill_id}
+              from="0"
+              setdialogstatus={setis_billdialogststus}
+              clicked={() => setfirst(false)}
+            ></DropDownDialog>
+          )}
+          {is_bill_id == 1 && (
+            <InputNumberrow
+              label="Bill Number:*"
+              hint="Bill Number"
+              value={billno}
+              editable={editable}
+              onChangeEvent={(updated) => {
+                setbillno(updated);
+              }}
+            ></InputNumberrow>
+          )}
+          <InputNumberrow
+            label="Total Bill Amount(Excluding Tax)*"
             hint="Total Bill Amount"
             editable={editable}
             value={totalbillamount}
@@ -627,17 +810,22 @@ export default function Lodging({ route }) {
             }}
           ></InputNumberrow>
           <InputNumberrow
-            label="Claim Amount (INR) (Including Tax):*"
+            label="Claim Amount(Excluding Tax)*"
             hint="Claim Amount"
-            value={claimamount}
             editable={editable}
+            value={claimamount}
             onChangeEvent={(updated) => {
               setclaimamount(updated);
             }}
           ></InputNumberrow>
+          <LabelTextColumnView
+            label="Eligible Amount(Excluding Tax):"
+            hint="Eligible Amount"
+            value={eligibleamount}
+          ></LabelTextColumnView>
           <InputNumberrow
-            label="Tax only (Luxury Service):*"
-            hint="Tax"
+            label="Tax Only(Luxury & Service)*"
+            hint="Tax Only"
             editable={editable}
             value={taxamount}
             onChangeEvent={(updated) => {
@@ -653,15 +841,54 @@ export default function Lodging({ route }) {
               setvendorname(updated);
             }}
           ></Inputtextrow>
-          <ReimbursementCommentBox
-            label={remarkslabel}
-            inputComment={remarks}
-            hint="Orders/Remarks"
-            editable={editable}
-            onInputCommentChanged={(updated) => {
-              setremarks(updated);
+          <DropDown
+            label="HSN Code*"
+            hint="HSN Code"
+            indata={HSN_number}
+            ontouch={() => {
+              if (editable) {
+                setHsn_dialogstatus(!Hsn_dialogstatus);
+              }
             }}
-          ></ReimbursementCommentBox>
+          ></DropDown>
+          {Hsn_dialogstatus && (
+            <SearchDialog
+              dialogstatus={Hsn_dialogstatus}
+              setValue={setHSN_number}
+              setdialogstatus={setHsn_dialogstatus}
+              from="HSN_Code"
+              setfirst={setfirst}
+            />
+          )}
+
+          <DropDown
+            label="Bank GST No*"
+            hint="Bank GST No"
+            indata={bank_gstno}
+            ontouch={() => {
+              if (editable) {
+                setbank_dialogststus(!bank_dialogstatus);
+              }
+            }}
+          ></DropDown>
+          {bank_dialogstatus && (
+            <SearchDialog
+              dialogstatus={bank_dialogstatus}
+              setValue={setbank_gstno}
+              setdialogstatus={setbank_dialogststus}
+              from="Bank_GST"
+              setfirst={setfirst}
+            />
+          )}
+          <Inputtextrow
+            label="Lodge GST Number :"
+            hint="Lodge GST Number"
+            editable={editable}
+            value={lodge_gstno}
+            onChangeEvent={(updated) => {
+              setlodge_gstno(updated);
+            }}
+          ></Inputtextrow>
         </ScrollView>
       )}
       {editable && !progressBar && (

@@ -32,6 +32,7 @@ export default function DailyDiem({ route }) {
   const FromDate = route.params.FromDate;
   const ToDate = route.params.ToDate;
   let DailyDiemId = route.params.DailyDiemId;
+  console.log(DailyDiemId+" DailyDiemId")
   let customid = route.params.customid;
   // let list = route.params.Data;
   let jsonobject;
@@ -65,8 +66,6 @@ export default function DailyDiem({ route }) {
   const [leavedays, setleavedays] = useState("");
   const [nooghourseditable, setnoofhourseditable] = useState(false);
   const [first, setfirst] = useState(true);
-
-  console.log(city + " city");
 
   const onPressboarding = (radioButtonsArray) => {
     setboarding(radioButtonsArray[0].selected);
@@ -217,7 +216,6 @@ export default function DailyDiem({ route }) {
 
   async function getTourGrade() {
     try {
-      let subcategoryarray = [];
       const response = await fetch(URL.TOUR_GRADE + route.params.TourId, {
         headers: {
           "Content-Type": "application/json",
@@ -227,12 +225,12 @@ export default function DailyDiem({ route }) {
       let json = await response.json();
 
       console.log(JSON.stringify(json) + " Tour Grade");
-      if ("detail" in json) {
-        if (json.detail == "Invalid credentials/token.") {
-          AlertCredentialError(json.detail, navigation);
-          return;
-        }
+
+      if(response.status ==403){
+        AlertCredentialError(json.detail, navigation);
+        return;
       }
+     
       settourgrade(json.employee_grade);
     } catch (error) {}
   }

@@ -1529,7 +1529,8 @@ export default function BookingScreen({ route }) {
 
         if (json) {
           if (json.status) {
-            const position = attachment.filter((item) => item.id !== docId);
+            const position = attachment.filter((item) => { item.id !== docId
+            });
             setAttachment(position);
           } else {
             Alert.alert(json.description);

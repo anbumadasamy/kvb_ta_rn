@@ -9,7 +9,8 @@ import {
   FlatList,
   TextInput,
   Button,
-  TouchableWithoutFeedback, Alert
+  TouchableWithoutFeedback,
+  Alert,
 } from "react-native";
 import { useState } from "react";
 export default function DropDownDialog({
@@ -73,15 +74,21 @@ export default function DropDownDialog({
   );
   function renderLocationsItem({ ...itemData }) {
     const clickmethod = () => {
+      console.log(JSON.stringify(itemData) + " Center Data");
       setdialogstatus(!dialogstatus);
       setdata(itemData.item.name);
       setModalVisible(!isModalVisible);
-      if (from == "CC") {
+      if (
+        from == "CC" ||
+        from == "Misc" ||
+        from == "Local" ||
+        from == "Local_Subcategory" || from == "Local_Onward"
+        || from =="0"
+      ) {
         if ("id" in itemData.item) {
           setid(itemData.item.id);
         }
       }
-      console.log(dialogstatus + " Thooyarey");
     };
     return (
       <View style={styles.textInput}>

@@ -6,12 +6,10 @@ import {
   ScrollView,
   Text,
   Alert,
-  Platform,
   Image,
   KeyboardAvoidingView,
 } from "react-native";
 import Inputtextrow from "../../components/ui/inputtextrow";
-import Datepicker from "../../components/ui/datepicker";
 import Dateview from "../../components/ui/Dateview";
 import SubmitButton from "../../components/ui/SubmitButton";
 import InputNumberrow from "../../components/ui/InputNumberrow";
@@ -21,7 +19,6 @@ import { AuthContext } from "../../data/Auth-Context";
 import { URL } from "../../utilities/UrlBase";
 import ReimbursementCommentBox from "../../components/ui/ReimbursementCommentBox";
 import moment from "moment";
-import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { CustomColors } from "../../utilities/CustomColors";
 import AlertCredentialError from "../../components/toast/AlertCredentialError";
 import ToastMessage from "../../components/toast/ToastMessage";
@@ -34,27 +31,53 @@ export default function LocalConveyance({ route }) {
   const ReqDate = route.params.ReqDate;
   let jsonobject;
   let LocalConveyanceId = route.params.LocalConveyanceId;
+
   const [first, setfirst] = useState(true);
   const [progressBar, setProgressBar] = useState(true);
-  const [pickerstatus, setpickerstatus] = useState(false);
-  const [dialogstatus, setdialogstatus] = useState(false);
+  const [motravel, setmotravel] = useState("");
   const [subcategory, setsubcategory] = useState("");
-  const [billno, setbillno] = useState("");
-  const [selectedDate, setselecteddate] = useState("Start Date");
-  const [jsondate, setjsondate] = useState("");
+  const [subcategory_id, setsubcategory_id] = useState("");
+  const [center, setcenter] = useState("");
+  const [centerid, setcenterid] = useState("");
+  const [traveldialogstatus, settraveldialogstatus] = useState(false);
+  const [subcategorydialogstatus, setsubcategorydialogstatus] = useState(false);
+  const [centerdialogstatus, setcenterdialogstatus] = useState(false);
+  const [onwardreturnstatus, setonwardreturndialogstatus] = useState(false);
+  const [traveldialogdata, settraveldialogdata] = useState("");
+  const [subcategorydata, setsubcategorydata] = useState();
+  const [centerdialogdata, setcenterdialogdata] = useState("");
+  const [onwardreturndata, setonwardreturndata] = useState("");
   const [fromplace, setfromplace] = useState("");
   const [toplace, settoplace] = useState("");
-  const [distance, setdistance] = useState("");
-  const [claimamount, setclaimamount] = useState("");
-  const [remarks, setremarks] = useState("");
+  const [onwardreturn, setonwardreturn] = useState("");
+  const [onwardreturn_id, setonwardreturn_id] = useState("");
   const [eligibleamount, seteligibleamount] = useState("");
   const [requestercomment, setrequestercomment] = useState("");
-  const [subcategorydata, setsubcategorydata] = useState();
+  const [claimamount, setclaimamount] = useState("");
+  const [remarks, setremarks] = useState("");
   const authCtx = useContext(AuthContext);
-  const [remarkslabel, setremarkslabel] = useState("Remarks :");
   const [editable, seteditable] = useState(true);
-
   const navigation = useNavigation();
+
+  useEffect(() => {
+    getdata("conv_travelmode", 0);
+    getdata("conv_center", 1);
+    getdata("conv_onward", 2);
+  }, []);
+
+  useEffect(() => {
+    // return () => {
+    console.log(motravel + " Motravel");
+    if (!first) {
+      if (motravel == "Road") {
+        getdata("conv_road", 3);
+      } else if (motravel == "Train") {
+        getdata("conv_train", 3);
+      }
+    }
+    // };
+  }, [motravel]);
+
   useEffect(() => {
     if (LocalConveyanceId != "") {
       get();
@@ -73,38 +96,51 @@ export default function LocalConveyance({ route }) {
   }, [route]);
 
   useEffect(() => {
-    eligibleamountvalidation();
-  }, [distance, subcategory]);
-
-  useEffect(() => {
-    if (
-      subcategory == "Personal vehicle Scooter" ||
-      subcategory == "Personal vehicle car"
-    ) {
-      if (parseInt(eligibleamount) < parseInt(claimamount)) {
-        setremarkslabel("Remarks* :");
-        if (!first) {
-          Alert.alert(
-            "You are exceeding the eligible amount. Please enter a valid remarks"
-          );
-        }
-      } else {
-        setremarkslabel("Remarks:");
+    if (!first) {
+      if (center != "") {
+        EligibleAmountCalculation();
       }
-    } else {
-      seteligibleamount("");
     }
-  }, [claimamount, eligibleamount]);
+  }, [center]);
 
-  function eligibleamountvalidation() {
-    if (
-      (subcategory == "Personal vehicle Scooter" ||
-        subcategory == "Personal vehicle car") &&
-      distance != ""
-    ) {
-      EligibleAmountCalculation();
-    }
+  async function getdata(getparam, id) {
+    try {
+      let subcategoryarray = [];
+      const response = await fetch(URL.COMMON_DROPDOWN + getparam, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: authCtx.auth_token,
+        },
+      });
+      let json = await response.json();
+      if (response.status == 403) {
+        AlertCredentialError(json.detail, navigation);
+      }
+      for (let i = 0; i < json.length; i++) {
+        const obj = {
+          id: json[i].value,
+          name: json[i].name,
+        };
+        subcategoryarray.push(obj);
+      }
+      switch (id) {
+        case 0:
+          settraveldialogdata(subcategoryarray);
+          break;
+        case 1:
+          setcenterdialogdata(subcategoryarray);
+          break;
+        case 2:
+          setonwardreturndata(subcategoryarray);
+          break;
+        case 3:
+          setsubcategorydata(subcategoryarray);
+          break;
+      }
+    } catch (error) {}
   }
+
+  
 
   async function get() {
     setProgressBar(true);
@@ -117,113 +153,78 @@ export default function LocalConveyance({ route }) {
       });
       let json = await response.json();
 
-      console.log(JSON.stringify(json) + "Local COnveyance");
-      if ("detail" in json) {
-        if (json.detail == "Invalid credentials/token.") {
-          AlertCredentialError(json.detail, navigation);
-        }
-      } else {
+      console.log(JSON.stringify(json) + "Local Convryance Data");
+
+      if (response.status == 403) {
+        AlertCredentialError(json.detail, navigation);
+        return;
+      }
+     
         for (let i = 0; i < json.data.length; i++) {
           if (json.data[i].id == LocalConveyanceId) {
-            let uniqdate = json.data[i].fromdate.split("-");
-
-            setjsondate(
-              moment(
-                new Date(uniqdate[1] + " " + uniqdate[0] + ", " + uniqdate[2])
-              ).format("YYYY-MM-DD")
-            );
-            setselecteddate(
-              moment(
-                new Date(uniqdate[1] + " " + uniqdate[0] + ", " + uniqdate[2])
-              ).format("DD-MM-YYYY")
-            );
-
             setfromplace(json.data[i].fromplace);
             settoplace(json.data[i].toplace);
-            setsubcategory(json.data[i].modeoftravel);
-            setdistance(json.data[i].distance);
-            setbillno(json.data[i].billno);
-            setclaimamount(json.data[i].claimedamount + "");
-            setremarks(json.data[i].remarks);
-            seteligibleamount(json.data[i].eligibleamount);
+            setmotravel(json.data[i].modeoftravel.name);
+            setsubcategory(json.data[i].modeoftravel.name);
+            setsubcategory_id(json.data[i].subcatogory.value);
+            setcenter(json.data[i].center.name);
+            setcenterid(json.data[i].center.value);
+            setonwardreturn(json.data[i].onwardreturn.name);
+            setonwardreturn_id(json.data[i].onwardreturn.value);
+            seteligibleamount(json.data[i].eligibleamount+"");
+            setclaimamount(json.data[i].claimedamount+"")
             setrequestercomment(json.requestercomment);
+            setremarks(json.data[i].remarks); 
             setProgressBar(false);
             break;
-          }
-        }
+          } 
       }
       setProgressBar(false);
     } catch (error) {
       setProgressBar(false);
     }
   }
-  async function getdata() {
-    try {
-      let subcategoryarray = [];
 
-      const response = await fetch(URL.COMMON_DROPDOWN + "mode_of_travel", {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: authCtx.auth_token,
-        },
-      });
-      let json = await response.json();
-      if ("detail" in json) {
-        if (json.detail == "Invalid credentials/token.") {
-          AlertCredentialError(json.detail, navigation);
-        }
-      } else {
-        for (let i = 0; i < json.length; i++) {
-          const obj = {
-            id: json[i].value,
-            name: json[i].name,
-          };
-          subcategoryarray.push(obj);
-        }
-        setsubcategorydata(subcategoryarray);
-      }
-    } catch (error) {}
-  }
   function validation() {
-    if (fromplace != "") {
-      if (toplace != "") {
-        if (subcategory != "") {
-          if (jsondate != "") {
-            if (distance != "") {
-              if (claimamount != "") {
-                if (parseInt(eligibleamount) < parseInt(claimamount)) {
-                  if (remarks != "") {
-                    LocalConveyancePost();
-                  } else {
-                    Alert.alert("Enter a Valid Remarks");
-                  }
-                } else {
-                  LocalConveyancePost();
-                }
-              } else {
-                Alert.alert("Enter a Claimamount");
-              }
-            } else {
-              Alert.alert("Enter a Distance");
-            }
-          } else {
-            Alert.alert("Select a Date");
-          }
-        } else {
-          Alert.alert("Choose Mode of Travel");
-        }
-      } else {
-        Alert.alert("Enter To Place");
-      }
-    } else {
+    if (fromplace == "") {
       Alert.alert("Enter From Place");
+      return;
     }
+    if (toplace == "") {
+      Alert.alert("Enter To Place");
+      return;
+    }
+    if (motravel == "") {
+      Alert.alert("Choose Mode of Travel");
+      return;
+    }
+    if (subcategory == "") {
+      Alert.alert("Choose Subcategory");
+      return;
+    }
+    if (center == "") {
+      Alert.alert("Choose Center");
+      return;
+    }
+    if (onwardreturn == "") {
+      Alert.alert("Choose Onward/Return");
+      return;
+    }
+    if (claimamount == "") {
+      Alert.alert("Enter Claimamount");
+      return;
+    }
+    if (remarks == "") {
+      Alert.alert("Enter Remarks");
+      return;
+    }
+    LocalConveyancePost();
   }
   async function EligibleAmountCalculation() {
     let eligible = {
-      expensegid: 4,
-      modeoftravel: subcategory,
-      distance: parseInt(distance),
+      expense_id: 4,
+      center: centerid,
+      tourgid: TourId,
     };
     try {
       const response = await fetch(URL.LOCAL_CONVEYANCE_ELIGIBLE_AMOUNT, {
@@ -234,15 +235,16 @@ export default function LocalConveyance({ route }) {
           Authorization: authCtx.auth_token,
         },
       });
+      console.log(JSON.stringify(response) + " eligible object");
 
       let json = await response.json();
-      if ("detail" in json) {
-        if (json.detail == "Invalid credentials/token.") {
-          AlertCredentialError(json.detail, navigation);
-        }
-      } else {
-        seteligibleamount(json.Eligible_amount);
+      console.log(JSON.stringify(json) + " EligibleAmount");
+      if (response.status == 403) {
+        AlertCredentialError(json.detail, navigation);
+        return;
       }
+
+      seteligibleamount(json.Eligible_amount + "");
     } catch (error) {}
   }
 
@@ -251,20 +253,21 @@ export default function LocalConveyance({ route }) {
     let obj;
 
     obj = {
-      tour_id: TourId,
-      expensegid: 4,
+      tourgid: TourId,
+      expense_id: 4,
       fromplace: fromplace,
       toplace: toplace,
-      fromdate: jsondate,
-      modeoftravel: subcategory,
-      distance: distance,
-      billno: billno,
+      modeoftravel: motravel,
+      subcatogory: subcategory_id,
+      center: centerid,
       remarks: remarks,
       mobile: 1,
+      onwardreturn:onwardreturn_id,
       requestercomment: requestercomment,
-      eligibleamount: eligibleamount,
+      approvedamount: parseInt(eligibleamount),
       claimedamount: parseInt(claimamount),
     };
+
     if (LocalConveyanceId != "") {
       obj["id"] = LocalConveyanceId;
       jsonobject = {
@@ -320,11 +323,7 @@ export default function LocalConveyance({ route }) {
     getdata();
   }, []);
 
-  const onStartDateChange = (selectedDate) => {
-    setpickerstatus(false);
-    setjsondate(moment(selectedDate).format("YYYY-MM-DD"));
-    setselecteddate(moment(selectedDate).format("DD-MM-YYYY"));
-  };
+
 
   return (
     <KeyboardAvoidingView
@@ -379,103 +378,108 @@ export default function LocalConveyance({ route }) {
               settoplace(updated);
             }}
           ></Inputtextrow>
-          {/* <Datepicker
-            onPressStart={() => {
-              if (editable) {
-                setpickerstatus(!pickerstatus);
-              }
-            }}
-            startDate={selectedDate}
-            initial="Start Date"
-          ></Datepicker>
-          <DateTimePickerModal
-            isVisible={pickerstatus}
-            mode="date"
-            onConfirm={onStartDateChange}
-            onCancel={() => {
-              setpickerstatus(false);
-            }}
-            display={Platform.OS == "ios" ? "inline" : "default"}
-            maximumDate={new Date(ToDate)}
-            minimumDate={new Date(FromDate)}
-          />
- */}
+
           <DropDown
             label="Mode of Travel*"
             hint="Mode of Travel"
-            indata={subcategory}
+            indata={motravel}
             ontouch={() => {
               if (editable) {
-                setdialogstatus(!dialogstatus);
+                settraveldialogstatus(!traveldialogstatus);
               }
             }}
           ></DropDown>
           <DropDown
-            label="Sub category *"
-            hint="Mode of Travel"
+            label="Sub category*"
+            hint="Sub category"
             indata={subcategory}
             ontouch={() => {
-              if (editable) {
-                setdialogstatus(!dialogstatus);
+              if (motravel != "") {
+                if (editable) {
+                  setsubcategorydialogstatus(!subcategorydialogstatus);
+                }
+              } else {
+                Alert.alert("First Choose Mode of Travel");
               }
             }}
           ></DropDown>
           <DropDown
             label="Center*"
-            hint="Mode of Travel"
-            indata={subcategory}
+            hint="Center"
+            indata={center}
             ontouch={() => {
               if (editable) {
-                setdialogstatus(!dialogstatus);
+                setcenterdialogstatus(!centerdialogstatus);
               }
             }}
           ></DropDown>
           <DropDown
             label="Onward/Return*"
             hint="Onward/Return"
-            indata={subcategory}
+            indata={onwardreturn}
             ontouch={() => {
               if (editable) {
-                setdialogstatus(!dialogstatus);
+                setonwardreturndialogstatus(!onwardreturnstatus);
               }
             }}
           ></DropDown>
 
-          {dialogstatus && (
+          {traveldialogstatus && (
             <DropDownDialog
-              dialogstatus={dialogstatus}
-              data={subcategorydata}
+              dialogstatus={traveldialogstatus}
+              data={traveldialogdata}
               Tittle="Mode of Travel"
+              setdata={setmotravel}
+              setdialogstatus={settraveldialogstatus}
+              clicked={() => {
+                setsubcategory("");
+                setfirst(false);
+              }}
+            ></DropDownDialog>
+          )}
+
+          {subcategorydialogstatus && (
+            <DropDownDialog
+              dialogstatus={subcategorydialogstatus}
+              data={subcategorydata}
+              Tittle="Subcategory"
+              from="Local_Subcategory"
+              setid={setsubcategory_id}
               setdata={setsubcategory}
-              setdialogstatus={setdialogstatus}
+              setdialogstatus={setsubcategorydialogstatus}
+            ></DropDownDialog>
+          )}
+
+          {centerdialogstatus && (
+            <DropDownDialog
+              dialogstatus={centerdialogstatus}
+              data={centerdialogdata}
+              Tittle="Center"
+              setdata={setcenter}
+              from="Local"
+              setid={setcenterid}
+              setdialogstatus={setcenterdialogstatus}
               clicked={() => {
                 setfirst(false);
               }}
             ></DropDownDialog>
           )}
-          {/*  <InputNumberrow
-            label="Distance in KM* : "
-            hint="Distance in KM"
-            value={distance}
-            editable={editable}
-            onChangeEvent={(updated) => {
-              setdistance(updated);
-              setfirst(false);
-            }}
-          ></InputNumberrow>
-          <Inputtextrow
-            label="Bill Number :"
-            hint="Bill No"
-            value={billno}
-            editable={editable}
-            onChangeEvent={(updated) => {
-              setbillno(updated);
-            }}
-          ></Inputtextrow> */}
+          {onwardreturnstatus && (
+            <DropDownDialog
+              dialogstatus={onwardreturnstatus}
+              data={onwardreturndata}
+              Tittle="Onward/Return"
+              from="Local_Onward"
+              setid={setonwardreturn_id}
+              setdata={setonwardreturn}
+              setdialogstatus={setonwardreturndialogstatus}
+            ></DropDownDialog>
+          )}
+
           <LabelTextColumnView
             label="Eligible Amount:"
             hint="Eligible Amount"
-            value={claimamount}
+            value={eligibleamount}
           ></LabelTextColumnView>
           <InputNumberrow
             label="Claim Amount* :"
@@ -487,7 +491,7 @@ export default function LocalConveyance({ route }) {
             }}
           ></InputNumberrow>
           <ReimbursementCommentBox
-            label={remarkslabel}
+            label="Remarks* :"
             inputComment={remarks}
             editable={editable}
             hint="Orders/Remarks"

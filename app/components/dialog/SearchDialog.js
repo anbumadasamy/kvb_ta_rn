@@ -111,6 +111,21 @@ export default function SearchDialog({
           "&expensename=Daily Diem&page=" +
           count;
         break;
+      case "Lodging_City_search":
+        url =
+          URL.DAILY_DIEM_CITY +
+          search +
+          "&employeegrade=" +
+          grade +
+          "&expensename=Lodging&page=" +
+          count;
+        break;
+      case "HSN_Code":
+        url = URL.HSN + search + "&page=" + count;
+        break;
+      case "Bank_GST":
+        url = URL.GST + search + "&page=" + count;
+        break;
     }
 
     console.log(url);
@@ -122,10 +137,14 @@ export default function SearchDialog({
           Authorization: from != "entity" ? authCtx.auth_token : "",
         },
       });
+      console.log("json Response Status---> " + response.status);
 
       let json = await response.json();
 
+
+
       console.log("json ---> " + JSON.stringify(json));
+      
 
       let obj = "";
 
@@ -231,6 +250,33 @@ export default function SearchDialog({
             dataArray.push(obj);
           }
           break;
+        case "Lodging_City_search":
+          for (let i = 0; i < json.data.length; i++) {
+            obj = {
+              name: json.data[i].city,
+              id: json.data[i].id,
+            };
+            dataArray.push(obj);
+          }
+          break;
+        case "HSN_Code":
+          for (let i = 0; i < json.data.length; i++) {
+            obj = {
+              name: json.data[i].code+"",
+              id: json.data[i].id,
+            };
+            dataArray.push(obj);
+          }
+          break;
+          case "Bank_GST":
+            for (let i = 0; i < json.data.length; i++) {
+              obj = {
+                name: json.data[i].bankgstno+"",
+                id: json.data[i].bank_name,
+              };
+              dataArray.push(obj);
+            }
+            break;
       }
 
       setData([...data, ...dataArray]);

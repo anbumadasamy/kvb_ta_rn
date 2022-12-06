@@ -136,6 +136,17 @@ export default function ExpenseListCard({
             from: from,
           });
           break;
+        case 8:
+          navigation.navigate("Miscellaneous Expense", {
+            TourId: itemData.item.tour_id,
+            FromDate: itemData.item.fromdate,
+            ToDate: itemData.item.todate,
+            ReqDate: itemData.item.Req,
+            Comments: reason,
+            MiscId: itemData.item.id,
+            from: from,
+          });
+          break;
       }
     }
     function expensecall() {
@@ -183,9 +194,9 @@ export default function ExpenseListCard({
               <Text style={styles.text}>{itemData.item.eligibleamount}</Text>
             </View>
             <View style={styles.row}>
-              {/* WhichExpense != 1 && */
-                data.length > 1 &&
-                itemData.item.from != "Approver" && (
+              {
+                /* WhichExpense != 1 && */
+                data.length > 1 && itemData.item.from != "Approver" && (
                   <MaterialIcons
                     name="delete"
                     size={24}
@@ -195,7 +206,8 @@ export default function ExpenseListCard({
                     }}
                     onPressIn={deletedialogcall}
                   />
-                )}
+                )
+              }
             </View>
           </View>
 
