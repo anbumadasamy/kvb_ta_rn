@@ -24,6 +24,7 @@ export const URL = {
   COMMON_DROPDOWN: TA_SERVER + "common_dropdown_get/",
   ONGOING_TOUR_SUMMARY: TA_SERVER + "ongoing_tour",
   TRAVEL_MAKER_SUMMARY: TA_SERVER + "tourdata",
+  TRAVEL_ADVANCE_SUMMARY: TA_SERVER + "touradvance",
   EXPENSE_SUMMARY: TA_SERVER + "claimreq/tour/",
   TRAVEL_DETAILS_GET: TA_SERVER + "tourdata/",
   CITY_LIST: TA_SERVER + "insert_ta_city",
