@@ -28,6 +28,7 @@ export default function SearchDialog({
   empId,
   onBehalOfId,
   branchId,
+  setigst,
 }) {
   const [isModalVisible, setModalVisible] = useState(dialogstatus);
   const authCtx = useContext(AuthContext);
@@ -290,6 +291,7 @@ export default function SearchDialog({
             obj = {
               name: json.data[i].code+"",
               id: json.data[i].id,
+              igstrate:json.data[i].igstrate,
             };
             dataArray.push(obj);
           }
@@ -469,6 +471,9 @@ export default function SearchDialog({
       }
       if (from == "LODGING") {
         setfirst(false);
+      }
+      if(from == "HSN_Code"){
+        setigst(itemData.item.igstrate+"")
       }
       if (from == "OnBehalfOfEmpclaim") {
         setId(itemData.item.id);
