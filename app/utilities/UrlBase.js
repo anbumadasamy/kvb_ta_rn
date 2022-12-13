@@ -71,8 +71,8 @@ export const URL = {
   ASSOCIATED_EXPENSES: TA_SERVER + "associate",
   EXPENSE_DELETE: TA_SERVER + "expense_delete/",
 
-  BS_GET: MASTER_SERVER + "searchbusinesssegment",
-  CC_GET: MASTER_SERVER + "searchbs_cc?bs_id=",
+  BS_GET: USER_SERVER + "searchbusinesssegment",
+  CC_GET: USER_SERVER + "searchbs_cc?bs_id=",
   EXPENSE_SUBMIT: TA_SERVER + "expense/submit",
 
   LOCAL_CONVEYANCE_ELIGIBLE_AMOUNT: TA_SERVER + "localconv/logic",

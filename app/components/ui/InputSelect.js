@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View, Pressable , Alert} from "react-native";
+import { StyleSheet, Text, View, Pressable} from "react-native";
 import { CustomColors } from "../../utilities/CustomColors";
 import { MaterialIcons } from "@expo/vector-icons";
 

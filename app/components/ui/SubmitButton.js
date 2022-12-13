@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable, Alert } from "react-native";
+import { View, Text, StyleSheet, Pressable } from "react-native";
 import { CustomColors } from "../../utilities/CustomColors";
 
 export default function SubmitButton({ children, onPressEvent }) {
@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
   buttonOuterContainer: {
     borderRadius: 5,
     height: 45,
-    width: 200,
+    width: 150,
     marginTop: 5,
     overflow: "hidden",
     alignSelf: "center",

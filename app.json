@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "nac_ta",
-    "slug": "nac_ta",
+    "name": "kvb_ta",
+    "slug": "kvb_ta",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./app/assets/pictures/icon.png",
@@ -16,7 +16,7 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "buildNumber": "4",
+      "buildNumber": "1",
       "supportsTablet": true,
       "bundleIdentifier": "com.vsolv.ta"
     },
@@ -29,11 +29,6 @@
     },
     "web": {
       "favicon": "./app/assets/pictures/favicon.png"
-    },
-    "extra": {
-      "eas": {
-        "projectId": "a3d68bde-a142-4ab4-840d-768bb66190a7"
-      }
     }
   }
 }

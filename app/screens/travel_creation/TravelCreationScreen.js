@@ -144,7 +144,9 @@ export default function TravelCreationScreen({ route }) {
   }, [route]);
 
   useLayoutEffect(() => {
-    LogBox.ignoreLogs(["VirtualizedLists should never be nested"]);
+    LogBox.ignoreLogs([
+      "VirtualizedLists should never be nested inside plain ScrollViews with the same orientation because it can break windowing and other functionality - use another VirtualizedList-backed container instead.",
+    ]);
     LogBox.ignoreLogs([
       "Non-serializable values were found in the navigation state.",
     ]);
@@ -169,8 +171,6 @@ export default function TravelCreationScreen({ route }) {
       GetEmpDetail(authCtx.user_id);
     }
   }, [self]);
-
-  useEffect(() => {});
 
   useEffect(() => {
     GetTravelReason();
@@ -214,9 +214,6 @@ export default function TravelCreationScreen({ route }) {
       }
     }
   }, [route]);
-
-  console.log("Start Date Ms :>> " + startDateMs);
-  console.log("End Date Ms :>> " + endDateMs);
 
   function minimumDateValidation() {
     const miniDate = new Date().getTime() - 150 * 24 * 60 * 60 * 1000;
