@@ -51,17 +51,26 @@ export default function TravelingExpenses({ route }) {
   const [departureplace, setdepartureplace] = useState("");
   const [placeofvisit, setplaceofvisit] = useState("");
   const [totaltkttamt, settotaltkttamt] = useState("");
-  const [tkt_bybank, settkt_bybank] = useState(false);
+  const [tkt_bybank, settkt_bybank] = useState("No");
+  const [tkt_bybank_id, settkt_bybank_id] = useState(0);
+  const [tkt_bybank_dstatus, settkt_bybank_dstatus] = useState(false);
+  const [highermode, sethighermode] = useState("No");
+  const [highermode_id, sethighermode_id] = useState(0);
+  const [highermode_dstatus, sethighermode_dstatus] = useState(false);
+  const [priority, setpriority] = useState("No");
+  const [priority_id, setpriority_id] = useState(0);
+  const [priority_dstatus, setpriority_dstatus] = useState(false);
   const [tkt_refno, settkt_refno] = useState("");
   const [actualmodeoftravel, setactualmodeoftravel] = useState();
   const [actualmodedata, setactualmodedata] = useState();
   const [actualmodestatus, setactualmodestatus] = useState();
   const [classoftravel, setclassoftravel] = useState("");
+  const [classoftravel_id, setclassoftravel_id] = useState("");
   const [classoftraveldata, setclassoftraveldata] = useState("");
+  const [yesornodata, setyesornodata] = useState("");
   const [classoftravelstatus, setclassoftravelstatus] = useState(false);
   const [eligiblemodeoftravel, seteligiblemodeoftravel] = useState(false);
-  const [highermode, sethighermode] = useState(false);
-  const [priority, setpriority] = useState(false);
+  const [is_igst, setis_igst] = useState(true);
   const [who_higher, setwho_higher] = useState("");
   const [no_of_dependent, setno_of_dependent] = useState("");
   const [dependent, setdependent] = useState("");
@@ -76,9 +85,13 @@ export default function TravelingExpenses({ route }) {
   const [vendor_gstno, setvendor_gstno] = useState("");
   const [requestercomment, setrequestercomment] = useState("");
   const [editable, seteditable] = useState(true);
+  const [first, setfirst] = useState("");
+
+  const [igst, setigst] = useState("0");
+  const [cgst, setcgst] = useState("0");
+  const [sgst, setsgst] = useState("0");
   const authCtx = useContext(AuthContext);
   const navigation = useNavigation();
-
 
   const [billno, setbillno] = useState("");
   const [remarks, setremarks] = useState("");
@@ -98,16 +111,17 @@ export default function TravelingExpenses({ route }) {
   function Highermoderadiobutton(radioButtonsArray) {
     sethighermode(radioButtonsArray[0].selected);
   }
-  function isbank(radioButtonsArray) {
-    settkt_bybank(radioButtonsArray[0].selected);
-  }
 
+  console.log(tkt_bybank_id + " tkt_bybank_id");
 
   useEffect(() => {
     navigation.setOptions({
       title: "Traveling Expenses",
     });
-  });
+    getdata("travel_travelmode", 0);
+    getdata("yn", 2);
+    tournogradeget();
+  }, []);
   useEffect(() => {
     if (route.params.from == "Approver") {
       seteditable(false);
@@ -116,111 +130,67 @@ export default function TravelingExpenses({ route }) {
     }
   }, [route]);
 
-  async function actualmode() {
-    let actualmodearray = [];
-    try {
-      const response = await fetch(URL.COMMON_DROPDOWN + "actualmode", {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: authCtx.auth_token,
-        },
-      });
-      let json = await response.json();
-      if ("detail" in json) {
-        if (json.detail == "Invalid credentials/token.") {
-          AlertCredentialError(json.detail, navigation);
-        }
-      } else {
-        for (let i = 0; i < json.length; i++) {
-          const obj = {
-            id: json[i].value,
-            name: json[i].name,
-          };
-          actualmodearray.push(obj);
-        }
-        setactualmodedata(actualmodearray);
-      }
-    } catch (error) {}
-  }
-  async function traveltrain() {
+  async function getdata(getparam, id) {
+    console.log(URL.COMMON_DROPDOWN + getparam + " Url " + id + " Whick Id");
+
     let traveltrainarray = [];
     try {
-      const response = await fetch(URL.COMMON_DROPDOWN + "travel_Train", {
+      const response = await fetch(URL.COMMON_DROPDOWN + getparam, {
         headers: {
           "Content-Type": "application/json",
           Authorization: authCtx.auth_token,
         },
       });
       let json = await response.json();
-      if ("detail" in json) {
-        if (json.detail == "Invalid credentials/token.") {
-          AlertCredentialError(json.detail, navigation);
-        }
-      } else {
-        for (let i = 0; i < json.length; i++) {
-          const obj = {
-            id: json[i].value,
-            name: json[i].name,
-          };
-          traveltrainarray.push(obj);
-        }
-        settraveltraindata(traveltrainarray);
+
+      console.log(JSON.stringify(json) + " Drop Down Response");
+
+      if (response.status == 403) {
+        AlertCredentialError(json.detail, navigation);
+        return;
       }
-    } catch (error) {}
-  }
-  async function travelair() {
-    let travelairarray = [];
-    try {
-      const response = await fetch(URL.COMMON_DROPDOWN + "travel_Air", {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: authCtx.auth_token,
-        },
-      });
-      let json = await response.json();
-      if ("detail" in json) {
-        if (json.detail == "Invalid credentials/token.") {
-          AlertCredentialError(json.detail, navigation);
-        }
-      } else {
-        for (let i = 0; i < json.length; i++) {
-          const obj = {
-            id: json[i].value,
-            name: json[i].name,
-          };
-          travelairarray.push(obj);
-        }
-        settravelairdata(travelairarray);
+
+      for (let i = 0; i < json.length; i++) {
+        const obj = {
+          id: json[i].value,
+          name: json[i].name,
+        };
+        traveltrainarray.push(obj);
+      }
+      switch (id) {
+        case 0:
+          setactualmodedata(traveltrainarray);
+          break;
+        case 1:
+          setclassoftraveldata(traveltrainarray);
+          break;
+        case 2:
+          setyesornodata(traveltrainarray);
+          break;
       }
     } catch (error) {}
   }
 
-  async function traveltypemethod() {
-    let traveltypearray = [];
+  async function tournogradeget() {
     try {
-      const response = await fetch(URL.COMMON_DROPDOWN + "traveltype", {
+      const response = await fetch(URL.TOUR_GRADE + +TourId, {
         headers: {
           "Content-Type": "application/json",
           Authorization: authCtx.auth_token,
         },
       });
       let json = await response.json();
-      if ("detail" in json) {
-        if (json.detail == "Invalid credentials/token.") {
-          AlertCredentialError(json.detail, navigation);
-        }
-      } else {
-        for (let i = 0; i < json.length; i++) {
-          const obj = {
-            id: json[i].value,
-            name: json[i].name,
-          };
-          traveltypearray.push(obj);
-        }
-        settraveldata(traveltypearray);
+
+      console.log(JSON.stringify(json) + "TourNoGrade");
+
+      if (response.status == 403) {
+        AlertCredentialError(json.detail, navigation);
+        return;
       }
+      seteligiblemodeoftravel(json.travelclass);
     } catch (error) {}
   }
+
   useEffect(() => {
     if (TravelingExpenseId != "") {
       get();
@@ -231,11 +201,44 @@ export default function TravelingExpenses({ route }) {
   }, [TravelingExpenseId]);
 
   useEffect(() => {
-    traveltypemethod();
-    travelair();
-    traveltrain();
-    actualmode();
-  }, []);
+    if (actualmodeoftravel != "") {
+      switch (actualmodeoftravel) {
+        case "Road":
+          getdata("travel_Road", 1);
+          break;
+        case "Train":
+          getdata("travel_Train", 1);
+          break;
+        case "Air":
+          getdata("travel_Air", 1);
+          break;
+        case "Sea":
+          getdata("travel_Sea", 1);
+          break;
+      }
+    }
+  }, [actualmodeoftravel]);
+
+  useEffect(() => {
+    if (!first) {
+      if (HSN_number != "" && bank_gstno != "" && vendor_gstno.length >= 2) {
+        if (
+          bank_gstno[0] + bank_gstno[1] + "" ==
+          vendor_gstno[0] + vendor_gstno[1] + ""
+        ) {
+          setcgst(parseFloat(igst / 2) + "");
+          setsgst(parseFloat(igst / 2) + "");
+          // setigst(0+"");
+          setis_igst(false);
+        } else {
+          // setigst(igst + "");
+          setis_igst(true);
+          /* setcgst(0+"");
+          setsgst(0+""); */
+        }
+      }
+    }
+  }, [HSN_number, bank_gstno, vendor_gstno]);
 
   async function get() {
     setProgressBar(true);
@@ -386,92 +389,116 @@ export default function TravelingExpenses({ route }) {
     setcheckoutTime(moment(selectedDate).format("HH:mm"));
   };
 
- 
- 
-
   function validation() {
-    if (jsoncheckingDate != "") {
-      if (jsoncheckoutDate != "") {
-        if (checkingTime != "") {
-          if (checkoutTime != "") {
-            if (traveltype != "") {
-              if (departureplace != "") {
-                if (placeofvisit != "") {
-                  if (claimamount != "") {
-                    if (modeoftravel != "") {
-                      if (modeoftravel == "Train" || modeoftravel == "Air") {
-                        if (classoftravel != "") {
-                          TravelingExpensePost();
-                        } else {
-                          Alert.alert("Choose Class of Travel");
-                        }
-                      } else {
-                        TravelingExpensePost();
-                      }
-                    } else {
-                      Alert.alert("Choose Mode of Travel");
-                    }
-                  } else {
-                    Alert.alert("Enter Claim Amount");
-                  }
-                } else {
-                  Alert.alert("Enter Visiting Place");
-                }
-              } else {
-                Alert.alert("Enter Departure Place");
-              }
-            } else {
-              Alert.alert("Choose Travel Type");
-            }
-          } else {
-            Alert.alert("Enter Checkout Time");
-          }
-        } else {
-          Alert.alert("Enter Checkin Time");
-        }
-      } else {
-        Alert.alert("Enter Checkout Date");
-      }
-    } else {
+    if (jsoncheckingDate == "") {
       Alert.alert("Enter Checkin Date");
+      return;
     }
+    if (jsoncheckoutDate == "") {
+      Alert.alert("Enter Checkout Date");
+      return;
+    }
+
+    if (checkingTime == "") {
+      Alert.alert("Enter Checkin Time");
+      return;
+    }
+    if (checkoutTime == "") {
+      Alert.alert("Enter Checkout Time");
+      return;
+    }
+    if (departureplace == "") {
+      Alert.alert("Enter Departure Place");
+      return;
+    }
+    if (placeofvisit == "") {
+      Alert.alert("Enter Place of Visit");
+      return;
+    }
+    if (tkt_bybank == 1 && tkt_refno == "") {
+      Alert.alert("Enter Ticket Reference Number");
+      return;
+    }
+    if (priority_id == 1 && who_higher == "") {
+      Alert.alert("Enter Who has opter Higher Mode");
+      return;
+    }
+    if (totaltkttamt == "") {
+      Alert.alert("Enter Total Ticket Amount");
+      return;
+    }
+    if (actualmodeoftravel == "") {
+      Alert.alert("Choose Mode of Travel");
+      return;
+    }
+    if (actualmodeoftravel == "") {
+      Alert.alert("Choose Mode of Travel");
+      return;
+    }
+    if (classoftravel == "") {
+      Alert.alert("Choose Class of Travel");
+      return;
+    }
+    if (claimamount == "") {
+      Alert.alert("Enter Claim Amount");
+      return;
+    }
+    TravelingExpensePost();
   }
   async function TravelingExpensePost() {
     setProgressBar(true);
     let jsonobject;
     let obj;
     obj = {
-      tour_id: TourId,
-      expensegid: 1,
-      fromdate: jsoncheckingDate + " " + checkingTime + ":00",
-      todate: jsoncheckingDate + " " + checkoutTime + ":00",
-      traveltype: traveltype,
-      fromplace: departureplace,
-      toplace: placeofvisit,
-      actualmode: modeoftravel,
-      billno: billno,
-      totaltkttamt: parseInt(claimamount),
-      vendorname: vendorname,
-      remarks: remarks,
-      mobile: 1,
+      dependencies: [],
       requestercomment: requestercomment,
-      eligiblemodeoftravel: "why_this_key?",
+      tourid: TourId,
+      expenseid: 1,
+      depaturedate: jsoncheckingDate + " " + checkingTime + ":00",
+      arrivaldate: jsoncheckingDate + " " + checkoutTime + ":00",
+      claimedamount: parseInt(claimamount),
+      depatureplace: departureplace,
+      placeofvisit: placeofvisit,
+      totaltkttamt: totaltkttamt,
+      tktbybank: tkt_bybank_id +"" ,
+      actualtravel: actualmodeoftravel,
+      highermodereasons: highermode_id +"",
+      priorpermission: priority_id + "",
+      classoftravel: classoftravel_id,
+      mobile: 1,
+      vendorname: vendorname,
+      vendorcode: vendorcode,
+      vendorgstno: vendor_gstno,
+      hsncode:HSN_number,
+    
+      approvedamount: parseInt(claimamount) ,
+      noofdependents: 0,
     };
-    if (modeoftravel == "Train" || modeoftravel == "Air") {
-      obj["travelclass"] = classoftravel;
-    }
-
-    if (highermode) {
-      obj["highermodereason"] = "YES";
+    if (tkt_bybank_id == 1) {
+      obj["tktrefno"] = tkt_refno;
     } else {
-      obj["highermodereason"] = "NO";
+      obj["tktrefno"] = 0;
     }
-    if (priority) {
-      obj["prior_permission"] = "YES";
+    if (highermode_id == 1) {
+      obj["highermodeopted"] = who_higher;
     } else {
-      obj["prior_permission"] = "NO";
+      obj["highermodeopted"] = "0";
     }
-
+   
+    if (bank_gstno != "") {
+      obj["bankgstno"] = bank_gstno;
+    } else {
+      obj["bankgstno"] = 0;
+    }
+    if (is_igst) {
+      obj["igst"] = parseFloat(igst);
+      obj["cgst"] = 0;
+      obj["sgst"] = 0;
+    } else {
+      obj["igst"] = 0;
+      obj["cgst"] = parseFloat(cgst);
+      obj["sgst"] = parseFloat(sgst);
+    }
     if (TravelingExpenseId != "") {
       obj["id"] = TravelingExpenseId;
       jsonobject = {
@@ -668,20 +695,39 @@ export default function TravelingExpenses({ route }) {
               settotaltkttamt(updated);
             }}
           ></InputNumberrow>
-          <CustomizedRadioButton
-            label="Ticket By Bank:"
-            status={tkt_bybank}
-            buttonpressed={isbank}
-          ></CustomizedRadioButton>
-          <InputNumberrow
-            label="Ticket Reference Number* :"
-            hint="Ticket Reference Number "
-            editable={editable}
-            value={tkt_refno}
-            onChangeEvent={(updated) => {
-              settkt_refno(updated);
+
+          <DropDown
+            label="Ticket By Bank"
+            hint="Ticket By Bank"
+            indata={tkt_bybank}
+            ontouch={() => {
+              if (editable) {
+                settkt_bybank_dstatus(!tkt_bybank_dstatus);
+              }
             }}
-          ></InputNumberrow>
+          ></DropDown>
+          {tkt_bybank_dstatus && (
+            <DropDownDialog
+              dialogstatus={tkt_bybank_dstatus}
+              data={yesornodata}
+              Tittle="Ticket By Bank"
+              setdata={settkt_bybank}
+              setdialogstatus={settkt_bybank_dstatus}
+              setid={settkt_bybank_id}
+              from="0"
+            ></DropDownDialog>
+          )}
+          {tkt_bybank_id == 1 && (
+            <InputNumberrow
+              label="Ticket Reference Number* :"
+              hint="Ticket Reference Number "
+              editable={editable}
+              value={tkt_refno}
+              onChangeEvent={(updated) => {
+                settkt_refno(updated);
+              }}
+            ></InputNumberrow>
+          )}
           <DropDown
             label="Actual Mode of Travel*"
             hint="Actual Mode of Travel"
@@ -699,6 +745,9 @@ export default function TravelingExpenses({ route }) {
               Tittle="Actual Mode of Travel"
               setdata={setactualmodeoftravel}
               setdialogstatus={setactualmodestatus}
+              clicked={() => {
+                setclassoftravel("");
+              }}
             ></DropDownDialog>
           )}
           <DropDown
@@ -717,8 +766,10 @@ export default function TravelingExpenses({ route }) {
               dialogstatus={classoftravelstatus}
               data={classoftraveldata}
               Tittle="Class of Travel"
-              setdata={setclassoftraveldata}
+              setdata={setclassoftravel}
               setdialogstatus={setclassoftravelstatus}
+              from="0"
+              setid={setclassoftravel_id}
             ></DropDownDialog>
           )}
 
@@ -728,28 +779,60 @@ export default function TravelingExpenses({ route }) {
             value={eligiblemodeoftravel}
           ></LabelTextColumnView>
 
-          <CustomizedRadioButton
+          <DropDown
             label="Higher Mode Opted Due To Personal Reasons of Exigencies:"
-            status={highermode}
-            buttonpressed={Highermoderadiobutton}
-          ></CustomizedRadioButton>
-
-          <CustomizedRadioButton
-            label="Prior Permission Taken for higher mode of travel:"
-            status={priority}
-            buttonpressed={Priorpermission}
-          ></CustomizedRadioButton>
-
-          {priority && (
-            <Inputtextrow
-            label="Who has opted Higher mode* :"
             hint="Higher Mode"
-            editable={editable}
-            value={who_higher}
-            onChangeEvent={(updated) => {
-              setwho_higher(updated);
+            indata={highermode}
+            ontouch={() => {
+              if (editable) {
+                sethighermode_dstatus(!highermode_dstatus);
+              }
             }}
-          ></Inputtextrow>
+          ></DropDown>
+          {highermode_dstatus && (
+            <DropDownDialog
+              dialogstatus={highermode_dstatus}
+              data={yesornodata}
+              Tittle="Higher Mode"
+              setdata={sethighermode}
+              setdialogstatus={sethighermode_dstatus}
+              setid={sethighermode_id}
+              from="0"
+            ></DropDownDialog>
+          )}
+
+          <DropDown
+            label="Prior Permission Taken for higher mode of travel:"
+            hint="Prior Permission "
+            indata={priority}
+            ontouch={() => {
+              if (editable) {
+                setpriority_dstatus(!priority_dstatus);
+              }
+            }}
+          ></DropDown>
+          {priority_dstatus && (
+            <DropDownDialog
+              dialogstatus={priority_dstatus}
+              data={yesornodata}
+              Tittle="Higher Mode"
+              setdata={setpriority}
+              setdialogstatus={setpriority_dstatus}
+              setid={setpriority_id}
+              from="0"
+            ></DropDownDialog>
+          )}
+
+          {priority_id == 1 && (
+            <Inputtextrow
+              label="Who has opted Higher mode* :"
+              hint="Higher Mode"
+              editable={editable}
+              value={who_higher}
+              onChangeEvent={(updated) => {
+                setwho_higher(updated);
+              }}
+            ></Inputtextrow>
           )}
 
           <InputNumberrow
@@ -793,7 +876,7 @@ export default function TravelingExpenses({ route }) {
             }}
           ></InputNumberrow>
 
-          <InputNumberrow
+          <Inputtextrow
             label="Vendor Name* :"
             hint="Vendor Name "
             editable={editable}
@@ -801,7 +884,7 @@ export default function TravelingExpenses({ route }) {
             onChangeEvent={(updated) => {
               setvendorname(updated);
             }}
-          ></InputNumberrow>
+          ></Inputtextrow>
 
           <Inputtextrow
             label="Vendor Code :"
@@ -813,7 +896,6 @@ export default function TravelingExpenses({ route }) {
             }}
           ></Inputtextrow>
 
-        
           <DropDown
             label="HSN Code*"
             hint="HSN Code"
@@ -821,17 +903,17 @@ export default function TravelingExpenses({ route }) {
             ontouch={() => {
               if (editable) {
                 setHsn_dialogstatus(!Hsn_dialogstatus);
+                setfirst(false);
               }
             }}
           ></DropDown>
-
           {Hsn_dialogstatus && (
             <SearchDialog
               dialogstatus={Hsn_dialogstatus}
               setValue={setHSN_number}
               setdialogstatus={setHsn_dialogstatus}
               from="HSN_Code"
-              setfirst={setfirst}
+              setigst={setigst}
             />
           )}
 
@@ -842,6 +924,7 @@ export default function TravelingExpenses({ route }) {
             ontouch={() => {
               if (editable) {
                 setbank_dialogststus(!bank_dialogstatus);
+                setfirst(false);
               }
             }}
           ></DropDown>
@@ -851,7 +934,6 @@ export default function TravelingExpenses({ route }) {
               setValue={setbank_gstno}
               setdialogstatus={setbank_dialogststus}
               from="Bank_GST"
-              setfirst={setfirst}
             />
           )}
           <Inputtextrow
@@ -861,8 +943,33 @@ export default function TravelingExpenses({ route }) {
             value={vendor_gstno}
             onChangeEvent={(updated) => {
               setvendor_gstno(updated);
+              setfirst(false);
             }}
           ></Inputtextrow>
+          {HSN_number != "" &&
+            bank_gstno != "" &&
+            vendor_gstno != "" &&
+            is_igst && (
+              <LabelTextColumnView
+                label="IGST Percentage:"
+                hint="IGST Percentage"
+                value={igst}
+              ></LabelTextColumnView>
+            )}
+          {!is_igst && (
+            <LabelTextColumnView
+              label="CGST Percentage:"
+              hint="CGST Percentage"
+              value={cgst}
+            ></LabelTextColumnView>
+          )}
+          {!is_igst && (
+            <LabelTextColumnView
+              label="SGST Percentage:"
+              hint="SGST Percentage"
+              value={sgst}
+            ></LabelTextColumnView>
+          )}
         </ScrollView>
       )}
       {editable && !progressBar && (

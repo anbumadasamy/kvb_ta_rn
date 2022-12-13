@@ -54,17 +54,18 @@ export default function Lodging({ route }) {
   const [city, setcity] = useState("");
   const [citydialogstatus, setcitydialogstatus] = useState(false);
   const [Center_Classification, setCenter_Classification] = useState("");
+  const [Center_Classification_id, setCenter_Classification_id] = useState("");
   const [CC_dialogstatus, setCC_dialogstatus] = useState(false);
   const [CC_data, setCC_data] = useState("");
   const [actualplace, setactualplace] = useState("");
   const [nodays, setnodays] = useState("");
-  const [accomodation, setaccomodation] = useState("");
+  const [accomodation, setaccomodation] = useState("No");
   const [accomodation_id, setaccomodation_id] = useState(0);
   const [yesornodata, setyesornodata] = useState("");
   const [accomodationdialogststus, setaccomodationdialogststus] =
     useState(false);
   const [tourgrade, settourgrade] = useState("");
-  const [is_bill, setis_bill] = useState("");
+  const [is_bill, setis_bill] = useState("No");
   const [is_bill_id, setis_bill_id] = useState(0);
   const [is_billdialogststus, setis_billdialogststus] = useState(false);
   const [ac_refno, setac_refno] = useState("");
@@ -82,6 +83,10 @@ export default function Lodging({ route }) {
   const [bank_gstno, setbank_gstno] = useState("");
   const [bank_dialogstatus, setbank_dialogststus] = useState(false);
   const [lodge_gstno, setlodge_gstno] = useState("");
+  const [igst, setigst] = useState("");
+  const [cgst, setcgst] = useState("");
+  const [sgst, setsgst] = useState("");
+  const [is_igst, setis_igst] = useState(true);
   const navigation = useNavigation();
   const authCtx = useContext(AuthContext);
 
@@ -99,18 +104,6 @@ export default function Lodging({ route }) {
     getdata("yn", 1);
     getTourGrade();
   }, []);
-  /* useEffect(() => {
-    if (parseInt(eligibleamount) < parseInt(claimamount)) {
-      setremarkslabel("Remarks:*");
-      if (!first) {
-        Alert.alert(
-          "You are exceeding the eligible amount. Please enter a valid remarks"
-        );
-      }
-    } else {
-      setremarkslabel("Remarks:");
-    }
-  }, [claimamount, eligibleamount]); */
 
   useEffect(() => {
     if (route.params.from == "Approver") {
@@ -141,18 +134,28 @@ export default function Lodging({ route }) {
     city,
   ]);
 
-  function eligibleamountvalidation() {
-    if (
-      subcategory != "" &&
-      checkoutTime != "" &&
-      checkingTime != "" &&
-      jsoncheckingDate != "" &&
-      jsoncheckoutDate != "" &&
-      city != ""
-    ) {
-      EligibleAmountCalculation();
+  useEffect(() => {
+    if (!first) {
+      console.log(lodge_gstno.length + "lodge_gstno.length");
+      if (HSN_number != "" && bank_gstno != "" && lodge_gstno.length >= 2) {
+        if (
+          bank_gstno[0] + bank_gstno[1] + "" ==
+          lodge_gstno[0] + lodge_gstno[1] + ""
+        ) {
+          setcgst(parseFloat(igst / 2) + "");
+          setsgst(parseFloat(igst / 2) + "");
+          // setigst(0);
+          setis_igst(false);
+        } else {
+          // setigst(igst + "");
+          setis_igst(true);
+          /* setcgst(0);
+          setsgst(0); */
+        }
+      }
     }
-  }
+  }, [HSN_number, bank_gstno, lodge_gstno]);
+
   async function EligibleAmountCalculation() {
     let eligible;
     eligible = {
@@ -175,7 +178,7 @@ export default function Lodging({ route }) {
       });
 
       let json = await response.json();
-      console.log(JSON.stringify(json)+" Eligible Amount JSON response")
+      console.log(JSON.stringify(json) + " Eligible Amount JSON response");
       if (response.status == 403) {
         AlertCredentialError(json.detail, navigation);
         return;
@@ -364,6 +367,8 @@ export default function Lodging({ route }) {
     setcheckoutDateStatus(false);
     setjsoncheckoutDate(moment(selectedDate).format("YYYY-MM-DD"));
     setcheckoutDate(moment(selectedDate).format("DD-MM-YYYY"));
+    setLjsoncheckoutDate(moment(selectedDate).format("YYYY-MM-DD"));
+    setLcheckoutDate(moment(selectedDate).format("DD-MM-YYYY"));
     setfirst(false);
   };
   const onLEndDate = (selectedDate) => {
@@ -380,6 +385,8 @@ export default function Lodging({ route }) {
   const onEndTime = (selectedDate) => {
     setcheckoutTimeStatus(false);
     setcheckoutTime(moment(selectedDate).format("HH:mm"));
+    setLcheckoutTimeStatus(false);
+    setLcheckoutTime(moment(selectedDate).format("HH:mm"));
     setfirst(false);
   };
   const onLEndTime = (selectedDate) => {
@@ -388,51 +395,79 @@ export default function Lodging({ route }) {
     setfirst(false);
   };
   function validation() {
-    if (jsoncheckingDate != "") {
-      if (jsoncheckoutDate != "") {
-        if (checkingTime != "") {
-          if (checkoutTime != "") {
-            if (subcategory != "") {
-              if (city != "") {
-                if (totalbillamount != "") {
-                  if (taxamount != "") {
-                    if (claimamount != "") {
-                      if (parseInt(eligibleamount) < parseInt(claimamount)) {
-                        if (remarks != "") {
-                          LodgingExpensePost();
-                        } else {
-                          Alert.alert("Enter Valid Remarks");
-                        }
-                      } else {
-                        LodgingExpensePost();
-                      }
-                    } else {
-                      Alert.alert("Enter Claim Amount");
-                    }
-                  } else {
-                    Alert.alert("Enter Tax Amount");
-                  }
-                } else {
-                  Alert.alert("Enter Total Bill Amount");
-                }
-              } else {
-                Alert.alert("Choose City");
-              }
-            } else {
-              Alert.alert("Choose Subcategory");
-            }
-          } else {
-            Alert.alert("Enter Checkout Time");
-          }
-        } else {
-          Alert.alert("Enter Checkin Time");
-        }
-      } else {
-        Alert.alert("Enter Checkout Date");
-      }
-    } else {
+    if (jsoncheckingDate == "") {
       Alert.alert("Enter Checkin Date");
+      return;
     }
+    if (jsoncheckoutDate == "") {
+      Alert.alert("Enter Checkout Date");
+      return;
+    }
+    if (jsonLcheckoutDate == "") {
+      Alert.alert("Enter Lodge Checkout Date");
+      return;
+    }
+    if (checkingTime == "") {
+      Alert.alert("Enter Checkin Time");
+      return;
+    }
+    if (checkoutTime == "") {
+      Alert.alert("Enter Checkout Time");
+      return;
+    }
+    if (LcheckoutTime == "") {
+      Alert.alert("Enter Lodge Checkout Time");
+      return;
+    }
+    if (city == "") {
+      Alert.alert("Choose City");
+      return;
+    }
+    if (Center_Classification == "") {
+      Alert.alert("Choose Center Classfication");
+      return;
+    }
+    if (actualplace == "") {
+      Alert.alert("Enter Place of Actual Stay");
+      return;
+    }
+    if (actualplace == "") {
+      Alert.alert("Enter Place of Actual Stay");
+      return;
+    }
+    if (nodays == "") {
+      Alert.alert("Enter No of Days");
+      return;
+    }
+    if (accomodation_id == 1) {
+      if (ac_refno == "") {
+        Alert.alert("Enter Accomodation Ref Number");
+        return;
+      }
+    }
+    if (is_bill_id == 1) {
+      if (billno == "") {
+        Alert.alert("Enter Bill Number");
+        return;
+      }
+    }
+    if (totalbillamount == "") {
+      Alert.alert("Enter Total Amount");
+      return;
+    }
+    if (claimamount == "") {
+      Alert.alert("Enter Claim Amount");
+      return;
+    }
+    if (eligibleamount == "") {
+      Alert.alert("Eligible Amount Can't be empty");
+      return;
+    }
+    if (taxamount == "") {
+      Alert.alert("Enter Tax Amount");
+      return;
+    }
+    LodgingExpensePost();
   }
 
   async function LodgingExpensePost() {
@@ -440,22 +475,32 @@ export default function Lodging({ route }) {
     let jsonobject;
     let obj;
     obj = {
-      tour_id: TourId,
+      tourgid: TourId,
       expensegid: 5,
       fromdate: jsoncheckingDate + " " + checkingTime + ":00",
       todate: jsoncheckingDate + " " + checkoutTime + ":00",
-      Lodge_Homestay: subcategory,
-      city: city,
-      billno: billno,
-      Billamountexculdingtax: parseInt(totalbillamount),
+      lodgcheckoutdate: jsonLcheckoutDate + " " + LcheckoutTime + ":00",
       claimedamount: parseInt(claimamount),
+      requestercomment: requestercomment,
+      city: city,
+      centreclassification: Center_Classification_id,
+      placeofactualstay: actualplace,
+      noofdays: nodays,
+      accbybank: accomodation_id,
+      acrefno: ac_refno,
+      billavailable: is_bill_id,
+      billnumber: billno,
+      totalbillamount: parseInt(totalbillamount),
+      hsncode: HSN_number,
       taxonly: parseInt(taxamount),
       vendorname: vendorname,
-      remarks: remarks,
+      bankgstno: bank_gstno,
+      vendorgstno: lodge_gstno,
+      approvedamount: parseInt(eligibleamount),
+      igst: igst,
+      cgst: cgst,
+      sgst: sgst,
       mobile: 1,
-      requestercomment: requestercomment,
-      eligibleamount: eligibleamount,
-      approvedamount: claimamount,
     };
 
     if (LodgingId != "") {
@@ -468,6 +513,7 @@ export default function Lodging({ route }) {
         data: [obj],
       };
     }
+    console.log(JSON.stringify(jsonobject) + " JSON Object for Lodging");
 
     try {
       const response = await fetch(URL.LODGING, {
@@ -480,13 +526,15 @@ export default function Lodging({ route }) {
       });
 
       let json = await response.json();
+      console.log(JSON.stringify(json) + " Lodging Response");
+      console.log(response.status + " Lodging Response status");
+
+      if (response.status == 403) {
+        AlertCredentialError(json.detail, navigation);
+        return;
+      }
 
       if (json) {
-        if ("detail" in json) {
-          if (json.detail == "Invalid credentials/token.") {
-            AlertCredentialError(json.detail, navigation);
-          }
-        }
         setProgressBar(false);
         if (json.message) {
           ToastMessage(json.message);
@@ -562,14 +610,14 @@ export default function Lodging({ route }) {
               if (editable) {
                 setcheckingDateStatus(!checkingdateStatus);
                 setcheckoutDate("");
-                setfirst(false)
+                setfirst(false);
               }
             }}
             outDateOnPress={() => {
               if (editable) {
                 if (checkingDate != "") {
                   setcheckoutDateStatus(!checkoutDateStatus);
-                  setfirst(false)
+                  setfirst(false);
                 } else {
                   Alert.alert("First Fill Departure Date");
                 }
@@ -581,13 +629,13 @@ export default function Lodging({ route }) {
             inTimeOnPress={() => {
               if (editable) {
                 setcheckingTimeStatus(!checkingTimeStatus);
-                setfirst(false)
+                setfirst(false);
               }
             }}
             outTimeOnPress={() => {
               if (editable) {
                 setcheckoutTimeStatus(!checkoutTimeStatus);
-                setfirst(false)
+                setfirst(false);
               }
             }}
             LoutTimeOnPress={() => {
@@ -677,7 +725,7 @@ export default function Lodging({ route }) {
             ontouch={() => {
               if (editable) {
                 setcitydialogstatus(!citydialogstatus);
-                setfirst(false)
+                setfirst(false);
               }
             }}
           ></DropDown>
@@ -708,6 +756,8 @@ export default function Lodging({ route }) {
               data={CC_data}
               Tittle="Center Classification"
               setdata={setCenter_Classification}
+              setid={setCenter_Classification_id}
+              from="0"
               setdialogstatus={setCC_dialogstatus}
               clicked={() => setfirst(false)}
             ></DropDownDialog>
@@ -739,7 +789,7 @@ export default function Lodging({ route }) {
             ontouch={() => {
               if (editable) {
                 setaccomodationdialogststus(!accomodationdialogststus);
-                setfirst(false)
+                setfirst(false);
               }
             }}
           ></DropDown>
@@ -848,6 +898,7 @@ export default function Lodging({ route }) {
             ontouch={() => {
               if (editable) {
                 setHsn_dialogstatus(!Hsn_dialogstatus);
+                setfirst(false);
               }
             }}
           ></DropDown>
@@ -857,7 +908,7 @@ export default function Lodging({ route }) {
               setValue={setHSN_number}
               setdialogstatus={setHsn_dialogstatus}
               from="HSN_Code"
-              setfirst={setfirst}
+              setigst={setigst}
             />
           )}
 
@@ -868,6 +919,7 @@ export default function Lodging({ route }) {
             ontouch={() => {
               if (editable) {
                 setbank_dialogststus(!bank_dialogstatus);
+                setfirst(false);
               }
             }}
           ></DropDown>
@@ -887,8 +939,33 @@ export default function Lodging({ route }) {
             value={lodge_gstno}
             onChangeEvent={(updated) => {
               setlodge_gstno(updated);
+              setfirst(false);
             }}
           ></Inputtextrow>
+          {HSN_number != "" &&
+            bank_gstno != "" &&
+            lodge_gstno != "" &&
+            is_igst && (
+              <LabelTextColumnView
+                label="IGST Percentage:"
+                hint="IGST Percentage"
+                value={igst}
+              ></LabelTextColumnView>
+            )}
+          {!is_igst && (
+            <LabelTextColumnView
+              label="CGST Percentage:"
+              hint="CGST Percentage"
+              value={cgst}
+            ></LabelTextColumnView>
+          )}
+          {!is_igst && (
+            <LabelTextColumnView
+              label="SGST Percentage:"
+              hint="SGST Percentage"
+              value={sgst}
+            ></LabelTextColumnView>
+          )}
         </ScrollView>
       )}
       {editable && !progressBar && (
