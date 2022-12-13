@@ -27,12 +27,13 @@ import ExpenseAddCCbs from "../screens/reimbursement/ExpenseAddCCBS";
 import OnBehalfOfTabScreen from "../screens/on_behalf_of/OnBehalfOfTabScreen";
 import MakerSummaryTabScreen from "../screens/travel_update/MakerSummaryTabScreen";
 import AddDocuments from "../screens/reimbursement/AddDocuments";
-import DateRelaxationScreen from "../screens/others/DateRelaxationScreen";
 import TravelManagmentScreen from "../screens/main/TravelManagmentScreen";
 import AdvanceCreationScreen from "../screens/advance_creation/AdvanceCreationScreen";
 import IncidentialExpenses from "../screens/reimbursement/IncidentialExpenses";
 import MiscExpenses from "../screens/reimbursement/MiscExpenses";
 import PackingExpenses from "../screens/reimbursement/PackingExpenses";
+import AdvanceCCBSSummaryScreen from "../screens/advance_creation/AdvanceCCBSSummaryScreen";
+import AdvanceCCBSCreationScreen from "../screens/advance_creation/AdvanceCCBSCreationScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -67,11 +68,14 @@ export default function Navigator() {
             name="Advance Creation"
             component={AdvanceCreationScreen}
           />
-          <Stack.Screen
-            name="Date Relaxation"
-            component={DateRelaxationScreen}
+           <Stack.Screen
+            name="CCBS"
+            component={AdvanceCCBSSummaryScreen}
           />
-
+           <Stack.Screen
+            name="Add CCBS"
+            component={AdvanceCCBSCreationScreen}
+          />
           <Stack.Screen
             name="AddItineraryScreen"
             component={AddItineraryScreen}

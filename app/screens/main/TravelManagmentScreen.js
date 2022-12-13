@@ -13,7 +13,6 @@ import {
   Pressable,
 } from "react-native";
 import { CustomColors } from "../../utilities/CustomColors";
-import AlertCredentialError from "../../components/toast/AlertCredentialError";
 import LogoutDialog from "../../components/dialog/LogoutDialog";
 
 let travelManagmentArray = [];
@@ -74,13 +73,6 @@ export default function TravelManagmentScreen() {
       title: "On Behalf Of",
       flag: authCtx.travelOnBehalfOf && authCtx.travelMaker ? true : false,
     },
-    /* {
-      id: 9,
-      icon: "rocket",
-      iconColor: "#95A5A6",
-      title: "Date Relaxation",
-      flag: authCtx.travelApprover,
-    }, */
   ];
 
   useEffect(() => {
@@ -92,10 +84,6 @@ export default function TravelManagmentScreen() {
     setTraveManagmentList(travelManagmentArray);
     travelManagmentArray = [];
   }, []);
-
-  /* useEffect(() => {
-    CeoTeamCheck();
-  }, []); */
 
   async function logout() {
     navigation.navigate("LoginScreen");
@@ -123,28 +111,6 @@ export default function TravelManagmentScreen() {
       console.error(error);
     }
   }
-
-  /* async function CeoTeamCheck() {
-    try {
-      const response = await fetch(URL.CEO_TEAMCHECK, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: authCtx.auth_token,
-        },
-      });
-      const json = await response.json();
-
-      if ("detail" in json) {
-        if(json.detail == "Invalid credentials/token."){
-        AlertCredentialError(json.detail, navigation);
-        }
-      }
-
-      authCtx.SetCeoPermission(json.onbehalf);
-    } catch (error) {
-      console.error(error);
-    }
-  } */
 
   function ClickEvent(id) {
     switch (id) {
@@ -174,9 +140,6 @@ export default function TravelManagmentScreen() {
       case 7:
         navigation.navigate("On Behalf Of");
         break;
-    /*   case 9:
-        navigation.navigate("Date Relaxation");
-        break; */
     }
   }
 
@@ -236,17 +199,6 @@ export default function TravelManagmentScreen() {
         <Text style={{ fontWeight: "bold", fontSize: 16, color: "black" }}>
           TA eClaim
         </Text>
-        {/* <Pressable
-          onPress={() => {
-            navigation.navigate("Recent Comments");
-          }}
-        >
-          <MaterialCommunityIcons
-            name="message-processing"
-            size={24}
-            color="#f7dc6f"
-          />
-        </Pressable> */}
       </View>
       <View style={styles.gridContainer}>
         <FlatList

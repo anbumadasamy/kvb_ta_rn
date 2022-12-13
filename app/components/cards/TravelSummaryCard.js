@@ -35,7 +35,9 @@ export default function TravelSummaryCard({
               navigation.navigate("Advance Creation", {
                 travelNo: itemData.item.id,
                 status: itemData.item.advanceStatusId,
+                statusText: itemData.item.advanceStatus,
                 reqDate: itemData.item.requestdate,
+                ccBsData: null,
               });
             } else if (
               itemData.item.travelStatusId == 3 &&

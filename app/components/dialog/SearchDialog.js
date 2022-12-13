@@ -29,6 +29,7 @@ export default function SearchDialog({
   onBehalOfId,
   branchId,
   setigst,
+  bsId,
 }) {
   const [isModalVisible, setModalVisible] = useState(dialogstatus);
   const authCtx = useContext(AuthContext);
@@ -88,6 +89,9 @@ export default function SearchDialog({
       case "BS":
         url = URL.BS_GET + "?query=" + search + "&page=" + count;
         break;
+      case "CC":
+        url = URL.CC_GET + bsId + "&query=" + search + "&page=" + count;
+        break;
       case "DAILYDIEM":
         url = URL.CITY_LIST + "?city_name=" + search + "&page=" + count;
         break;
@@ -130,7 +134,7 @@ export default function SearchDialog({
       case "Bank_GST":
         url = URL.GST + search + "&page=" + count;
         break;
-        case "permitted_by":
+      case "permitted_by":
         url =
           URL.PERMITTED_BY_EMP_LIST +
           empId +
@@ -168,10 +172,7 @@ export default function SearchDialog({
 
       let json = await response.json();
 
-
-
       console.log("json ---> " + JSON.stringify(json));
-      
 
       let obj = "";
 
@@ -203,6 +204,17 @@ export default function SearchDialog({
 
           break;
         case "BS":
+          for (let i = 0; i < json.data.length; i++) {
+            obj = {
+              name: json.data[i].name,
+              id: json.data[i].id,
+              code: json.data[i].code,
+              no: json.data[i].no,
+            };
+            dataArray.push(obj);
+          }
+          break;
+        case "CC":
           for (let i = 0; i < json.data.length; i++) {
             obj = {
               name: json.data[i].name,
@@ -289,23 +301,23 @@ export default function SearchDialog({
         case "HSN_Code":
           for (let i = 0; i < json.data.length; i++) {
             obj = {
-              name: json.data[i].code+"",
+              name: json.data[i].code + "",
               id: json.data[i].id,
-              igstrate:json.data[i].igstrate,
+              igstrate: json.data[i].igstrate,
             };
             dataArray.push(obj);
           }
           break;
-          case "Bank_GST":
-            for (let i = 0; i < json.data.length; i++) {
-              obj = {
-                name: json.data[i].bankgstno+"",
-                id: json.data[i].bank_name,
-              };
-              dataArray.push(obj);
-            }
-            break;
-            case "permitted_by":
+        case "Bank_GST":
+          for (let i = 0; i < json.data.length; i++) {
+            obj = {
+              name: json.data[i].bankgstno + "",
+              id: json.data[i].bank_name,
+            };
+            dataArray.push(obj);
+          }
+          break;
+        case "permitted_by":
           for (let i = 0; i < json.data.length; i++) {
             obj = {
               name: json.data[i].full_name,
@@ -333,7 +345,6 @@ export default function SearchDialog({
               id: json[i].id,
             };
             dataArray.push(obj);
-           
           }
           break;
       }
@@ -421,7 +432,9 @@ export default function SearchDialog({
                       from == "entity" ||
                       from == "permitted_by" ||
                       from == "approver_branch" ||
-                      from == "approver_name"
+                      from == "approver_name" ||
+                      from == "BS" ||
+                      from == "CC"
                     ) {
                       setId("");
                     }
@@ -465,15 +478,16 @@ export default function SearchDialog({
         from == "entity" ||
         from == "permitted_by" ||
         from == "approver_branch" ||
-        from == "approver_name"
+        from == "approver_name" ||
+        from == "CC"
       ) {
         setId(itemData.item.id);
       }
       if (from == "LODGING") {
         setfirst(false);
       }
-      if(from == "HSN_Code"){
-        setigst(itemData.item.igstrate+"")
+      if (from == "HSN_Code") {
+        setigst(itemData.item.igstrate + "");
       }
       if (from == "OnBehalfOfEmpclaim") {
         setId(itemData.item.id);

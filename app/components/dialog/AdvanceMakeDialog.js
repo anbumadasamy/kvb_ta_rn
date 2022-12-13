@@ -23,7 +23,6 @@ export default function AdvanceMakeDialog({
   const [isModalVisible, setModalVisible] = useState(dialogStatus);
 
   const toggleModalVisibility = () => {
-    console.log("Closed......")
     setModalVisible(!isModalVisible);
     setDialogstatus(false);
   };

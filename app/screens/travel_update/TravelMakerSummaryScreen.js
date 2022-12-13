@@ -200,6 +200,7 @@ export default function TravelMakerSummaryScreen({
             tourCancelStatusId: json.data[i].tour_cancel_enable,
             isTourEnded: json.data[i].is_tour_ended,
             advanceStatusId: json.data[i].advance_status_id,
+            advanceStatus: json.data[i].advance_status,
           };
 
           makerSummaryArray.push(obj);

@@ -15,8 +15,6 @@ import InputTextC from "../../components/ui/InputTextC";
 import SubmitButton from "../../components/ui/SubmitButton";
 import DateSelector from "../../components/ui/DateSelector";
 
-let requirementsDetailsArray = [];
-
 export default function AddItineraryScreen({ route }) {
   const navigation = useNavigation();
   const itineraryFrom = route.params.itineraryFrom;
@@ -55,32 +53,12 @@ export default function AddItineraryScreen({ route }) {
     setMinDate(route.params.minDate);
   }, [route]);
 
-  console.log("Max Date :>> " + maxDate);
-  console.log("Min Date :>> " + minDate);
-
   useLayoutEffect(() => {
     navigation.setOptions({
       title: "Add Itinerary",
     });
 
-    requirementsDetailsArray = [];
-
     if ("itineraryDetail" in route.params) {
-      if ("requirement_details" in route.params.itineraryDetail) {
-        for (
-          let i = 0;
-          i < route.params.itineraryDetail.requirement_details.length;
-          i++
-        ) {
-          requirementsDetailsArray.push(
-            route.params.itineraryDetail.requirement_details[i]
-          );
-        }
-        inputChangedHandler("requirement_details", [
-          ...itineraryData.requirement_details,
-          ...route.params.itineraryDetail.requirement_details,
-        ]);
-      }
       inputChangedHandler(
         "randomItineraryId",
         route.params.itineraryDetail.randomItineraryId
