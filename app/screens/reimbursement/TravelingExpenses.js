@@ -85,7 +85,7 @@ export default function TravelingExpenses({ route }) {
   const [vendor_gstno, setvendor_gstno] = useState("");
   const [requestercomment, setrequestercomment] = useState("");
   const [editable, seteditable] = useState(true);
-  const [first, setfirst] = useState("");
+  const [first, setfirst] = useState(true);
 
   const [igst, setigst] = useState("0");
   const [cgst, setcgst] = useState("0");
@@ -105,13 +105,6 @@ export default function TravelingExpenses({ route }) {
   const [classoftravellabel, setclassoftravellabel] = useState(false);
   const [tittle, settittle] = useState();
 
-  function Priorpermission(radioButtonsArray) {
-    setpriority(radioButtonsArray[0].selected);
-  }
-  function Highermoderadiobutton(radioButtonsArray) {
-    sethighermode(radioButtonsArray[0].selected);
-  }
-
   console.log(tkt_bybank_id + " tkt_bybank_id");
 
   useEffect(() => {
@@ -122,7 +115,7 @@ export default function TravelingExpenses({ route }) {
     getdata("yn", 2);
     tournogradeget();
   }, []);
-  useEffect(() => {
+  useEffect(() => { 
     if (route.params.from == "Approver") {
       seteditable(false);
     } else {
@@ -131,8 +124,6 @@ export default function TravelingExpenses({ route }) {
   }, [route]);
 
   async function getdata(getparam, id) {
-    console.log(URL.COMMON_DROPDOWN + getparam + " Url " + id + " Whick Id");
-
     let traveltrainarray = [];
     try {
       const response = await fetch(URL.COMMON_DROPDOWN + getparam, {
@@ -221,6 +212,7 @@ export default function TravelingExpenses({ route }) {
 
   useEffect(() => {
     if (!first) {
+      console.log("Inga vanthiyada mandaya");
       if (HSN_number != "" && bank_gstno != "" && vendor_gstno.length >= 2) {
         if (
           bank_gstno[0] + bank_gstno[1] + "" ==
@@ -250,118 +242,127 @@ export default function TravelingExpenses({ route }) {
         },
       });
       let json = await response.json();
-      if ("detail" in json) {
-        if (json.detail == "Invalid credentials/token.") {
-          AlertCredentialError(json.detail, navigation);
-        }
-      } else {
-        for (let i = 0; i < json.data.length; i++) {
-          if (json.data[i].id == TravelingExpenseId) {
-            let datewithtime = json.data[i].fromdate.split(" ");
-            let uniqdate = datewithtime[0].split("-");
-            let uniqtime = datewithtime[1];
 
-            let outdatewithtime = json.data[i].todate.split(" ");
-            let uniqoutdate = outdatewithtime[0].split("-");
-            let uniqouttime = outdatewithtime[1];
+      console.log(JSON.stringify(json) + " Traveling Expense Get");
 
-            setCheckingDate(uniqdate);
-            setcheckoutDate(uniqoutdate);
-            setCheckingTime(uniqtime);
-            setcheckoutTime(uniqouttime);
+      if (response.status == 403) {
+        AlertCredentialError(json.detail, navigation);
+        return;
+      }
 
-            setjsonCheckingDate(
-              moment(
-                new Date(
-                  uniqdate[1] +
-                    " " +
-                    uniqdate[2] +
-                    ", " +
-                    uniqdate[0] +
-                    " " +
-                    uniqtime +
-                    ":00"
-                )
-              ).format("YYYY-MM-DD")
-            );
+      for (let i = 0; i < json.data.length; i++) {
+        if (json.data[i].id == TravelingExpenseId) {
+          let datewithtime = json.data[i].depaturedate.split(" ");
+          let uniqdate = datewithtime[0].split("-");
+          let uniqtime = datewithtime[1];
 
-            setCheckingDate(
-              moment(
-                new Date(
-                  uniqdate[1] +
-                    " " +
-                    uniqdate[2] +
-                    ", " +
-                    uniqdate[0] +
-                    " " +
-                    uniqtime +
-                    ":00"
-                )
-              ).format("DD-MM-YYYY")
-            );
+          let outdatewithtime = json.data[i].arrivaldate.split(" ");
+          let uniqoutdate = outdatewithtime[0].split("-");
+          let uniqouttime = outdatewithtime[1];
 
-            setjsoncheckoutDate(
-              moment(
-                new Date(
-                  uniqoutdate[1] +
-                    " " +
-                    uniqoutdate[2] +
-                    ", " +
-                    uniqoutdate[0] +
-                    " " +
-                    uniqtime +
-                    ":00"
-                )
-              ).format("YYYY-MM-DD")
-            );
+          setCheckingTime(uniqtime);
+          setcheckoutTime(uniqouttime);
 
-            setcheckoutDate(
-              moment(
-                new Date(
-                  uniqoutdate[1] +
-                    " " +
-                    uniqoutdate[2] +
-                    ", " +
-                    uniqoutdate[0] +
-                    " " +
-                    uniqtime +
-                    ":00"
-                )
-              ).format("DD-MM-YYYY")
-            );
+          setjsonCheckingDate(
+            moment(
+              new Date(
+                uniqdate[1] +
+                  " " +
+                  uniqdate[2] +
+                  ", " +
+                  uniqdate[0] +
+                  " " +
+                  uniqtime +
+                  ":00"
+              )
+            ).format("YYYY-MM-DD")
+          );
 
-            settraveltype(json.data[i].traveltype);
-            setdepartureplace(json.data[i].fromplace);
-            setmodeoftravel(json.data[i].actualmode);
-            setplaceofvisit(json.data[i].toplace);
+          setCheckingDate(
+            moment(
+              new Date(
+                uniqdate[1] +
+                  " " +
+                  uniqdate[2] +
+                  ", " +
+                  uniqdate[0] +
+                  " " +
+                  uniqtime +
+                  ":00"
+              )
+            ).format("DD-MM-YYYY")
+          );
 
-            if (
-              json.data[i].actualmode == "Train" ||
-              json.data[i].actualmode == "Air"
-            ) {
-              setclassoftravellabel(!classoftravellabel);
-              setclassoftravel(json.data[i].travelclass);
-            }
+          setjsoncheckoutDate(
+            moment(
+              new Date(
+                uniqoutdate[1] +
+                  " " +
+                  uniqoutdate[2] +
+                  ", " +
+                  uniqoutdate[0] +
+                  " " +
+                  uniqtime +
+                  ":00"
+              )
+            ).format("YYYY-MM-DD")
+          );
 
-            if (json.data[i].prior_permission == "YES") {
-              setpriority(true);
-            } else {
-              setpriority(false);
-            }
-            if (json.data[i].highermodereason == "YES") {
-              sethighermode(true);
-            } else {
-              sethighermode(false);
-            }
-
-            setvendorname(json.data[i].vendorname);
-            setclaimamount(json.data[i].claimedamount + "");
-            setbillno(json.data[i].billno);
-            setremarks(json.data[i].remarks);
-            setrequestercomment(json.requestercomment);
-            setProgressBar(false);
-            break;
+          setcheckoutDate(
+            moment(
+              new Date(
+                uniqoutdate[1] +
+                  " " +
+                  uniqoutdate[2] +
+                  ", " +
+                  uniqoutdate[0] +
+                  " " +
+                  uniqtime +
+                  ":00"
+              )
+            ).format("DD-MM-YYYY")
+          );
+          setdepartureplace(json.data[i].depatureplace);
+          setplaceofvisit(json.data[i].placeofvisit);
+          settotaltkttamt(json.data[i].totaltkttamt + "");
+          settkt_bybank(json.data[i].tktbybank.name);
+          settkt_bybank_id(json.data[i].tktbybank.value + "");
+          settkt_refno(json.data[i].tktrefno + "");
+          setactualmodeoftravel(json.data[i].actualtravel.name);
+          setclassoftravel(json.data[i].classoftravel.name);
+          setclassoftravel_id(json.data[i].classoftravel.value);
+          seteligiblemodeoftravel(json.data[i].eligibletravel);
+          setpriority(json.data[i].priorpermission.name + "");
+          setpriority_id(json.data[i].priorpermission.value + "");
+          setno_of_dependent(json.data[i].noofdependents + "");
+          setclaimamount(json.data[i].claimedamount + "");
+          setvendorname(json.data[i].vendorname);
+          setvendorcode(json.data[i].vendorcode);
+          setvendor_gstno(json.data[i].vendorgstno);
+          if (json.data[i].bankgstno != "0") {
+            setbank_gstno(json.data[i].bankgstno);
           }
+          if (json.data[i].hsncode.code != null) {
+            setHSN_number(json.data[i].hsncode.code);
+          }
+          if (json.data[i].igst == 0) {
+            setcgst(json.data[i].cgst + "");
+            setsgst(json.data[i].sgst + "");
+            setis_igst(false);
+          } else {
+            setigst(json.data[i].igst + "");
+            setis_igst(true);
+          }
+          if (json.data[i].highermodereasons == "1") {
+            setwho_higher(json.data[i].highermodeopted + "");
+            sethighermode("Yes");
+          } else {
+            sethighermode("No");
+          }
+          sethighermode_id(json.data[i].highermodereasons + "");
+          setrequestercomment(json.requestercomment);
+          setProgressBar(false);
+          break;
         }
       }
     } catch (error) {
@@ -460,18 +461,18 @@ export default function TravelingExpenses({ route }) {
       depatureplace: departureplace,
       placeofvisit: placeofvisit,
       totaltkttamt: totaltkttamt,
-      tktbybank: tkt_bybank_id +"" ,
+      tktbybank: tkt_bybank_id + "",
       actualtravel: actualmodeoftravel,
-      highermodereasons: highermode_id +"",
+      highermodereasons: highermode_id + "",
       priorpermission: priority_id + "",
       classoftravel: classoftravel_id,
       mobile: 1,
       vendorname: vendorname,
       vendorcode: vendorcode,
       vendorgstno: vendor_gstno,
-      hsncode:HSN_number,
-    
-      approvedamount: parseInt(claimamount) ,
+      hsncode: HSN_number,
+
+      approvedamount: parseInt(claimamount),
       noofdependents: 0,
     };
     if (tkt_bybank_id == 1) {
@@ -484,7 +485,7 @@ export default function TravelingExpenses({ route }) {
     } else {
       obj["highermodeopted"] = "0";
     }
-   
+
     if (bank_gstno != "") {
       obj["bankgstno"] = bank_gstno;
     } else {
@@ -956,20 +957,26 @@ export default function TravelingExpenses({ route }) {
                 value={igst}
               ></LabelTextColumnView>
             )}
-          {!is_igst && (
-            <LabelTextColumnView
-              label="CGST Percentage:"
-              hint="CGST Percentage"
-              value={cgst}
-            ></LabelTextColumnView>
-          )}
-          {!is_igst && (
-            <LabelTextColumnView
-              label="SGST Percentage:"
-              hint="SGST Percentage"
-              value={sgst}
-            ></LabelTextColumnView>
-          )}
+          {!is_igst &&
+            HSN_number != "" &&
+            bank_gstno != "" &&
+            vendor_gstno != "" && (
+              <LabelTextColumnView
+                label="CGST Percentage:"
+                hint="CGST Percentage"
+                value={cgst}
+              ></LabelTextColumnView>
+            )}
+          {!is_igst &&
+            HSN_number != "" &&
+            bank_gstno != "" &&
+            vendor_gstno != "" && (
+              <LabelTextColumnView
+                label="SGST Percentage:"
+                hint="SGST Percentage"
+                value={sgst}
+              ></LabelTextColumnView>
+            )}
         </ScrollView>
       )}
       {editable && !progressBar && (
