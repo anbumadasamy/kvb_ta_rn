@@ -35,6 +35,12 @@ export const CustomColors = {
 
   label_color:"#6c6d6e",
   text_color:"#080808",
+
+  // fab button color
+  fab_approve :"#2ecc71",
+  fab_forward: "#3498db",
+  fab_return: "#f1c40f",
+  fab_reject: "#FE5886",
   
 
 };

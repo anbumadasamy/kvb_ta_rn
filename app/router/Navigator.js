@@ -32,6 +32,8 @@ import AdvanceCreationScreen from "../screens/advance_creation/AdvanceCreationSc
 import IncidentialExpenses from "../screens/reimbursement/IncidentialExpenses";
 import MiscExpenses from "../screens/reimbursement/MiscExpenses";
 import PackingExpenses from "../screens/reimbursement/PackingExpenses";
+import CancelApprovalTabScreen from "../screens/travel_advance_cancel_approvel/CancelApprovalTabScreen";
+import CancelMakerTabScreen from "../screens/travel_advance_cancel_maker/CancelMakerTabScreen";
 import AdvanceCCBSSummaryScreen from "../screens/advance_creation/AdvanceCCBSSummaryScreen";
 import AdvanceCCBSCreationScreen from "../screens/advance_creation/AdvanceCCBSCreationScreen";
 
@@ -68,18 +70,19 @@ export default function Navigator() {
             name="Advance Creation"
             component={AdvanceCreationScreen}
           />
-           <Stack.Screen
-            name="CCBS"
-            component={AdvanceCCBSSummaryScreen}
-          />
-           <Stack.Screen
-            name="Add CCBS"
-            component={AdvanceCCBSCreationScreen}
-          />
+          <Stack.Screen name="CCBS" component={AdvanceCCBSSummaryScreen} />
+          <Stack.Screen name="Add CCBS" component={AdvanceCCBSCreationScreen} />
           <Stack.Screen
             name="AddItineraryScreen"
             component={AddItineraryScreen}
           />
+
+          <Stack.Screen
+            name="Cancel Approval"
+            component={CancelApprovalTabScreen}
+          />
+
+          <Stack.Screen name="Cancel Maker" component={CancelMakerTabScreen} />
 
           <Stack.Screen
             name="TravelHistoryScreen"

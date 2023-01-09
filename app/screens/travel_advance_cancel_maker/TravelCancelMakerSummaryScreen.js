@@ -14,7 +14,7 @@ import moment from "moment";
 
 let travelApprovelSummaryArray = [];
 
-export default function TravelApprovelSummaryScreen({
+export default function TravelCancelMakerSummaryScreen({
   travelDialogStatus,
   setTravelDialogStatus,
   onBehalfDialogStatus,
@@ -54,7 +54,7 @@ export default function TravelApprovelSummaryScreen({
   }, [self]);
 
   useEffect(() => {
-  //  CeoTeamCheck();
+    //  CeoTeamCheck();
   }, []);
 
   useEffect(() => {
@@ -148,36 +148,40 @@ export default function TravelApprovelSummaryScreen({
     if (onBehalfOfEmpId == "") {
       if (jsonDate == "" && travelNo == "") {
         url =
-          URL.TRAVEL_APPROVEL_SUMMARY +
-          "status=" +
+          URL.MAKER_TRAVEL_CANCEL_SUMMARY +
+          "AdvanceCancel" +
+          "?status=" +
           filterStatus +
           "&page=" +
           pageNo;
       } else if (jsonDate != "" && travelNo == "") {
         url =
-          URL.TRAVEL_APPROVEL_SUMMARY +
-          "page=" +
-          pageNo +
-          "&status=" +
+          URL.MAKER_TRAVEL_CANCEL_SUMMARY +
+          "AdvanceCancel" +
+          "?status=" +
           filterStatus +
+          "&page=" +
+          pageNo +
           "&request_date=" +
           jsonDate;
       } else if (travelNo != "" && jsonDate == "") {
         url =
-          URL.TRAVEL_APPROVEL_SUMMARY +
-          "page=" +
-          pageNo +
-          "&status=" +
+          URL.MAKER_TRAVEL_CANCEL_SUMMARY +
+          "AdvanceCancel" +
+          "?status=" +
           filterStatus +
+          "&page=" +
+          pageNo +
           "&tour_no=" +
           travelNo;
       } else if (jsonDate != "" && travelNo != "") {
         url =
-          URL.TRAVEL_APPROVEL_SUMMARY +
-          "page=" +
-          pageNo +
-          "&status=" +
+          URL.MAKER_TRAVEL_CANCEL_SUMMARY +
+          "AdvanceCancel" +
+          "?status=" +
           filterStatus +
+          "&page=" +
+          pageNo +
           "&tour_no=" +
           travelNo +
           "&request_date=" +
@@ -186,8 +190,9 @@ export default function TravelApprovelSummaryScreen({
     } else if (onBehalfOfEmpId != "") {
       if (jsonDate == "" && travelNo == "") {
         url =
-          URL.TRAVEL_APPROVEL_SUMMARY +
-          "status=" +
+          URL.MAKER_TRAVEL_CANCEL_SUMMARY +
+          "AdvanceCancel" +
+          "?status=" +
           filterStatus +
           "&onbehalf=" +
           parseInt(onBehalfOfEmpId) +
@@ -195,33 +200,36 @@ export default function TravelApprovelSummaryScreen({
           pageNo;
       } else if (jsonDate != "" && travelNo == "") {
         url =
-          URL.TRAVEL_APPROVEL_SUMMARY +
-          "page=" +
-          pageNo +
-          "&status=" +
+          URL.MAKER_TRAVEL_CANCEL_SUMMARY +
+          "AdvanceCancel" +
+          "?status=" +
           filterStatus +
+          "&page=" +
+          pageNo +
           "&onbehalf=" +
           parseInt(onBehalfOfEmpId) +
           "&request_date=" +
           jsonDate;
       } else if (travelNo != "" && jsonDate == "") {
         url =
-          URL.TRAVEL_APPROVEL_SUMMARY +
-          "page=" +
-          pageNo +
-          "&status=" +
+          URL.MAKER_TRAVEL_CANCEL_SUMMARY +
+          "AdvanceCancel" +
+          "?status=" +
           filterStatus +
+          "&page=" +
+          pageNo +
           "&onbehalf=" +
           parseInt(onBehalfOfEmpId) +
           "&tour_no=" +
           travelNo;
       } else if (jsonDate != "" && travelNo != "") {
         url =
-          URL.TRAVEL_APPROVEL_SUMMARY +
-          "page=" +
-          pageNo +
-          "&status=" +
+          URL.MAKER_TRAVEL_CANCEL_SUMMARY +
+          "AdvanceCancel" +
+          "?status=" +
           filterStatus +
+          "&page=" +
+          pageNo +
           "&onbehalf=" +
           parseInt(onBehalfOfEmpId) +
           "&tour_no=" +

@@ -21,13 +21,13 @@ export default function TravelApprovelSummaryCard({ data, scroll, from, onBehalf
       <Pressable
         style={styles.item}
         onPress={() => {
-          navigation.navigate("TravelDetailScreen", {
+          navigation.navigate("Travel Creation", {
             travelNo: itemData.item.id,
             appGid: itemData.item.appGid,
             status: itemData.item.tourStatusId,
             tourCancelStatusId: itemData.item.tourCancelStatusId,
             onBehalfOfEmpId: onBehalfOfEmpId ? onBehalfOfEmpId : "",
-            from: from,
+            summaryFrom: from,
           });
         }}
       >

@@ -30,7 +30,7 @@ export default function AdvanceCCBSSummaryScreen({ route }) {
     ccbsData: [],
   });
 
-  console.log("Edit data :>> " + JSON.stringify(route.params.ccBsData));
+  // console.log("Edit data :>> " + JSON.stringify(route.params.advanceData));
 
   useEffect(() => {
     if (advanceCCBSData.ccbsData.length > 0) {
@@ -48,11 +48,20 @@ export default function AdvanceCCBSSummaryScreen({ route }) {
               )
       );
     }
-    console.log("Calculated Balance :>> " + JSON.stringify(balanceAmount));
+    //  console.log("Calculated Balance :>> " + JSON.stringify(balanceAmount));
   }, [advanceCCBSData.ccbsData]);
 
   useEffect(() => {
     ccbsDataArray = [];
+
+    if ("advanceData" in route.params) {
+      inputChangedHandler("reqAmount", route.params.reqAmount);
+      inputChangedHandler("randomAdvId", route.params.randomAdvId);
+      inputChangedHandler("appAmount", route.params.appAmount);
+      inputChangedHandler("reason", route.params.reason);
+      inputChangedHandler("approver", route.params.approver);
+      inputChangedHandler("ccbsData", route.params.ccbsData);
+    }
 
     if (route.params.ccbsData != null && "ccbsData" in route.params) {
       let position = "NEW";
@@ -107,7 +116,10 @@ export default function AdvanceCCBSSummaryScreen({ route }) {
           editable={editableStatus}
           keyboard="numeric"
           value={advanceCCBSData.reqAmount}
-          onChangeEvent={inputChangedHandler.bind(this, "reqAmount")}
+          onChangeEvent={(value) => {
+            inputChangedHandler("reqAmount", value);
+            inputChangedHandler("appAmount", value);
+          }}
         />
         <InputText
           label="Approved amount:"

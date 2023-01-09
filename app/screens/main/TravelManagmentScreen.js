@@ -35,14 +35,28 @@ export default function TravelManagmentScreen() {
       id: 2,
       icon: "reader",
       iconColor: "#3498db",
-      title: "Maker Summary",
+      title: "Travel Summary (M)",
+      flag: authCtx.travelMaker,
+    },
+    {
+      id: 8,
+      icon: "reader",
+      iconColor: "#3498db",
+      title: "Cancel Summary (M)",
       flag: authCtx.travelMaker,
     },
     {
       id: 3,
       icon: "thumbs-up-sharp",
       iconColor: "#8e44ad",
-      title: "Checker Summary",
+      title: "Travel Summary (C)",
+      flag: authCtx.travelApprover,
+    },
+    {
+      id: 9,
+      icon: "thumbs-down-sharp",
+      iconColor: "#f1c40f",
+      title: "Cancel Summary (C)",
       flag: authCtx.travelApprover,
     },
     {
@@ -119,7 +133,7 @@ export default function TravelManagmentScreen() {
           itineraryDetails: null,
           onBehalfOf: authCtx.travelOnBehalfOf,
           from: "Travel_Managment",
-          status: 101
+          status: 101,
         });
         break;
       case 2:
@@ -139,6 +153,12 @@ export default function TravelManagmentScreen() {
         break;
       case 7:
         navigation.navigate("On Behalf Of");
+        break;
+      case 8:
+        navigation.navigate("Cancel Maker");
+        break;
+      case 9:
+        navigation.navigate("Cancel Approval");
         break;
     }
   }

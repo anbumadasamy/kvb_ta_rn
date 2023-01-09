@@ -24,6 +24,8 @@ import DeleteDialog from "../../components/dialog/DeleteDialog";
 import InputNumber from "../../components/ui/InputNumber";
 import StartEndDatePicker from "../../components/ui/StartEndDatePicker";
 import SearchDialog from "../../components/dialog/SearchDialog";
+import { FloatingAction } from "react-native-floating-action";
+import ApprovelReasonDialog from "../../components/dialog/ApprovelReasonDialog";
 import SubmitButton from "../../components/ui/SubmitButton";
 import LabelTextView from "../../components/ui/LabelTextView";
 import HeaderBox from "../../components/ui/HeaderBox";
@@ -33,6 +35,8 @@ import Onbehalfofradiobutton from "../../components/ui/Onbehalfofradiobutton";
 import ToastMessage from "../../components/toast/ToastMessage";
 import AlertCredentialError from "../../components/toast/AlertCredentialError";
 import AttachmentDialog from "../../components/dialog/AttachmentDialog";
+import ApproverSelectDialog from "../../components/dialog/ApproverSelectDialog";
+import CustomizedRadioButton from "../../components/ui/CustomizedRadiobutton";
 import DocumentBox from "../../components/ui/DocumentBox";
 
 let itineraryArray = [];
@@ -43,15 +47,23 @@ let itineraryJsonArray = [];
 export default function TravelCreationScreen({ route }) {
   const [status] = useState(route.params.status);
   const [travelNo] = useState(route.params.travelNo);
+  const [from] = useState(route.params.summaryFrom);
+  const [appGid] = useState(
+    "appGid" in route.params ? route.params.appGid : ""
+  );
 
   const navigation = useNavigation();
   const authCtx = useContext(AuthContext);
-  const [editable] = useState(status == 101 || status == 2 || status == 4);
+  const [editable] = useState(
+    from == "travel_maker_summary" &&
+      (status == 101 || status == 2 || status == 4)
+  );
   const [minimumDate, setMinimumDate] = useState("");
   const [onBehalfofDialog, setOnbehalfOfDialog] = useState(false);
   const [onBehalfOf, setOnBehalfOf] = useState(false);
   const [self, setSelf] = useState(true);
   const [fundsTransfer, setFundsTransfer] = useState(false);
+  const [transferRadioButton, setTransferRadioButton] = useState(false);
   const [onBehalfOfId, setOnbehalfOfId] = useState(null);
   const [onBehalfOfName, setOnBehalfOfName] = useState("");
   const [onBehalfOfDesigination, setOnBehalfOfDesigination] = useState("");
@@ -60,7 +72,7 @@ export default function TravelCreationScreen({ route }) {
   const [randomDocumentId, setRandomDocumentId] = useState(null);
   const [randomItineraryId, setRandomItineraryId] = useState(null);
   const [itineraryEligible, setItineraryEligible] = useState(true);
-  const [progressBar, setProgressBar] = useState(false);
+  const [progressBar, setProgressBar] = useState(true);
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
   const [startDateStatus, setStartDateStatus] = useState(false);
@@ -68,6 +80,13 @@ export default function TravelCreationScreen({ route }) {
   const [attachmentDialogStatus, setAttachmentDialogStatus] = useState(false);
   const [attachment, setAttachment] = useState([]);
   const [travelReason, setTravelReason] = useState([]);
+  const [transferStatus, setTransferStatus] = useState(false);
+  const [approvelDialogStatus, setApprovelDialogStatus] = useState(false);
+  const [reason, setReason] = useState("");
+  const [buttontext, setButtontext] = useState("");
+  const [actionPosition, setActionPosition] = useState("");
+  const [approverSelectDialogStatus, setApproverSelectDialogStatus] =
+    useState(false);
 
   const [startDateMs, setStartDateMs] = useState("");
   const [endDateMs, setEndDateMs] = useState("");
@@ -111,10 +130,23 @@ export default function TravelCreationScreen({ route }) {
 
   useEffect(() => {
     minimumDateValidation();
+    GetTravelReason();
     if (status != 101) {
       TravelDetail();
     }
   }, []);
+
+  useEffect(() => {
+    if (
+      travelData.travelReasonId == 6 ||
+      travelData.travelReasonId == 7 ||
+      travelData.travelReasonId == 8
+    ) {
+      setTransferRadioButton(true);
+    } else {
+      setTransferRadioButton(false);
+    }
+  }, [travelData.travelReasonId]);
 
   useEffect(() => {
     let title = "";
@@ -125,6 +157,8 @@ export default function TravelCreationScreen({ route }) {
       } else if (status == 3) {
         title = "Travel Detail";
       }
+    } else if (route.params.summaryFrom == "travel_approvel") {
+      title = "Travel Detail";
     } else {
       title = "eClaim Travel Creation";
     }
@@ -132,9 +166,6 @@ export default function TravelCreationScreen({ route }) {
     navigation.setOptions({
       title: title,
     });
-    LogBox.ignoreLogs([
-      "VirtualizedLists should never be nested inside plain ScrollViews with the same orientation because it can break windowing and other functionality - use another VirtualizedList-backed container instead.",
-    ]);
   });
 
   useEffect(() => {
@@ -162,19 +193,17 @@ export default function TravelCreationScreen({ route }) {
   }, [onBehalfOfId]);
 
   useEffect(() => {
-    inputChangedHandler("onBehalfOfBranch", "");
-    inputChangedHandler("onBehalfOfBranchCode", "");
-    if (self) {
-      inputChangedHandler("onBehalfOfId", "");
-      inputChangedHandler("onBehalfOfName", "");
-      inputChangedHandler("onBehalfOfDesigination", "");
-      GetEmpDetail(authCtx.user_id);
+    if (status == 101) {
+      inputChangedHandler("onBehalfOfBranch", "");
+      inputChangedHandler("onBehalfOfBranchCode", "");
+      if (self) {
+        inputChangedHandler("onBehalfOfId", "");
+        inputChangedHandler("onBehalfOfName", "");
+        inputChangedHandler("onBehalfOfDesigination", "");
+        GetEmpDetail(authCtx.user_id);
+      }
     }
   }, [self]);
-
-  useEffect(() => {
-    GetTravelReason();
-  }, [route]);
 
   useEffect(() => {
     if (endDate) {
@@ -215,9 +244,325 @@ export default function TravelCreationScreen({ route }) {
     }
   }, [route]);
 
+  function TransferStatus(radioButtonsArray) {
+    setTransferStatus(radioButtonsArray[0].selected);
+  }
+
   function minimumDateValidation() {
     const miniDate = new Date().getTime() - 150 * 24 * 60 * 60 * 1000;
     setMinimumDate(new Date(miniDate));
+  }
+
+  const action = [
+    {
+      text: "Approve",
+      icon: require("../../assets/icons/approve.png"),
+      name: "Approve",
+      position: 1,
+      color: CustomColors.fab_approve,
+    },
+    {
+      text: "Forward",
+      icon: require("../../assets/icons/forward.png"),
+      name: "Forward",
+      position: 2,
+      color: CustomColors.fab_forward,
+    },
+    {
+      text: "Return",
+      icon: require("../../assets/icons/return.png"),
+      name: "Return",
+      position: 3,
+      color: CustomColors.fab_return,
+    },
+    {
+      text: "Reject",
+      icon: require("../../assets/icons/reject.png"),
+      name: "Reject",
+      position: 4,
+      color: CustomColors.fab_reject,
+    },
+  ];
+
+  function FloatingActionButton() {
+    return (
+      <View>
+        <FloatingAction
+          actions={action}
+          distanceToEdge={{ vertical: 0, horizontal: 5 }}
+          onPressItem={(name) => {
+            setActionPosition(name);
+            if (name != "Forward") {
+              setApprovelDialogStatus(true);
+            } else {
+              setApproverSelectDialogStatus(true);
+            }
+            setButtontext(name);
+          }}
+          color="#6c3483"
+          tintColor="white"
+        />
+      </View>
+    );
+  }
+
+  function MemberAction(name) {
+    switch (name) {
+      case "Approve":
+        if (from === "travel_approvel_summary") {
+          TravelApprove();
+        } else if (from === "cancel_approvel_summary") {
+          CancelApprove();
+        }
+        break;
+      case "Return":
+        if (from === "travel_approvel_summary") {
+          TravelReturn();
+        }
+        break;
+      case "Reject":
+        if (from === "travel_approvel_summary") {
+          TravelReject();
+        } else if (from === "cancel_approvel_summary") {
+          CancelReject();
+        }
+        break;
+    }
+  }
+
+  async function TravelApprove() {
+    setProgressBar(true);
+    let data;
+    data = {
+      id: appGid,
+      tourgid: travelNo,
+      status: "3",
+      appcomment: reason,
+      applevel: "1",
+      apptype: "tour",
+    };
+    if (onBehalfOfId != "") {
+      data["onbehalf"] = parseInt(onBehalfOfId);
+    }
+    try {
+      const response = await fetch(URL.TRAVEl_APPROVE, {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-type": "application/json",
+          Authorization: authCtx.auth_token,
+        },
+      });
+
+      let json = await response.json();
+
+      if ("detail" in json) {
+        if (json.detail == "Invalid credentials/token.") {
+          AlertCredentialError(json.detail, navigation);
+        }
+      }
+      setReason("");
+
+      if (json) {
+        setProgressBar(false);
+        if (json.message) {
+          ToastMessage(json.message);
+          navigation.goBack();
+          navigation.goBack();
+          navigation.navigate("Checker Summary");
+        } else {
+          Alert.alert(json.description);
+        }
+      }
+    } catch (error) {
+      setProgressBar(false);
+      console.error(error);
+    }
+  }
+
+  async function CancelApprove() {
+    setProgressBar(true);
+    try {
+      const response = await fetch(URL.TRAVEl_APPROVE, {
+        method: "POST",
+        body: JSON.stringify({
+          appcomment: reason,
+          apptype: "TourCancel",
+          id: appGid,
+          status: "3",
+          approvedby: 1,
+          applevel: "1",
+          tourgid: travelNo,
+        }),
+        headers: {
+          "Content-type": "application/json",
+          Authorization: authCtx.auth_token,
+        },
+      });
+
+      let json = await response.json();
+
+      if ("detail" in json) {
+        if (json.detail == "Invalid credentials/token.") {
+          AlertCredentialError(json.detail, navigation);
+        }
+      }
+      setReason("");
+
+      if (json) {
+        setProgressBar(false);
+        if (json.message) {
+          ToastMessage(json.message);
+          navigation.goBack();
+          navigation.goBack();
+          navigation.navigate("Checker Summary");
+        } else {
+          Alert.alert(json.description);
+        }
+      }
+    } catch (error) {
+      setProgressBar(false);
+      console.error(error);
+    }
+  }
+
+  async function TravelReturn() {
+    setProgressBar(true);
+    let data;
+    data = {
+      id: appGid,
+      tour_id: travelNo,
+      appcomment: reason,
+      apptype: "tour",
+    };
+    if (onBehalfOfId != "") {
+      data["onbehalf"] = parseInt(onBehalfOfId);
+    }
+    try {
+      const response = await fetch(URL.TRAVEl_RETURN, {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-type": "application/json",
+          Authorization: authCtx.auth_token,
+        },
+      });
+
+      let json = await response.json();
+
+      if ("detail" in json) {
+        if (json.detail == "Invalid credentials/token.") {
+          AlertCredentialError(json.detail, navigation);
+        }
+      }
+      setReason("");
+
+      if (json) {
+        setProgressBar(false);
+        if (json.message) {
+          ToastMessage(json.message);
+          navigation.goBack();
+          navigation.goBack();
+          navigation.navigate("Checker Summary");
+        } else {
+          Alert.alert(json.description);
+        }
+      }
+    } catch (error) {
+      setProgressBar(false);
+      console.error(error);
+    }
+  }
+
+  async function TravelReject() {
+    setProgressBar(true);
+    let data;
+    data = {
+      id: appGid,
+      tour_id: travelNo,
+      appcomment: reason,
+      apptype: "tour",
+    };
+    if (onBehalfOfId != "") {
+      data["onbehalf"] = parseInt(onBehalfOfId);
+    }
+    try {
+      const response = await fetch(URL.TRAVEl_REJECT, {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-type": "application/json",
+          Authorization: authCtx.auth_token,
+        },
+      });
+
+      let json = await response.json();
+
+      if ("detail" in json) {
+        if (json.detail == "Invalid credentials/token.") {
+          AlertCredentialError(json.detail, navigation);
+        }
+      }
+      setReason("");
+
+      if (json) {
+        setProgressBar(false);
+        if (json.message) {
+          ToastMessage(json.message);
+          navigation.goBack();
+          navigation.goBack();
+          navigation.navigate("Checker Summary");
+        } else {
+          Alert.alert(json.description);
+        }
+      }
+    } catch (error) {
+      setProgressBar(false);
+      console.error(error);
+    }
+  }
+
+  async function CancelReject() {
+    setProgressBar(true);
+    try {
+      const response = await fetch(URL.TRAVEl_REJECT, {
+        method: "POST",
+        body: JSON.stringify({
+          id: appGid,
+          tour_id: travelNo,
+          appcomment: reason,
+          apptype: "TourCancel",
+        }),
+        headers: {
+          "Content-type": "application/json",
+          Authorization: authCtx.auth_token,
+        },
+      });
+
+      let json = await response.json();
+
+      if ("detail" in json) {
+        if (json.detail == "Invalid credentials/token.") {
+          AlertCredentialError(json.detail, navigation);
+        }
+      }
+      setReason("");
+
+      if (json) {
+        setProgressBar(false);
+        if (json.message) {
+          ToastMessage(json.message);
+          navigation.goBack();
+          navigation.goBack();
+          navigation.navigate("Checker Summary");
+        } else {
+          Alert.alert(json.description);
+        }
+      }
+    } catch (error) {
+      setProgressBar(false);
+      console.error(error);
+    }
   }
 
   async function TravelDetail() {
@@ -274,8 +619,17 @@ export default function TravelCreationScreen({ route }) {
       inputChangedHandler("permittedByName", json.permittedby);
       inputChangedHandler("permittedById", json.permittedby_id);
 
-      inputChangedHandler("quantumOfFunds", json.quantum_of_funds);
-      inputChangedHandler("openingBalance", json.opening_balance);
+      setOnBehalfOfName(json.employee_name);
+      setOnBehalfOfDesigination(json.empdesignation);
+      inputChangedHandler("onBehalfOfCode", json.employee_code);
+      //  inputChangedHandler("onBehalfOfBranch", json.employee_branch_name);
+      //  inputChangedHandler("onBehalfOfBranchCode", json.employee_branch_code);
+
+      if (json.reason_data.id == 2) {
+        inputChangedHandler("quantumOfFunds", json.quantum_of_funds.toString());
+        inputChangedHandler("openingBalance", json.opening_balance.toString());
+        setFundsTransfer(true);
+      }
 
       inputChangedHandler(
         "approverBranch",
@@ -355,7 +709,9 @@ export default function TravelCreationScreen({ route }) {
       inputChangedHandler("onBehalfOfCode", json.code);
       inputChangedHandler("onBehalfOfBranch", json.employee_branch_name);
       inputChangedHandler("onBehalfOfBranchCode", json.employee_branch_code);
+      setProgressBar(false);
     } catch (error) {
+      setProgressBar(false);
       console.error(error);
     }
   }
@@ -615,7 +971,7 @@ export default function TravelCreationScreen({ route }) {
       ordernoremarks: travelData.comments,
       permittedby: travelData.permittedById,
       empbranchgid: `${travelData.approverBranchId} ${travelData.approverBranch}`,
-      transfer_on_promotion: travelData.transferOnPromotion,
+      transfer_on_promotion: transferStatus,
       quantum_of_funds:
         travelData.quantumOfFunds == 0 ? null : travelData.quantumOfFunds,
       opening_balance:
@@ -677,14 +1033,23 @@ export default function TravelCreationScreen({ route }) {
         setProgressBar(false);
         if (json.message) {
           ToastMessage(json.message);
-          navigation.goBack();
+          /* navigation.goBack();
           if (status != 101) {
             navigation.goBack();
+          } */
+
+          if (status == 2 || status == 4) {
+            inputChangedHandler("itinerary_details", []);
+            setProgressBar(true);
+            TravelDetail();
           }
-          if (travelData.onBehalfOfId != "") {
-            navigation.navigate("On Behalf Of");
-          } else {
-            navigation.navigate("Maker Summary");
+
+          if (status == 101) {
+            if (travelData.onBehalfOfId != "") {
+              navigation.navigate("On Behalf Of");
+            } else {
+              navigation.navigate("Maker Summary");
+            }
           }
         } else {
           Alert.alert(json.description);
@@ -697,31 +1062,35 @@ export default function TravelCreationScreen({ route }) {
   }
 
   function Create() {
-    if (travelData.startDate != "Start Date") {
-      if (travelData.endDate != "End Date") {
-        if (travelData.travelReason != "") {
-          if (travelData.itinerary_details.length > 0) {
-            if (
-              travelData.itinerary_details[
-                travelData.itinerary_details.length - 1
-              ].endDate == travelData.endDate
-            ) {
-              TravelCreation();
-            } else {
-              Alert.alert("Check itinerary end date");
-            }
-          } else {
-            Alert.alert("Add itinerary");
-          }
-        } else {
-          Alert.alert("Choose travel reason");
-        }
-      } else {
-        Alert.alert("Select end date");
-      }
-    } else {
-      Alert.alert("Select start date");
+    if (travelData.startDate == "Start Date") {
+      ToastMessage("Select start date", null, "error");
+      return;
     }
+
+    if (travelData.endDate == "End Date") {
+      ToastMessage("Select end date", null, "error");
+      return;
+    }
+
+    if (travelData.travelReason == "") {
+      ToastMessage("Choose travel reason", null, "error");
+      return;
+    }
+
+    if (travelData.itinerary_details.length == 0) {
+      ToastMessage("Add itinerary", null, "error");
+      return;
+    }
+
+    if (
+      travelData.itinerary_details[travelData.itinerary_details.length - 1]
+        .endDate != travelData.endDate
+    ) {
+      ToastMessage("Add itinerary till travel end date", null, "error");
+      return;
+    }
+
+    TravelCreation();
   }
 
   const onPressRadioButton = (radioButtonsArray) => {
@@ -912,6 +1281,14 @@ export default function TravelCreationScreen({ route }) {
               }}
             />
 
+            {transferRadioButton && (
+              <CustomizedRadioButton
+                label="Transfer On Promotion:"
+                status={transferStatus}
+                buttonpressed={TransferStatus}
+              ></CustomizedRadioButton>
+            )}
+
             {fundsTransfer && (
               <View>
                 <InputNumber
@@ -1070,16 +1447,44 @@ export default function TravelCreationScreen({ route }) {
               data={travelData.itinerary_details}
               from="travel_creation"
             />
-            {deleteDialogStatus && (
-              <DeleteDialog
-                dialogstatus={deleteDialogStatus}
-                setDialogstatus={() => {
-                  setDeleteDialogStatus(!deleteDialogStatus);
-                }}
-                onPressDelete={DeleteItinerary}
-              />
-            )}
           </ScrollView>
+          {deleteDialogStatus && (
+            <DeleteDialog
+              dialogstatus={deleteDialogStatus}
+              setDialogstatus={() => {
+                setDeleteDialogStatus(!deleteDialogStatus);
+              }}
+              onPressDelete={DeleteItinerary}
+            />
+          )}
+
+          {approverSelectDialogStatus && (
+            <ApproverSelectDialog
+              dialogStatus={approverSelectDialogStatus}
+              setDialogStatus={setApproverSelectDialogStatus}
+              title=""
+              buttontext={buttontext}
+              onPressEvent={() => {
+
+              }}
+            />
+          )}
+
+          {approvelDialogStatus && (
+            <ApprovelReasonDialog
+              dialogStatus={approvelDialogStatus}
+              setDialogStatus={setApprovelDialogStatus}
+              tittle=""
+              setValue={setReason}
+              buttontext={buttontext}
+              value={reason}
+              selectedPosition={setActionPosition}
+              onPressEvent={() => {
+                MemberAction(actionPosition);
+                setApprovelDialogStatus(!approvelDialogStatus);
+              }}
+            ></ApprovelReasonDialog>
+          )}
           <View>
             {editable && (
               <SubmitButton onPressEvent={Create}>
@@ -1087,6 +1492,10 @@ export default function TravelCreationScreen({ route }) {
               </SubmitButton>
             )}
           </View>
+
+          {from == "travel_approvel_summary" &&
+            status == 2 &&
+            FloatingActionButton()}
         </KeyboardAvoidingView>
       )}
     </View>
