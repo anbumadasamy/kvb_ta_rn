@@ -51,9 +51,10 @@ export default function AdvanceClaimCard({ data, scroll }) {
             <Pressable
               onPress={() => {
                 navigation.navigate("CCBS", {
-                  ccBsData: itemData.item,
+                  advanceData: itemData.item,
                   totalAmount: itemData.item.reqAmount,
-                  randomAdvId: itemData.item.randomAdvId
+                  randomAdvId: itemData.item.randomAdvId,
+                  ccbsData: null
                 });
               }}
             >

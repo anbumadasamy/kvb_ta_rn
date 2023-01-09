@@ -12,6 +12,7 @@ import SearchDialog from "../../components/dialog/SearchDialog";
 import { useNavigation } from "@react-navigation/native";
 import InputSelect from "../../components/ui/InputSelect";
 import ToastMessage from "../../components/toast/ToastMessage";
+import AlertCredentialError from "../../components/toast/AlertCredentialError";
 import CommentBox from "../../components/ui/CommentBox";
 import { URL } from "../../utilities/UrlBase";
 import SubmitButton from "../../components/ui/SubmitButton";
@@ -23,6 +24,7 @@ import AdvanceClaimCard from "../../components/cards/AdvanceClaimCard";
 
 let advanceDataArray = [];
 let ccBsDataArray = [];
+let ccbsClaimDataArray = [];
 
 export default function AdvanceCreationScreen({ route }) {
   const authCtx = useContext(AuthContext);
@@ -35,6 +37,10 @@ export default function AdvanceCreationScreen({ route }) {
     useState(false);
   const [editable] = useState(route.params.status == -1);
   const [advanceCardStatus, setAdvanceCardStatus] = useState(false);
+  const [jsonAdvanceData, setJsonAdvanceData] = useState({
+    advance: [],
+    ccbs: [],
+  });
   const [travelAdvanceData, setTravelAdvanceData] = useState({
     travelNo: route.params.travelNo,
     reqDate: route.params.reqDate,
@@ -51,7 +57,7 @@ export default function AdvanceCreationScreen({ route }) {
     advanceData: [],
   });
 
-  console.log("Travel Advance :>> " + JSON.stringify(travelAdvanceData));
+  //  console.log("Travel Advance :>> " + JSON.stringify(travelAdvanceData));
 
   useLayoutEffect(() => {
     LogBox.ignoreLogs([
@@ -73,6 +79,15 @@ export default function AdvanceCreationScreen({ route }) {
 
   function inputChangedHandler(inputIdentifier, enteredValue) {
     setTravelAdvanceData((currentInputValues) => {
+      return {
+        ...currentInputValues,
+        [inputIdentifier]: enteredValue,
+      };
+    });
+  }
+
+  function jsonChangedHandler(inputIdentifier, enteredValue) {
+    setJsonAdvanceData((currentInputValues) => {
       return {
         ...currentInputValues,
         [inputIdentifier]: enteredValue,
@@ -130,7 +145,7 @@ export default function AdvanceCreationScreen({ route }) {
         },
       });
       let json = await response.json();
-      console.log("Travel Advance Data :>> " + JSON.stringify(json));
+      //     console.log("Travel Advance Data :>> " + JSON.stringify(json));
     } catch (error) {
       console.error("Error :>> " + error);
     }
@@ -162,12 +177,65 @@ export default function AdvanceCreationScreen({ route }) {
     ]);
   }
 
-  async function AdvanceCreation() {
+  function AdvanceClaimValidation() {
+    if (travelAdvanceData.approverBranch == "") {
+      ToastMessage("Choose approver branch", null, "error");
+      return;
+    }
+
+    if (travelAdvanceData.approverName == "") {
+      ToastMessage("Choose approver name", null, "error");
+      return;
+    }
+
+    if (travelAdvanceData.advanceData.length == 0) {
+      ToastMessage("Create advance", null, "error");
+      return;
+    }
+
+    ccbsClaimDataArray = [];
     //  setProgressBar(true);
+    const pos = travelAdvanceData.advanceData.length - 1;
+    const advanceClaimObj = {
+      tourgid: parseInt(travelAdvanceData.travelNo),
+      //  id: parseInt(travelAdvanceData.advanceData[pos].id),
+      remarks: travelAdvanceData.comments,
+      reason: travelAdvanceData.advanceData[pos].reason,
+      appamount: null,
+      reqamount: parseInt(travelAdvanceData.advanceData[pos].reqAmount),
+      approval: travelAdvanceData.approverId,
+    };
+    jsonChangedHandler("advance", [advanceClaimObj]);
+
+    for (
+      let i = 0;
+      i < travelAdvanceData.advanceData[pos].ccbsData.length;
+      i++
+    ) {
+      const ccbsClaimData = {
+        tourgid: parseInt(travelAdvanceData.travelNo),
+        ccid: parseInt(travelAdvanceData.advanceData[pos].ccbsData[i].ccId),
+        bsid: parseInt(travelAdvanceData.advanceData[pos].ccbsData[i].bsId),
+        amount: parseInt(travelAdvanceData.advanceData[pos].ccbsData[i].amount),
+        percentage: parseFloat(
+          travelAdvanceData.advanceData[pos].ccbsData[i].percentage
+        ),
+      };
+      ccbsClaimDataArray.push(ccbsClaimData);
+    }
+    jsonChangedHandler("ccbs", ccbsClaimDataArray);
+    ccbsClaimDataArray = [];
+
+    console.log("Claim Advance Data :>> " + JSON.stringify(jsonAdvanceData));
+
+    ClaimAdvance(jsonAdvanceData);
+  }
+
+  async function ClaimAdvance(jsonAdvanceData) {
     try {
-      const response = await fetch(URL.TRAVEL_CREATION, {
+      const response = await fetch(URL.TRAVEL_ADVANCE_SUMMARY, {
         method: "POST",
-        body: advanceObj,
+        body: JSON.stringify(jsonAdvanceData),
         headers: {
           "Content-type": "application/json",
           Authorization: authCtx.auth_token,
@@ -176,7 +244,7 @@ export default function AdvanceCreationScreen({ route }) {
 
       let json = await response.json();
 
-      console.log("Response :>> " + JSON.stringify(json));
+      console.log("json :>> " + JSON.stringify(json));
 
       if ("detail" in json) {
         if (json.detail == "Invalid token.") {
@@ -186,11 +254,14 @@ export default function AdvanceCreationScreen({ route }) {
       }
 
       if (json) {
-        setProgressBar(false);
+        //  setProgressBar(false);
         if (json.message) {
-          ToastMessage(json.message);
+          ToastMessage(json.message, null, "");
+          navigation.goBack();
+          navigation.goBack();
+          navigation.navigate("Maker Summary")
         } else {
-          Alert.alert(json.description);
+          ToastMessage(json.description, null, "error");
         }
       }
     } catch (error) {
@@ -314,7 +385,10 @@ export default function AdvanceCreationScreen({ route }) {
                     Alert.alert("Choose Approver");
                     return;
                   } else {
-                    navigation.navigate("CCBS", { ccbsData: null, approver: travelAdvanceData.approverName});
+                    navigation.navigate("CCBS", {
+                      ccbsData: null,
+                      approver: travelAdvanceData.approverName,
+                    });
                     //  setAdvanceMakeDialogStatus(true);
                   }
                 }}
@@ -350,7 +424,9 @@ export default function AdvanceCreationScreen({ route }) {
       </View>
       <View style={{ paddingBottom: 10 }}>
         {editable && (
-          <SubmitButton onPressEvent={() => {}}>Claim Advance</SubmitButton>
+          <SubmitButton onPressEvent={AdvanceClaimValidation}>
+            Claim Advance
+          </SubmitButton>
         )}
       </View>
     </View>

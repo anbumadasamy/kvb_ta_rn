@@ -2,8 +2,8 @@ import * as React from "react";
 import { useLayoutEffect, useContext, useState } from "react";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { useNavigation } from "@react-navigation/native";
-import TravelApprovelSummaryScreen from "./TravelApprovelSummaryScreen";
-import AdvanceApprovelSummaryScreen from "./AdvanceApprovelSummaryScreen";
+import TravelCancelApprovelSummaryScreen from "./TravelCancelMakerSummaryScreen";
+import AdvanceCancelApprovelSummaryScreen from "./AdvanceCancelMakerSummaryScreen";
 import { AuthContext } from "../../data/Auth-Context";
 import { MaterialIcons } from "@expo/vector-icons";
 import { onOpen } from "react-native-actions-sheet-picker";
@@ -32,7 +32,7 @@ function MemberTabs({
         name="Travel Approvel Summary"
         children={() => {
           return (
-            <TravelApprovelSummaryScreen
+            <TravelCancelApprovelSummaryScreen
               travelDialogStatus={travelDialogStatus}
               setTravelDialogStatus={setTravelDialogStatus}
               onBehalfDialogStatus={onBehalfDialogStatus}
@@ -46,7 +46,7 @@ function MemberTabs({
         name="Advance Approvel Summary"
         children={() => {
           return (
-            <AdvanceApprovelSummaryScreen
+            <AdvanceCancelApprovelSummaryScreen
               advanceDialogStatus={advanceDialogStatus}
               setAdvanceDialogStatus={setAdvanceDialogStatus}
             />
@@ -57,7 +57,7 @@ function MemberTabs({
     </Tab.Navigator>
   );
 }
-export default function MemberTravelApprovalScreen() {
+export default function CancelMakerTabScreen() {
   const authCtx = useContext(AuthContext);
   const navigation = useNavigation();
 

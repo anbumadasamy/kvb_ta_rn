@@ -1,13 +1,3 @@
-/* const USER_SERVER = "http://143.110.244.51:8185/usrserv/";
-const TA_SERVER = "http://143.110.244.51:8185/taserv/";
-const MASTER_SERVER = "http://143.110.244.51:8185/mstserv/";
-const ECF_SERVER = "http://143.110.244.51:8185/ecfserv/"; */
-
-/* const USER_SERVER = "http://192.168.4.68:8000/usrserv/";
-const TA_SERVER = "http://192.168.4.68:8000/taserv/";
-const MASTER_SERVER = "http://192.168.4.68:8000/mstserv/";
-const ECF_SERVER = "http://192.168.4.68:8000/ecfserv/"; */
-
 //KVB
 const USER_SERVER = "http://143.110.244.51:8184/usrserv/";
 const TA_SERVER = "http://143.110.244.51:8184/taserv/";
@@ -19,8 +9,10 @@ export const URL = {
   LOGOUT_URL: USER_SERVER + "logout",
   ENTITY_LIST: USER_SERVER + "entity",
   CLAIM_MAKER_SUMMARY: TA_SERVER + "expense_summary",
-  // APPROVAL_SUMMARY: TA_SERVER + "nac_tourapprove/claim",
   APPROVAL_SUMMARY: TA_SERVER + "tourapprove/claim",
+  APPROVAL_SUMMARY_API: TA_SERVER + "tourapprove/",
+  MAKER_TRAVEL_CANCEL_SUMMARY: TA_SERVER + "cancelled_data?type=",
+  ADVANCE_APPROVAL_SUMMARY: TA_SERVER + "tourapprove/advance?",
   COMMON_DROPDOWN: TA_SERVER + "common_dropdown_get/",
   ONGOING_TOUR_SUMMARY: TA_SERVER + "ongoing_tour",
   TRAVEL_MAKER_SUMMARY: TA_SERVER + "tourdata",
@@ -39,7 +31,7 @@ export const URL = {
   DOCUMENT_DELETE: TA_SERVER + "particular_doc_get/",
   HOLIDAY_CHECK: TA_SERVER + "holiday_check?",
   // ON_BEHALF_OF_EMPLOYEE_GET: TA_SERVER + "nac_onbehalf_emp_get?query=",
-   ON_BEHALF_OF_EMPLOYEE_GET: TA_SERVER + "onbehalf_emp_get",
+  ON_BEHALF_OF_EMPLOYEE_GET: TA_SERVER + "onbehalf_emp_get",
 
   ON_BEHALF_OF_EMPLOYEE_DETAIL: TA_SERVER + "emp_details_get?onbehalf=",
   SKIP_APPROVER: TA_SERVER + "rm_skip/",
@@ -48,7 +40,7 @@ export const URL = {
   DATE_RELAXATION_SUMMARY: TA_SERVER + "date_relaxation?page=",
   SWITCH_DATE_RELAXATION: TA_SERVER + "date_relaxation",
 
-  TRAVEL_APPROVEL_SUMMARY: TA_SERVER + "nac_tourapprove/tour?",
+  TRAVEL_APPROVEL_SUMMARY: TA_SERVER + "tourapprove/tour?",
   CCBS_GET: TA_SERVER + "ccbs_get?",
 
   EMPLOYEE_BASE_LOCATION: TA_SERVER + "employee_base_get",
@@ -65,7 +57,7 @@ export const URL = {
   LOCAL_CONVEYANCE: TA_SERVER + "localconv",
   LODGING: TA_SERVER + "lodging",
   INCIDENTIAL: TA_SERVER + "incidental",
-  MISC:TA_SERVER + "misc",
+  MISC: TA_SERVER + "misc",
 
   TRAVELING_EXPENSES: TA_SERVER + "travel",
   ASSOCIATED_EXPENSES: TA_SERVER + "associate",
@@ -80,13 +72,11 @@ export const URL = {
   LODGING_ElIGIBLE: TA_SERVER + "lodging/logic",
   INCIDENTIAL_ElIGIBLE: TA_SERVER + "incidental/logic",
 
-
-  TRAVEL_APPROVEL_SUMMARY: TA_SERVER + "nac_tourapprove/tour?",
+  TRAVEL_APPROVEL_SUMMARY: TA_SERVER + "tourapprove/tour?",
   APPROVAL_FLOW_SUMMARY: TA_SERVER + "approval_flow_get?type=all&tourid=",
 
-
   // on behalf of api
-  ON_BEHALF_OF_SUMMARY: TA_SERVER + "nac_tourdata?onbehalf=",
+  ON_BEHALF_OF_SUMMARY: TA_SERVER + "tourdata?onbehalf=",
 
   // chat api
   SEND_CHAT: TA_SERVER + "chat_box",
@@ -110,17 +100,14 @@ export const URL = {
   REQUIREMENT_USER_CANCEL: TA_SERVER + "cancel_booking_request?booking_type=",
 
   TOUR_GRADE: TA_SERVER + "tourno_grade_get/",
-  DAILY_DIEM_CITY:TA_SERVER+"allowance?city=",
-  HSN:MASTER_SERVER+"search_hsn?query=",
-  GST:USER_SERVER+"bank_gst_get?gst=",
+  DAILY_DIEM_CITY: TA_SERVER + "allowance?city=",
+  HSN: MASTER_SERVER + "search_hsn?query=",
+  GST: USER_SERVER + "bank_gst_get?gst=",
 
   //New
-  
 
   // kvb travel creation
   PERMITTED_BY_EMP_LIST: USER_SERVER + "branchwise_employee_get/0?maker=",
   APPROVER_BRANCH_LIST: USER_SERVER + "search_employeebranch",
   APPROVER_EMP_LIST: TA_SERVER + "branch_approver_get/tour/branch/",
-
-
 };

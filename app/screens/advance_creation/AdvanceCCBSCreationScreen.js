@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { View, StyleSheet, Alert, Text } from "react-native";
 import { CustomColors } from "../../utilities/CustomColors";
+import ToastMessage from "../../components/toast/ToastMessage";
 
 export default function AdvanceCCBSCreationScreen({ route }) {
   const [editable] = useState(true);
@@ -29,14 +30,14 @@ export default function AdvanceCCBSCreationScreen({ route }) {
     balanceAmount: route.params.balanceAmount,
   });
 
-  console.log(
+  /* console.log(
     "Balance Amount in creation screen :>> " +
       JSON.stringify(ccbsData.balanceAmount)
   );
   console.log(
     "Total Amount in creation screen :>> " +
       JSON.stringify(ccbsData.totalAmount)
-  );
+  ); */
 
   function inputChangedHandler(inputIdentifier, enteredValue) {
     setCcbsData((currentInputValues) => {
@@ -129,17 +130,21 @@ export default function AdvanceCCBSCreationScreen({ route }) {
           keyboard={"numeric"}
           editable={editable ? true : false}
           onChangeEvent={(value) => {
-            inputChangedHandler("amount", value);
-            if (value.toString().length > 0) {
-              inputChangedHandler(
-                "percentage",
-                (
-                  (parseFloat(value) * 100) /
-                  parseFloat(ccbsData.totalAmount)
-                ).toString()
-              );
+            if (value <= ccbsData.totalAmount) {
+              inputChangedHandler("amount", value);
+              if (value.toString().length > 0) {
+                inputChangedHandler(
+                  "percentage",
+                  (
+                    (parseFloat(value) * 100) /
+                    parseFloat(ccbsData.totalAmount)
+                  ).toString()
+                );
+              } else {
+                inputChangedHandler("percentage", "");
+              }
             } else {
-              inputChangedHandler("percentage", "");
+              ToastMessage("Check amount", null, "error");
             }
           }}
         />
@@ -150,17 +155,21 @@ export default function AdvanceCCBSCreationScreen({ route }) {
           keyboard={"numeric"}
           editable={editable ? true : false}
           onChangeEvent={(value) => {
-            inputChangedHandler("percentage", value);
-            if (value.toString().length > 0) {
-              inputChangedHandler(
-                "amount",
-                (
-                  (parseFloat(ccbsData.totalAmount) * parseFloat(value)) /
-                  100
-                ).toString()
-              );
+            if (value <= 100) {
+              inputChangedHandler("percentage", value);
+              if (value.toString().length > 0) {
+                inputChangedHandler(
+                  "amount",
+                  (
+                    (parseFloat(ccbsData.totalAmount) * parseFloat(value)) /
+                    100
+                  ).toString()
+                );
+              } else {
+                inputChangedHandler("amount", "");
+              }
             } else {
-              inputChangedHandler("amount", "");
+              ToastMessage("Check precentage", null, "error");
             }
           }}
         />

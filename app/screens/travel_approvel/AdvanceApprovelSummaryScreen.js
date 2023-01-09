@@ -1,25 +1,27 @@
 import { useEffect, useState, useContext } from "react";
-import { useIsFocused } from "@react-navigation/native";
-import { View, StyleSheet, Text, Image, LogBox } from "react-native";
+import { useNavigation, useIsFocused } from "@react-navigation/native";
+import { View, StyleSheet, Text, Image } from "react-native";
 import SearchFilterDialog from "../../components/dialog/SearchFilterDialog";
 import { Picker } from "react-native-actions-sheet-picker";
-import TravelSummaryCard from "../../components/cards/TravelSummaryCard";
+import TravelApprovelSummaryCard from "../../components/cards/TravelApprovelSummaryCard";
+import AlertCredentialError from "../../components/toast/AlertCredentialError";
 import moment from "moment";
 import { URL } from "../../utilities/UrlBase";
 import { CustomColors } from "../../utilities/CustomColors";
-import AlertCredentialError from "../../components/toast/AlertCredentialError";
 import { AuthContext } from "../../data/Auth-Context";
 
 let first = false;
-let travelCancelSummaryArray = [];
+let travelAdvanceApprovelSummaryArray = [];
 
-export default function MakerCancelSummaryScreen({
-  cancelDialogStatus,
-  setCancelDialogStatus,
+export default function AdvanceApprovelSummaryScreen({
+  advanceDialogStatus,
+  setAdvanceDialogStatus,
 }) {
   const authCtx = useContext(AuthContext);
+  const navigation = useNavigation();
   const isFocused = useIsFocused();
-  const [travelCancelSummary, setTravelCancelSummary] = useState([]);
+  const [travelAdvanceApprovelSummary, setTravelAdvanceApprovelSummary] =
+    useState([]);
   const [filterStatus, setFilterStatus] = useState(2);
   const [pagination, setPagination] = useState(true);
   const [progressBar, setProgressBar] = useState(true);
@@ -28,25 +30,19 @@ export default function MakerCancelSummaryScreen({
   const [travelNo, setTravelNo] = useState("");
   const [reqDate, setReqDate] = useState("");
   const [jsonDate, setJsonDate] = useState("");
-  const [status, setStatus] = useState("Pending List");
+  const [status, setStatus] = useState("Pennding List");
   const [filStatus, setFilstatus] = useState(1);
 
   useEffect(() => {
     if (pagination) {
-      travelCancelSummaryArray = [];
-      GetCancelSummary();
+      travelAdvanceApprovelSummaryArray = [];
+      getApprovelSummary();
     }
   }, [filStatus, pageNo]);
 
   useEffect(() => {
-    LogBox.ignoreLogs([
-      "value provided is not in a recognized RFC2822 or ISO format.",
-    ]);
-  });
-
-  useEffect(() => {
     if (isFocused) {
-      authCtx.SetMakerSummaryType("CANCEL_SUMMARY");
+      authCtx.SetMemberType("CANCEL_APPROVEL");
     }
   }, [isFocused]);
 
@@ -58,12 +54,16 @@ export default function MakerCancelSummaryScreen({
 
   if (first) {
     first = false;
-    travelCancelSummaryArray = [];
+    travelAdvanceApprovelSummaryArray = [];
   } else {
     first = true;
   }
 
   const filterList = [
+    {
+      id: 1,
+      name: "Search by Travel No or Date",
+    },
     {
       id: 3,
       name: "Approved List",
@@ -84,22 +84,20 @@ export default function MakerCancelSummaryScreen({
     setJsonDate(moment(selectedDate).format("DD-MMM-YYYY"));
   };
 
-  async function GetCancelSummary() {
+  async function getApprovelSummary(from) {
     let url;
 
     if (jsonDate == "" && travelNo == "") {
       url =
-        URL.TRAVEL_MAKER_SUMMARY +
-        "?apptype=TourCancel" +
-        "&status=" +
+        URL.ADVANCE_APPROVAL_SUMMARY +
+        "status=" +
         filterStatus +
         "&page=" +
         pageNo;
     } else if (jsonDate != "" && travelNo == "") {
       url =
-        URL.TRAVEL_MAKER_SUMMARY +
-        "?apptype=TourCancel" +
-        "&page=" +
+        URL.ADVANCE_APPROVAL_SUMMARY +
+        "page=" +
         pageNo +
         "&status=" +
         filterStatus +
@@ -107,9 +105,8 @@ export default function MakerCancelSummaryScreen({
         jsonDate;
     } else if (travelNo != "" && jsonDate == "") {
       url =
-        URL.TRAVEL_MAKER_SUMMARY +
-        "?apptype=TourCancel" +
-        "&page=" +
+        URL.ADVANCE_APPROVAL_SUMMARY +
+        "page=" +
         pageNo +
         "&status=" +
         filterStatus +
@@ -117,9 +114,8 @@ export default function MakerCancelSummaryScreen({
         travelNo;
     } else if (jsonDate != "" && travelNo != "") {
       url =
-        URL.TRAVEL_MAKER_SUMMARY +
-        "?apptype=TourCancel" +
-        "&page=" +
+        URL.ADVANCE_APPROVAL_SUMMARY +
+        "page=" +
         pageNo +
         "&status=" +
         filterStatus +
@@ -128,8 +124,6 @@ export default function MakerCancelSummaryScreen({
         "&request_date=" +
         jsonDate;
     }
-
-    console.log("url :>> " + JSON.stringify(url));
 
     try {
       const response = await fetch(url, {
@@ -155,25 +149,30 @@ export default function MakerCancelSummaryScreen({
 
       for (let i = 0; i < json.data.length; i++) {
         const obj = {
-          id: json.data[i].id,
-          requestdate: moment(json.data[i].requestdate).format("DD-MM-YYYY"),
-          startdate: moment(json.data[i].startdate).format("DD-MM-YYYY"),
-          enddate: moment(json.data[i].enddate).format("DD-MM-YYYY"),
-          approvedby: json.data[i].approver_data.name,
-          reason: json.data[i].reason,
+          id: json.data[i].tourid,
+          appGid: json.data[i].id,
+          raiserName: json.data[i].employee_name,
+          desigination: json.data[i].empdesignation,
+          requestDate: moment(json.data[i].requestdate_ms).format("DD-MM-YYYY"),
           travelStatus: json.data[i].tour_status,
-          travelStatusId: json.data[i].tour_status_id,
-          tourCancelStatus: json.data[i].tour_cancel_status,
+          tourStatusId: json.data[i].tour_status_id,
           tourCancelStatusId: json.data[i].tour_cancel_status_id,
-          isTourEnded: json.data[i].is_tour_ended,
+          reason: json.data[i].reason,
         };
-        travelCancelSummaryArray.push(obj);
+        travelAdvanceApprovelSummaryArray.push(obj);
       }
-      setTravelCancelSummary([
-        ...travelCancelSummary,
-        ...travelCancelSummaryArray,
+
+      setTravelAdvanceApprovelSummary([
+        ...travelAdvanceApprovelSummary,
+        ...travelAdvanceApprovelSummaryArray,
       ]);
       setProgressBar(false);
+      if (from == "search_filter") {
+        setFilter(!filter);
+        setTravelNo("");
+        setReqDate("");
+        setJsonDate("");
+      }
     } catch (error) {
       console.error(error);
     }
@@ -203,11 +202,11 @@ export default function MakerCancelSummaryScreen({
             <View style={styles.statusContainer}>
               <Text style={styles.statusText}>{status}</Text>
             </View>
-            {travelCancelSummary.length > 0 ? (
+            {travelAdvanceApprovelSummary.length > 0 ? (
               <View>
-                <TravelSummaryCard
-                  data={travelCancelSummary}
-                  from="travel_cancel_summary"
+                <TravelApprovelSummaryCard
+                  data={travelAdvanceApprovelSummary}
+                  from="cancel_approvel"
                   scroll={() => {
                     setPageNo(pageNo + 1);
                   }}
@@ -220,14 +219,14 @@ export default function MakerCancelSummaryScreen({
         )}
 
         <Picker
-          id="cancelSummaryFilter"
+          id="memberCancelApprovelFilter"
           data={filterList}
           searchable={false}
           label="Which list you want ?"
           setSelected={(value) => {
             setPagination(true);
             setProgressBar(true);
-            setTravelCancelSummary([]);
+            setTravelAdvanceApprovelSummary([]);
             setFilterStatus(value.id);
             setStatus(value.name);
             setFilstatus(
@@ -240,18 +239,18 @@ export default function MakerCancelSummaryScreen({
             setPageNo(1);
           }}
         />
-        {cancelDialogStatus && (
+        {advanceDialogStatus && (
           <SearchFilterDialog
             Clear={Clear}
-            dialogStatus={cancelDialogStatus}
+            dialogStatus={advanceDialogStatus}
             close={() => {
-              setCancelDialogStatus(!cancelDialogStatus);
+              setAdvanceDialogStatus(!advanceDialogStatus);
             }}
             confirmFilter={() => {
-              setTravelCancelSummary([]);
+              setTravelAdvanceApprovelSummary([]);
               setPageNo(1);
-              setPagination(true);
               setProgressBar(true);
+              setPagination(true);
               setFilstatus(
                 Math.floor(Math.random() * 100) +
                   1 +
@@ -259,7 +258,7 @@ export default function MakerCancelSummaryScreen({
                   Math.floor(Math.random() * 100) +
                   1
               );
-              setCancelDialogStatus(!cancelDialogStatus);
+              setAdvanceDialogStatus(!advanceDialogStatus);
             }}
             travelNo={travelNo}
             setTravelNo={setTravelNo}
@@ -293,7 +292,6 @@ const styles = StyleSheet.create({
   statusContainer: {
     marginBottom: 8,
     marginLeft: 5,
-    width: "28%",
     alignContent: "center",
     borderRadius: 5,
   },
