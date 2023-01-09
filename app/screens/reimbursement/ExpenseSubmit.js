@@ -38,6 +38,8 @@ export default function ExpenseSubmit({ route }) {
   const [tourexpensebutton, settourexpensebutton] = useState(true);
   let previous;
 
+  console.log(JSON.stringify(route)+" Route Data")
+
   useEffect(() => {
     if ("previous" in route.params) {
       if (route.params.previous == true) {
