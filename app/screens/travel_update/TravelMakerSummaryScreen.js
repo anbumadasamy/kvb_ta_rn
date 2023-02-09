@@ -17,7 +17,7 @@ import { CustomColors } from "../../utilities/CustomColors";
 import ToastMessage from "../../components/toast/ToastMessage";
 import AlertCredentialError from "../../components/toast/AlertCredentialError";
 import { Picker } from "react-native-actions-sheet-picker";
-import ApprovelReasonDialog from "../../components/dialog/ApprovelReasonDialog";
+import ApproverSelectDialog from "../../components/dialog/ApproverSelectDialog";
 import moment from "moment";
 
 let makerSummaryArray = [];
@@ -33,8 +33,7 @@ export default function TravelMakerSummaryScreen({
   const [filterStatus, setFilterStatus] = useState(2);
   const [progressBar, setProgressBar] = useState(true);
   const [pagination, setPagination] = useState(true);
-  const [reasonDialogStatus, setReasonDialogStatus] = useState(false);
-  const [reason, setReason] = useState();
+  const [reason, setReason] = useState("");
   const [pickerStatus, setPickerStatus] = useState(false);
   const [pageNo, setPageNo] = useState(1);
   const [travelNo, setTravelNo] = useState("");
@@ -42,6 +41,12 @@ export default function TravelMakerSummaryScreen({
   const [jsonDate, setJsonDate] = useState("");
   const [status, setStatus] = useState("Pennding List");
   const [filStatus, setFilstatus] = useState(1);
+  const [approverSelectDialogStatus, setApproverSelectDialogStatus] =
+    useState(false);
+  const [forwardApproverBranch, setForwardApproverBranch] = useState(null);
+  const [forwardApproverName, setForwardApproverName] = useState(null);
+  const [forwardApproverId, setForwardApproverId] = useState(null);
+  const [forwardApproverBranchId, setForwardApproverBranchId] = useState(null);
 
   useEffect(() => {
     if (isFocused) {
@@ -84,6 +89,63 @@ export default function TravelMakerSummaryScreen({
       name: "Rejected List",
     },
   ];
+
+  async function CancelAction(appGid) {
+    console.log(forwardApproverBranch);
+    console.log(forwardApproverBranchId);
+    console.log(forwardApproverName);
+    console.log(forwardApproverId);
+
+    setProgressBar(true);
+    let data;
+
+    data = {
+      tour_id: appGid,
+      appcomment: reason,
+      apptype: "TourCancel",
+      approval: forwardApproverId,
+    };
+
+    try {
+      const response = await fetch(URL.TRAVEL_FORWARD, {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-type": "application/json",
+          Authorization: authCtx.auth_token,
+        },
+      });
+
+      let json = await response.json();
+
+      // console.log("Forward Data :>> " + JSON.stringify(json));
+
+      if ("detail" in json) {
+        if (json.detail == "Invalid credentials/token.") {
+          AlertCredentialError(json.detail, navigation);
+        }
+      }
+
+      if (json) {
+        setProgressBar(false);
+        if (json.message) {
+          setForwardApproverBranch(null);
+          setForwardApproverBranchId(null);
+          setForwardApproverName(null);
+          setForwardApproverId(null);
+          setReason("");
+          ToastMessage(json.message);
+          navigation.goBack();
+          navigation.navigate("Checker Summary");
+        } else {
+          Alert.alert(json.description);
+        }
+      }
+    } catch (error) {
+      setProgressBar(false);
+      console.error(error);
+    }
+  }
 
   function Clear() {
     setTravelNo("");
@@ -214,15 +276,14 @@ export default function TravelMakerSummaryScreen({
     }
   }
 
-  async function CancelRequest(cancelReason, cancelTravelId) {
+  async function CancelRequest(cancelTravelId) {
     try {
       const response = await fetch(URL.TRAVEL_CANCEL_REQUEST, {
         method: "POST",
         body: JSON.stringify({
-          appcomment: cancelReason,
-          approval: 6,
+          appcomment: reason,
           apptype: "TourCancel",
-          status: 1,
+          approval: forwardApproverId,
           tour_id: cancelTravelId,
         }),
         headers: {
@@ -242,9 +303,12 @@ export default function TravelMakerSummaryScreen({
       if (json) {
         if (json.message) {
           ToastMessage(json.message);
+          setForwardApproverBranch(null);
+          setForwardApproverBranchId(null);
+          setForwardApproverName(null);
+          setForwardApproverId(null);
           setTravelNo("");
           setReason("");
-          navigation.goBack();
           navigation.goBack();
           navigation.navigate("Maker Summary");
         } else if (json.description) {
@@ -292,23 +356,9 @@ export default function TravelMakerSummaryScreen({
                   from="travel_maker_summary"
                   travelCancelRequest={(value) => {
                     setTravelNo(value);
-                    setReasonDialogStatus(!reasonDialogStatus);
+                    setApproverSelectDialogStatus(true);
                   }}
                 />
-                {reasonDialogStatus && (
-                  <ApprovelReasonDialog
-                    dialogStatus={reasonDialogStatus}
-                    setDialogStatus={setReasonDialogStatus}
-                    tittle=""
-                    setValue={setReason}
-                    buttontext="Cancel"
-                    value={reason}
-                    from="cancel"
-                    onPressEvent={() => {
-                      CancelRequest(reason, travelNo);
-                    }}
-                  ></ApprovelReasonDialog>
-                )}
               </View>
             ) : (
               <Text style={styles.noDataFoundText}>No data found</Text>
@@ -338,6 +388,26 @@ export default function TravelMakerSummaryScreen({
             setPageNo(1);
           }}
         />
+        {approverSelectDialogStatus && (
+          <ApproverSelectDialog
+            dialogStatus={approverSelectDialogStatus}
+            setDialogStatus={setApproverSelectDialogStatus}
+            title=""
+            forwardApproverBranch={forwardApproverBranch}
+            forwardApproverBranchId={forwardApproverBranchId}
+            forwardApproverName={forwardApproverName}
+            setForwardApproverBranch={setForwardApproverBranch}
+            setForwardApproverBranchId={setForwardApproverBranchId}
+            setForwardApproverName={setForwardApproverName}
+            setForwardApproverId={setForwardApproverId}
+            remarks={reason}
+            setRemarks={setReason}
+            buttontext="Confirm"
+            onPressEvent={() => {
+              CancelRequest(travelNo);
+            }}
+          />
+        )}
         {travelDialogStatus && (
           <SearchFilterDialog
             Clear={Clear}

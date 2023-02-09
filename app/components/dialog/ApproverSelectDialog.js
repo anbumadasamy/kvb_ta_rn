@@ -1,7 +1,15 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import { CustomColors } from "../../utilities/CustomColors";
-import { View, StyleSheet, Text, Modal, Pressable } from "react-native";
+import SearchDialog from "./SearchDialog";
+import {
+  View,
+  StyleSheet,
+  Text,
+  Modal,
+  Pressable,
+  TextInput,
+} from "react-native";
 
 export default function ApproverSelectDialog({
   dialogStatus,
@@ -9,20 +17,25 @@ export default function ApproverSelectDialog({
   title,
   onPressEvent,
   buttontext,
+  forwardApproverBranch,
+  forwardApproverBranchId,
+  forwardApproverName,
+  setForwardApproverBranch,
+  setForwardApproverBranchId,
+  setForwardApproverName,
+  setForwardApproverId,
+  remarks,
+  setRemarks,
 }) {
   const [isModalVisible, setModalVisible] = useState(dialogStatus);
+
+  const [branchDialogStatus, setBranchDialogStatus] = useState(false);
+  const [empDialogStatus, setEmpDialogStatus] = useState(false);
 
   const toggleModalVisibility = () => {
     setModalVisible(!isModalVisible);
     setDialogStatus(!dialogStatus);
   };
-
-  function onPressBranchEvent() {
-    console.log("Branch.......");
-  }
-  function onPressEmpEvent() {
-    console.log("Employee.......");
-  }
 
   return (
     <View style={styles.screen}>
@@ -31,7 +44,14 @@ export default function ApproverSelectDialog({
         transparent
         visible={isModalVisible}
         presentationStyle="overFullScreen"
-        onDismiss={toggleModalVisibility}
+        onDismiss={() => {
+          toggleModalVisibility();
+          setForwardApproverBranch(null);
+          setForwardApproverBranchId(null);
+          setForwardApproverName(null);
+          setForwardApproverId(null);
+          setRemarks("");
+        }}
       >
         <View style={styles.viewWrapper}>
           <View style={styles.modalView}>
@@ -50,27 +70,52 @@ export default function ApproverSelectDialog({
                 name={"close"}
                 size={24}
                 color="#FFBB4F"
-                onPress={toggleModalVisibility}
+                onPress={() => {
+                  toggleModalVisibility();
+                  setForwardApproverBranch(null);
+                  setForwardApproverBranchId(null);
+                  setForwardApproverName(null);
+                  setForwardApproverId(null);
+                  setRemarks("");
+                }}
               />
             </View>
 
-            <Pressable style={styles.pressable} onPress={onPressBranchEvent}>
-              {fAppBranch ? (
-                <Text style={styles.text}>{fAppBranch}</Text>
+            <Pressable
+              style={styles.pressable}
+              onPress={() => {
+                setBranchDialogStatus(true);
+              }}
+            >
+              {forwardApproverBranch ? (
+                <Text style={styles.text}>{forwardApproverBranch}</Text>
               ) : (
                 <Text style={styles.textHint}>Choose Approver Branch</Text>
               )}
               <MaterialIcons name="arrow-drop-down" size={24} color="#A2A2A2" />
             </Pressable>
 
-            <Pressable style={styles.pressable} onPress={onPressEmpEvent}>
-              {fAppName ? (
-                <Text style={styles.text}>{fAppName}</Text>
+            <Pressable
+              style={styles.pressable}
+              onPress={() => {
+                setEmpDialogStatus(true);
+              }}
+            >
+              {forwardApproverName ? (
+                <Text style={styles.text}>{forwardApproverName}</Text>
               ) : (
                 <Text style={styles.textHint}>Choose Approver Name</Text>
               )}
               <MaterialIcons name="arrow-drop-down" size={24} color="#A2A2A2" />
             </Pressable>
+
+            <TextInput
+              placeholder="Reason"
+              value={remarks}
+              placeholderTextColor={CustomColors.primary_gray}
+              style={styles.textInput}
+              onChangeText={setRemarks}
+            />
 
             <Pressable
               style={({ pressed }) =>
@@ -86,16 +131,43 @@ export default function ApproverSelectDialog({
           </View>
         </View>
       </Modal>
+      {branchDialogStatus && (
+        <SearchDialog
+          dialogstatus={branchDialogStatus}
+          setdialogstatus={setBranchDialogStatus}
+          from="approver_branch"
+          setValue={(value) => {
+            setForwardApproverBranch(value);
+          }}
+          setId={(id) => {
+            setForwardApproverBranchId(id);
+          }}
+        />
+      )}
+      {empDialogStatus && (
+        <SearchDialog
+          dialogstatus={empDialogStatus}
+          setdialogstatus={setEmpDialogStatus}
+          branchId={forwardApproverBranchId}
+          from="approver_name"
+          setValue={(value) => {
+            setForwardApproverName(value);
+          }}
+          setId={(id) => {
+            setForwardApproverId(id);
+          }}
+        />
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   screen: {
-    flex: 1,
+    //  flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#fff",
+    //   backgroundColor: "#fff",
   },
   viewWrapper: {
     flex: 1,
@@ -109,7 +181,7 @@ const styles = StyleSheet.create({
     left: "10%",
     right: "10%",
     elevation: 5,
-    backgroundColor: "#fff",
+    backgroundColor: "#ffffff",
     borderRadius: 7,
   },
   icon: {
@@ -117,17 +189,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 20,
     flexDirection: "row",
-  },
-  textInput: {
-    width: "90%",
-    justifyContent: "center",
-    alignSelf: "center",
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderColor: "rgba(0, 0, 0, 0.2)",
-    borderWidth: 1,
-    borderRadius: 9,
-    marginBottom: 25,
   },
   button: {
     width: "80%",
@@ -162,6 +223,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginHorizontal: 20,
     marginBottom: 20,
+    height: 40,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: CustomColors.primary_gray,
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  textInput: {
+    flexDirection: "row",
+    marginHorizontal: 20,
+    marginBottom: 20,
+    padding: 6,
     height: 40,
     borderRadius: 5,
     borderWidth: 1,

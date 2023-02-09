@@ -37,7 +37,7 @@ export default function OnBehalfOfTravelSummaryCard({ data, scroll, from }) {
               onBehalfOfName: itemData.item.onBehalfOfName,
               onBehalfOfId: itemData.item.onBehalfOfId,
               onBehalfOfDesigination: itemData.item.onBehalfOfDesigination,
-              summaryFrom: from,
+              from: from,
             });
           } else {
             navigation.navigate("TravelDetailScreen", {

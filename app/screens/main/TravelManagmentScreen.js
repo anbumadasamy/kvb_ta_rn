@@ -132,7 +132,7 @@ export default function TravelManagmentScreen() {
         navigation.navigate("Travel Creation", {
           itineraryDetails: null,
           onBehalfOf: authCtx.travelOnBehalfOf,
-          from: "Travel_Managment",
+          from: "travel_creation",
           status: 101,
         });
         break;

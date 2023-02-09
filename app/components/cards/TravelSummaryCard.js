@@ -32,7 +32,7 @@ export default function TravelSummaryCard({
               itemData.item.travelStatusId == 3 &&
               !itemData.item.isTourEnded
             ) {
-              navigation.navigate("Advance Creation", {
+              navigation.navigate("Advance", {
                 travelNo: itemData.item.id,
                 status: itemData.item.advanceStatusId,
                 statusText: itemData.item.advanceStatus,
@@ -48,7 +48,7 @@ export default function TravelSummaryCard({
               navigation.navigate("Travel Creation", {
                 travelNo: itemData.item.id,
                 status: itemData.item.travelStatusId,
-                summaryFrom: from,
+                from: from,
               });
             }
           }

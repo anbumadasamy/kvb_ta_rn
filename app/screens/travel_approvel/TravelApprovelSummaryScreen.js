@@ -54,7 +54,7 @@ export default function TravelApprovelSummaryScreen({
   }, [self]);
 
   useEffect(() => {
-  //  CeoTeamCheck();
+    //  CeoTeamCheck();
   }, []);
 
   useEffect(() => {
@@ -74,12 +74,16 @@ export default function TravelApprovelSummaryScreen({
     if (onbehalfof) {
       filterList = [
         {
+          id: 2,
+          name: "Pending List",
+        },
+        {
           id: 3,
           name: "Approved List",
         },
         {
-          id: 2,
-          name: "Pending List",
+          id: 6,
+          name: "Forward List",
         },
         {
           id: 5,
@@ -93,12 +97,16 @@ export default function TravelApprovelSummaryScreen({
     } else {
       filterList = [
         {
+          id: 2,
+          name: "Pending List",
+        },
+        {
           id: 3,
           name: "Approved List",
         },
         {
-          id: 2,
-          name: "Pending List",
+          id: 6,
+          name: "Forward List",
         },
         {
           id: 5,

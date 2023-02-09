@@ -61,10 +61,6 @@ export default function AdvanceCancelMakerSummaryScreen({
 
   const filterList = [
     {
-      id: 1,
-      name: "Search by Travel No or Date",
-    },
-    {
       id: 3,
       name: "Approved List",
     },
@@ -89,17 +85,17 @@ export default function AdvanceCancelMakerSummaryScreen({
 
     if (jsonDate == "" && travelNo == "") {
       url =
-        URL.TRAVEL_MAKER_SUMMARY +
-        "/touradvance" +
-        "?status=" +
+        URL.MAKER_TRAVEL_CANCEL_SUMMARY +
+        "AdvanceCancel" +
+        "&status=" +
         filterStatus +
         "&page=" +
         pageNo;
     } else if (jsonDate != "" && travelNo == "") {
       url =
-        URL.TRAVEL_MAKER_SUMMARY +
-        "/touradvance" +
-        "?page=" +
+        URL.MAKER_TRAVEL_CANCEL_SUMMARY +
+        "AdvanceCancel" +
+        "&page=" +
         pageNo +
         "&status=" +
         filterStatus +
@@ -107,9 +103,9 @@ export default function AdvanceCancelMakerSummaryScreen({
         jsonDate;
     } else if (travelNo != "" && jsonDate == "") {
       url =
-        URL.TRAVEL_MAKER_SUMMARY +
-        "/touradvance" +
-        "?page=" +
+        URL.MAKER_TRAVEL_CANCEL_SUMMARY +
+        "AdvanceCancel" +
+        "&page=" +
         pageNo +
         "&status=" +
         filterStatus +
@@ -117,9 +113,9 @@ export default function AdvanceCancelMakerSummaryScreen({
         travelNo;
     } else if (jsonDate != "" && travelNo != "") {
       url =
-        URL.TRAVEL_MAKER_SUMMARY +
-        "/touradvance" +
-        "?page=" +
+        URL.MAKER_TRAVEL_CANCEL_SUMMARY +
+        "AdvanceCancel" +
+        "&page=" +
         pageNo +
         "&status=" +
         filterStatus +

@@ -14,15 +14,15 @@ export default function DocumentBox({
   setDocId,
   setDocName,
   deleteEvent,
-  from,
   pressCamera,
   pressFolder,
+  editable,
 }) {
   return (
     <View style={styles.mainContainer}>
       <View style={styles.headerContainer}>
         <Text style={styles.Text}>Attachments: </Text>
-        {from == "create_update" && (
+        {editable && (
           <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
             <Pressable style={{ marginRight: 20 }} onPress={pressFolder}>
               <Ionicons name="ios-folder" size={24} color="#f1c40f" />

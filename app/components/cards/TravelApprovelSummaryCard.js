@@ -27,7 +27,7 @@ export default function TravelApprovelSummaryCard({ data, scroll, from, onBehalf
             status: itemData.item.tourStatusId,
             tourCancelStatusId: itemData.item.tourCancelStatusId,
             onBehalfOfEmpId: onBehalfOfEmpId ? onBehalfOfEmpId : "",
-            summaryFrom: from,
+            from: from,
           });
         }}
       >
