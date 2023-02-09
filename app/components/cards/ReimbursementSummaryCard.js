@@ -47,6 +47,7 @@ export default function ReimbursementSummaryCard({ data, scroll }) {
               previous: itemData.item.previous,
               from: itemData.item.from,
               empid: itemData.item.empid,
+              onbehalf:itemData.item.onbehalf,
             });
           } else {
             navigation.navigate("MemberApprovalTabScreen", {

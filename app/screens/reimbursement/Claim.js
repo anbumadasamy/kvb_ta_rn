@@ -11,6 +11,7 @@ import { URL } from "../../utilities/UrlBase";
 import { AuthContext } from "../../data/Auth-Context";
 import AlertCredentialError from "../../components/toast/AlertCredentialError";
 import ToastMessage from "../../components/toast/ToastMessage";
+import OnbehalfDialog from "../../components/dialog/Onbehalfof_Dialog";
 
 export default function Claim({
   from,
@@ -31,14 +32,21 @@ export default function Claim({
   const [jsondate, setjsondate] = useState("");
   const [getclaimsummary, setclaimsummary] = useState([]);
   const [filtercall, setfiltercall] = useState(false);
-  const [onbehalfOfName, setOnbehalfOfName] = useState("All");
+  const [onbehalfOfName, setOnbehalfOfName] = useState("");
   const [listname, setlistname] = useState("All");
   const [onbehalfOfId, setOnbehalfOfId] = useState(0);
   const [fromprevious, setfromprevious] = useState(false);
+  const [self, setself] = useState(true);
+  const [onbehalfofemployyeid, setonbehalfofemployeeid] = useState("");
+  const [employyename, setemployeename] = useState("");
+  const [onbehalfofbranchid, setonbehalfofbranchid] = useState("");
+  const [branchname, setbranchname] = useState("");
 
   const authCtx = useContext(AuthContext);
   const isFocused = useIsFocused();
   const navigation = useNavigation();
+
+  console.log(onbehalfofemployyeid+" onbehalfofemployyeid Name")
 
   useEffect(() => {
     if (from == "Expense Submit" || from == "backfromOnbehalf") {
@@ -79,15 +87,29 @@ export default function Claim({
 
   useEffect(() => {
     if (hasnext) {
+      console.log("here Called")
       getclaim();
     }
-  }, [count, getstatus, filtercall, fromprevious, onbehalfOfId]);
+  }, [count, getstatus, filtercall, fromprevious, onbehalfofemployyeid,hasnext]);
 
   function clearmethod() {
     setcount(1);
     setclaimsummary([]);
     setProgressBar(true);
     setHasnext(true);
+  }
+  function onbehalfstatusmethod() {
+    setOnbehalfOfDialogstatus(!onBehalfofDialogstatus);
+    setHasnext(true);
+    setclaimsummary([]);
+    setProgressBar(true);
+    setcount(1);
+  }
+  function closeonbehalfofdialog() {
+    setOnbehalfOfDialogstatus(!onBehalfofDialogstatus);
+    setonbehalfofemployeeid("");
+    setemployeename("");
+    setself(true);
   }
 
   useEffect(() => {
@@ -123,8 +145,10 @@ export default function Claim({
           break;
         case 7:
           setstatus("");
-          setOnbehalfOfId(0);
-          setOnbehalfOfName("All");
+          setOnbehalfOfId("");
+          setOnbehalfOfName("");
+          setonbehalfofbranchid("")
+          setbranchname("");
           break;
         case 8:
           setstatus(5);
@@ -177,7 +201,8 @@ export default function Claim({
     let claimsummaryarray = [];
     let Url;
 
-    if (from == "On Behalf Of" || from == "backfromOnbehalf") {
+    // if (from == "On Behalf Of" || from == "backfromOnbehalf") {
+     if (onbehalfofemployyeid != "") {
       if (getstatus != "") {
         Url =
           URL.CLAIM_MAKER_SUMMARY +
@@ -186,7 +211,7 @@ export default function Claim({
           "&status=" +
           getstatus +
           "&onbehalf=" +
-          onbehalfOfId +
+          onbehalfofemployyeid +
           "&request_date=" +
           jsondate +
           "&tour_no=" +
@@ -197,7 +222,7 @@ export default function Claim({
           "?page=" +
           count +
           "&onbehalf=" +
-          onbehalfOfId +
+          onbehalfofemployyeid +
           "&request_date=" +
           jsondate +
           "&tour_no=" +
@@ -226,6 +251,7 @@ export default function Claim({
           tourno;
       }
     }
+    console.log(Url+" Claim Summarry Url")
 
     try {
       const response = await fetch(Url, {
@@ -277,6 +303,12 @@ export default function Claim({
           }
           if ("permit_bycode" in json.data[i]) {
             obj["permit_bycode"] = json.data[i].permit_bycode;
+          }
+          if(onbehalfofemployyeid != ""){
+            obj["onbehalf"] = true;
+          }
+          else{
+            obj["onbehalf"] = false;
           }
           claimsummaryarray.push(obj);
         }
@@ -343,7 +375,7 @@ export default function Claim({
                   <View style={styles.statusContainer}>
                     <Text style={styles.statusText}>{listname}</Text>
                   </View>
-                  {onBehalfofDialogstatus != null && (
+                  {onbehalfOfName !="" && (
                     <View style={styles.onBehalfofNameContainer}>
                       <Text
                         multiline={false}
@@ -388,7 +420,24 @@ export default function Claim({
               ></TourNoDateFilter>
             )}
             {onBehalfofDialogstatus && (
-              <SearchDialog
+                <OnbehalfDialog
+                  dialogstatus={onBehalfofDialogstatus}
+                  clicked={onbehalfstatusmethod}
+                  setself={setself}
+                  self={self}
+                  employyeid={onbehalfofemployyeid}
+                  branchname={branchname}
+                  setbranchname={setbranchname}
+                  onbehalfofbranchid={onbehalfOfId}
+                  setonbehalfofbranchid={setOnbehalfOfId}
+                  setemployeeid={setonbehalfofemployeeid}
+                  employee_name={onbehalfOfName}
+                  setemployeename={setOnbehalfOfName}
+                  close={closeonbehalfofdialog}
+                ></OnbehalfDialog>
+               
+            )}
+              {/* <SearchDialog
                 dialogstatus={onBehalfofDialogstatus}
                 setdialogstatus={setOnbehalfOfDialogstatus}
                 from="OnBehalfOfEmpclaim"
@@ -399,8 +448,7 @@ export default function Claim({
                   setOnbehalfOfId(id);
                 }}
                 apicall={clearmethod}
-              />
-            )}
+              /> */}
 
             <Picker
               id="travelclaimlist"
@@ -436,9 +484,11 @@ export default function Claim({
                     setSelected(select);
                     setlistname(select.name);
                   } else {
-                    if (onbehalfOfId != 0) {
-                      setOnbehalfOfId("0");
-                      setOnbehalfOfName("All");
+                    if (onbehalfOfId != "") {
+                      setOnbehalfOfId("");
+                      setOnbehalfOfName("");
+                      setbranchname("");
+                      setonbehalfofbranchid("");
                       setHasnext(true);
                       setcount(1);
                       setclaimsummary([]);

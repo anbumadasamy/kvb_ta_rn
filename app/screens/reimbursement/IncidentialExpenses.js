@@ -173,6 +173,14 @@ export default function IncidentialExpenses({ route }) {
       Alert.alert("Enter Single Fare");
       return;
     }
+    if(sdreturn && traveltime > 24){
+      Alert.alert("Enter Valid Travel time");
+      return;
+    }
+    if(!sdreturn && traveltime < 24){
+      Alert.alert("Enter Valid Travel time");
+      return;
+    }
     if (incidentialexpense == "") {
       Alert.alert("Incidential Expense Can't be empty");
       return;

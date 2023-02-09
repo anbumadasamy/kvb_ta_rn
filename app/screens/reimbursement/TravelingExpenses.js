@@ -93,19 +93,7 @@ export default function TravelingExpenses({ route }) {
   const authCtx = useContext(AuthContext);
   const navigation = useNavigation();
 
-  const [billno, setbillno] = useState("");
-  const [remarks, setremarks] = useState("");
-  const [traveltype, settraveltype] = useState("");
-  const [traveldata, settraveldata] = useState();
-  const [traveltraindata, settraveltraindata] = useState();
-  const [travelairdata, settravelairdata] = useState();
-  const [dialogstatus, setdialogstatus] = useState(false);
-  const [modedialogstatus, setmodedialogstatus] = useState(false);
-  const [modeoftravel, setmodeoftravel] = useState("");
-  const [classoftravellabel, setclassoftravellabel] = useState(false);
-  const [tittle, settittle] = useState();
-
-  console.log(tkt_bybank_id + " tkt_bybank_id");
+  
 
   useEffect(() => {
     navigation.setOptions({
@@ -220,13 +208,12 @@ export default function TravelingExpenses({ route }) {
         ) {
           setcgst(parseFloat(igst / 2) + "");
           setsgst(parseFloat(igst / 2) + "");
-          // setigst(0+"");
+        
           setis_igst(false);
         } else {
-          // setigst(igst + "");
+          
           setis_igst(true);
-          /* setcgst(0+"");
-          setsgst(0+""); */
+        
         }
       }
     }

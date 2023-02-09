@@ -25,6 +25,7 @@ export default function MemberApprovalSummaryCard({ data, scroll }) {
     />
   );
   function renderLocationsItem({ ...itemData }) {
+    console.log(JSON.stringify(itemData)+" itemData")
     function expensecall() {
       navigation.navigate("MemberApprovalTabScreen", {
         TourId: itemData.item.id,

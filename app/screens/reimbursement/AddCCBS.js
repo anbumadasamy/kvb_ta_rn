@@ -11,14 +11,23 @@ import { FontAwesome } from "@expo/vector-icons";
 import CCBSSummaryCard from "../../components/cards/CCBSSummaryCard";
 import AlertCredentialError from "../../components/toast/AlertCredentialError";
 import ToastMessage from "../../components/toast/ToastMessage";
+import DropDown from "../../components/ui/DropDown";
+import SearchDialog from "../../components/dialog/SearchDialog";
+import DocumentBox from "../../components/ui/DocumentBox";
+import * as DocumentPicker from "expo-document-picker";
+import * as ImagePicker from "expo-image-picker";
+import DeleteDialog from "../../components/dialog/DeleteDialog";
+
+let attachmentArray = [];
 
 export default function AddCCBS({ route }) {
   const navigation = useNavigation();
   const FromDate = route.params.FromDate;
   const ToDate = route.params.ToDate;
   const ReqDate = route.params.ReqDate;
+  const filemandatory = route.params.filemandatory;
   const claimamount = route.params.claimamount;
-  const empid = route.params.empid;
+  const empid = route.params.empid; 
   const onbehalf = route.params.onbehalf;
   const [getccbslist, setccbslist] = useState([]);
   const [addccbs, setaddccbs] = useState(true);
@@ -28,9 +37,23 @@ export default function AddCCBS({ route }) {
   const [remarks, setremarks] = useState(route.params.makercomment);
   const [progressBar, setProgressBar] = useState(false);
   const [TourId, setTourId] = useState(route.params.TourId);
+
   const authCtx = useContext(AuthContext);
 
+  const [branch, setbranch] = useState(route.params.branch_name);
+  const [branchid, setbranchid] = useState(route.params.branch_id);
+  const [branchdialogstatus, setbranchdialogstatus] = useState();
+  const [employeedialogstatus, setemployeedialogstatus] = useState();
+  const [employee, setemployee] = useState(route.params.approverfull_name);
+  const [editable, seteditable] = useState(true);
+  const [employeeid, setemployeeid] = useState(route.params.approverid);
+  const [attachment, setAttachment] = useState([]);
+  const [randomDocumentId, setRandomDocumentId] = useState(null);
+  const [documentDeleteDialog, setDocumentDeleteDialog] = useState(false);
+
   let totalgivenamount = 0;
+
+  console.log(filemandatory+" filemandatory")
 
   useEffect(() => {
     if (getccbslist.length > 0) {
@@ -90,10 +113,11 @@ export default function AddCCBS({ route }) {
         },
       });
       let json = await response.json();
+      console.log(JSON.stringify(json)+" Data From Api")
 
       if ("detail" in json) {
-        if(json.detail == "Invalid credentials/token."){
-        AlertCredentialError(json.detail, navigation);
+        if (json.detail == "Invalid credentials/token.") {
+          AlertCredentialError(json.detail, navigation);
         }
       } else {
         for (let i = 0; i < json.length; i++) {
@@ -123,16 +147,114 @@ export default function AddCCBS({ route }) {
     }
   }
 
+  const OpenCamera = async () => {
+    attachmentArray = [];
+    console.log(" First permissionResult")
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+    console.log(JSON.stringify(permissionResult)+" permissionResult")
+    if (permissionResult.granted === false) {
+      alert("You've refused to allow this app to access your camera!");
+      return;
+    }
+ 
+
+    const result = await ImagePicker.launchCameraAsync();
+
+   
+    console.log(JSON.stringify(result)+" result")
+
+    if (!result.cancelled) {
+      let mimeType = result.uri.split(".");
+      let file = {
+        randomDocumentId:
+          Math.floor(Math.random() * 100) +
+          1 +
+          "" +
+          Math.floor(Math.random() * 100) +
+          1,
+        uri: result.uri,
+        name: `IMG_${Math.random()}.${mimeType[mimeType.length - 1]}`,
+        type: `image/${mimeType[mimeType.length - 1]}`,
+      };
+      attachmentArray.push(file);
+      setAttachment([...attachment, ...attachmentArray]);
+    }
+  };
+  const PickDocument = async () => {
+    const type = [
+      "image/*",
+      "application/pdf",
+      "application/msword",
+      "application/xlsx",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "text/plain",
+    ];
+    attachmentArray = [];
+    let result = await DocumentPicker.getDocumentAsync({
+      type: type,
+    });
+    if (result.type == "success") {
+      let file = {
+        randomDocumentId:
+          Math.floor(Math.random() * 100) +
+          1 +
+          "" +
+          Math.floor(Math.random() * 100) +
+          1,
+        uri: result.uri,
+        name: result.name,
+        type: result.mimeType,
+      };
+
+      attachmentArray.push(file);
+      setAttachment([...attachment, ...attachmentArray]);
+    }
+  };
+
+  function DeleteDocument() {
+    const position = attachment.filter(
+      (item) => item.randomDocumentId !== randomDocumentId
+    );
+    setAttachment(position);
+  }
+
   useEffect(() => {
     navigation.setOptions({
       title: "Expenses",
     });
   }, []);
   function validation() {
-    if (totalgiven == claimamount) {
+    if (remarks == "") {
+      Alert.alert("Comments can't be empty");
+      return;
+    }
+    if (branch == "") {
+      Alert.alert("Choose Branch");
+      return;
+    }
+    if (employee == "") {
+      Alert.alert("Choose Approver");
+      return;
+    }
+    if (getccbslist.length == 0) {
+      Alert.alert("Enter a valid CCBS");
+      return;
+    }
+    if (totalgiven != claimamount) {
+      Alert.alert("Enter a valid Expense Amount");
+      return;
+    }
+    if(filemandatory && attachment.length == 0){
+      Alert.alert("File is mandatory");
+      return;
+    }
+    ccbspost();
+
+    /*  if (totalgiven == claimamount) {
       if (remarks != "") {
         if (getccbslist.length != 0) {
-          ccbspost();
+          
+          
         } else {
           Alert.alert("Enter a valid CCBS");
         }
@@ -141,7 +263,7 @@ export default function AddCCBS({ route }) {
       }
     } else {
       Alert.alert("Enter a valid Expense Amount");
-    }
+    } */
   }
   async function ccbspost() {
     setProgressBar(true);
@@ -163,6 +285,7 @@ export default function AddCCBS({ route }) {
 
     obj = {
       tourgid: TourId,
+      approvedby: employeeid,
       appcomment: remarks,
       ccbs: ccbjarray,
     };
@@ -170,7 +293,24 @@ export default function AddCCBS({ route }) {
       obj["onbehalfof"] = empid;
     }
 
+    console.log(JSON.stringify(obj)+"CCBS object")
+
+   
+
     data.append("data", JSON.stringify(obj));
+
+    for (let i = 0; i < attachment.length; i++) {
+      let fileobj;
+
+      fileobj = {
+        uri: attachment[i].uri,
+        name: attachment[i].name,
+        type: attachment[i].type,
+      };
+
+      data.append("file", fileobj);
+    }
+
 
     try {
       const response = await fetch(URL.EXPENSE_SUBMIT, {
@@ -184,10 +324,12 @@ export default function AddCCBS({ route }) {
 
       let json = await response.json();
 
+      console.log(JSON.stringify(json)+" Json Response")
+
       if (json) {
         if ("detail" in json) {
-          if(json.detail == "Invalid credentials/token."){
-          AlertCredentialError(json.detail, navigation);
+          if (json.detail == "Invalid credentials/token.") {
+            AlertCredentialError(json.detail, navigation);
           }
         }
         setProgressBar(false);
@@ -236,10 +378,74 @@ export default function AddCCBS({ route }) {
                 <Text style={styles.text}>{FromDate}</Text>
                 <Text style={styles.text}>{ToDate}</Text>
               </View>
+              <View style={{ top: 20 }}>
+                <DropDown
+                  label="Branch*"
+                  hint="Select Branch"
+                  indata={branch}
+                  ontouch={() => {
+                    setbranchdialogstatus(!branchdialogstatus);
+                  }}
+                ></DropDown>
+                <DropDown
+                  label="Employee*"
+                  hint="Employee"
+                  indata={employee}
+                  ontouch={() => {
+                    if (branch != "") {
+                      setemployeedialogstatus(!employeedialogstatus);
+                    } else {
+                      Alert.alert("Choose Branch");
+                    }
+                  }}
+                ></DropDown>
+
+                <DocumentBox
+                  documentData={attachment}
+                  from="create_update"
+                  pressCamera={OpenCamera}
+                  pressFolder={PickDocument}
+                  deleteEvent={(value) => {
+                    setRandomDocumentId(value);
+                    setDocumentDeleteDialog(!documentDeleteDialog);
+                  }}
+                />
+              </View>
             </View>
+            {documentDeleteDialog && (
+              <DeleteDialog
+                dialogstatus={documentDeleteDialog}
+                setDialogstatus={() => {
+                  setDocumentDeleteDialog(!documentDeleteDialog);
+                }}
+                onPressDelete={DeleteDocument}
+              />
+            )}
+
+            {branchdialogstatus && (
+              <SearchDialog
+                dialogstatus={branchdialogstatus}
+                setValue={setbranch}
+                setId={setbranchid}
+                setdialogstatus={setbranchdialogstatus}
+                from="approver_branch"
+              />
+            )}
+            {employeedialogstatus && (
+              <SearchDialog
+                dialogstatus={employeedialogstatus}
+                setValue={setemployee}
+                branchId={branchid}
+                setId={setemployeeid}
+                setdialogstatus={setemployeedialogstatus}
+                from="approver_name"
+              />
+            )}
+
             <CommentBox
               label=""
               inputComment={remarks}
+              editable={editable}
               hint="Comments*"
               onInputCommentChanged={(updated) => {
                 setremarks(updated);
@@ -269,6 +475,7 @@ export default function AddCCBS({ route }) {
                       ReqDate: ReqDate,
                       empid: empid,
                       onbehalf: onbehalf,
+                      filemandatory:filemandatory,
                     });
                   }}
                 />
@@ -314,7 +521,7 @@ const styles = StyleSheet.create({
   },
   maincontainer: {
     top: 5,
-    bottom: 10,
+    bottom: 20,
     justifyContent: "space-between",
   },
   row: {

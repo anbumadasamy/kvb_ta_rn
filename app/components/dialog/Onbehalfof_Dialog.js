@@ -2,14 +2,8 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { CustomColors } from "../../utilities/CustomColors";
 import Onbehalfofradiobutton from "../ui/Onbehalfofradiobutton";
 import SearchDialog from "../../components/dialog/SearchDialog";
-import {
-  View,
-  StyleSheet,
-  Text,
-  Modal,
-  Pressable,
-} from "react-native";
-import {useState } from "react";
+import { View, StyleSheet, Text, Modal, Pressable } from "react-native";
+import { useState } from "react";
 import DropDownWithoutLabel from "../ui/DropDownWithoutLabel";
 
 export default function OnbehalfDialog({
@@ -22,10 +16,16 @@ export default function OnbehalfDialog({
   employee_name,
   setemployeename,
   close,
+  branchname,
+  setbranchname,
+  onbehalfofbranchid,
+  setonbehalfofbranchid,
 }) {
   const [isModalVisible, setModalVisible] = useState(dialogstatus);
 
   const [employesearchdialogstatus, setemploysearchdialogstatus] =
+    useState(false);
+  const [branchdialogstatus, setbranchdialogstatus] =
     useState(false);
 
   const toggleModalVisibility = () => {
@@ -35,6 +35,7 @@ export default function OnbehalfDialog({
   const onPressRadioButton = (radioButtonsArray) => {
     setself(radioButtonsArray[0].selected);
   };
+  console.log(employyeid+" Onbehalf Of Dialog")
 
   /*  useEffect(() => {
     console.log("ANbuuuuuuuuu")
@@ -68,37 +69,61 @@ export default function OnbehalfDialog({
               />
             </View>
             <View style={styles.radiobutton}>
-              <Onbehalfofradiobutton
+              {/* <Text>Onbehalf of: </Text> */}
+               <Onbehalfofradiobutton
                 status={self}
                 buttonpressed={onPressRadioButton}
               ></Onbehalfofradiobutton>
             </View>
 
             {!self && (
-              <View style={styles.dropdown}>
-                <DropDownWithoutLabel
-                  hint="Employee"
-                  indata={employee_name}
-                  ontouch={() => {
-                    setemploysearchdialogstatus(!employesearchdialogstatus);
-                  }}
-                ></DropDownWithoutLabel>
-              </View>
-            )}
+            <View style={styles.dropdown}>
+              <DropDownWithoutLabel
+                hint="Select Branch"
+                indata={branchname}
+                ontouch={() => {
+                  setbranchdialogstatus(!branchdialogstatus);
+                }}
+              ></DropDownWithoutLabel>
+            </View>
+             )} 
+               {!self && (
+            <View style={styles.dropdown}>
+              <DropDownWithoutLabel
+                hint="Employee"
+                indata={employee_name}
+                ontouch={() => {
+                  setemploysearchdialogstatus(!employesearchdialogstatus);
+                }}
+              ></DropDownWithoutLabel>
+            </View>
+             )} 
 
+            {branchdialogstatus && (
+              <SearchDialog
+                dialogstatus={branchdialogstatus}
+                setValue={setbranchname}
+                setId={setonbehalfofbranchid}
+                setdialogstatus={setbranchdialogstatus}
+                from="approver_branch"
+              />
+            )}
             {employesearchdialogstatus && (
               <SearchDialog
                 dialogstatus={employesearchdialogstatus}
                 setValue={setemployeename}
                 setId={setemployeeid}
+                onBehalOfId={onbehalfofbranchid}
                 setdialogstatus={setemploysearchdialogstatus}
-                from="CeoTeam"
+                from="OnBehalfOfEmpclaim"
               />
             )}
 
             <Pressable
-             style={({pressed}) => pressed ? [styles.button, styles.pressed] : styles.button}
-             android_ripple={{ color: CustomColors.ripple_color }}
+              style={({ pressed }) =>
+                pressed ? [styles.button, styles.pressed] : styles.button
+              }
+              android_ripple={{ color: CustomColors.ripple_color }}
               onPress={() => {
                 if (!self) {
                   if (employee_name != "") {
@@ -108,6 +133,8 @@ export default function OnbehalfDialog({
                 } else {
                   setemployeeid("");
                   setemployeename("");
+                  setbranchname("");
+                  setonbehalfofbranchid("")
                   toggleModalVisibility();
                   clicked();
                 }
@@ -152,6 +179,7 @@ const styles = StyleSheet.create({
   },
   radiobutton: {
     marginLeft: 20,
+    // marginBottom: 20,
   },
   dropdown: {
     marginLeft: 30,

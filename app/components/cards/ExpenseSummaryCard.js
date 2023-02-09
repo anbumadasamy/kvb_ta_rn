@@ -32,6 +32,7 @@ export default function ExpenseSummaryCard({
     />
   );
   function renderItem({ ...itemData }) {
+    console.log(itemData.item.claimstatusid + "claimstatusid Date");
     function expensecall() {
       console.log(itemData.item.reqdate + "Req Date");
       let Position;
@@ -61,6 +62,10 @@ export default function ExpenseSummaryCard({
         case 6:
           Position = 8;
           title = "Miscellaneous List";
+          break;
+        case 7:
+          Position = 7;
+          title = "Packaging/Freight List";
           break;
         case 9:
           Position = 5;
@@ -109,7 +114,7 @@ export default function ExpenseSummaryCard({
             </View>
 
             <View style={styles.mainrow}>
-              <View style={styles.file}>
+             {/*  <View style={styles.file}>
                 <MaterialIcons
                   name="image"
                   size={24}
@@ -123,10 +128,11 @@ export default function ExpenseSummaryCard({
                     });
                   }}
                 />
-              </View>
+              </View> */}
               <View>
                 {(itemData.item.claimstatusid == -1 ||
-                  itemData.item.claimstatusid == 1) && (
+                  itemData.item.claimstatusid == 1 ||
+                  itemData.item.claimstatusid == 5) && (
                   <MaterialIcons
                     name="delete"
                     size={24}

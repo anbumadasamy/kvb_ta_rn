@@ -4,6 +4,11 @@ const TA_SERVER = "http://143.110.244.51:8184/taserv/";
 const MASTER_SERVER = "http://143.110.244.51:8184/mstserv/";
 const ECF_SERVER = "http://143.110.244.51:8185/ecfserv/";
 
+/* const USER_SERVER = " http://192.168.1.40:8000/usrserv/";
+const TA_SERVER = " http://192.168.1.40:8000/taserv/";
+const MASTER_SERVER = " http://192.168.1.40:8000/mstserv/";
+const ECF_SERVER = " http://192.168.1.40:8000/ecfserv/"; */
+
 export const URL = {
   LOGIN_URL: USER_SERVER + "auth_token",
   LOGOUT_URL: USER_SERVER + "logout",

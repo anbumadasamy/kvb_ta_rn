@@ -26,6 +26,7 @@ export default function ExpenseAddCCbs({ route }) {
   const ReqDate = route.params.ReqDate;
   const empid = route.params.empid;
   const onbehalf = route.params.onbehalf;
+  const filemandatory = route.params.filemandatory;
   const [getbs, setbs] = useState("");
   const [getbsdialogstatus, setbsdialogstatus] = useState(false);
   const [getccdialogstatus, setccdialogstatus] = useState(false);
@@ -54,7 +55,7 @@ export default function ExpenseAddCCbs({ route }) {
         if (route.params.id == route.params.data[i].id) {
           setbs(route.params.data[i].bs);
           setcc(route.params.data[i].cc);
-          setpercentage(route.params.data[i].percentage);
+          setpercentage(route.params.data[i].percentage+"");
           setamount(route.params.data[i].getamount + "");
           setbsid(route.params.data[i].bsid);
           setccid(route.params.data[i].ccid);
@@ -111,6 +112,7 @@ export default function ExpenseAddCCbs({ route }) {
         claimamount: claimamount,
         empid: empid,
         onbehalf: onbehalf,
+        filemandatory : filemandatory
       });
     }
   }, [getlist]);
