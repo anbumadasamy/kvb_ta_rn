@@ -41,7 +41,7 @@ export default function AdvanceSummaryCard({
             navigation.navigate("Travel Update", {
               travelNo: itemData.item.id,
               status: itemData.item.tourStatusId,
-              summaryFrom: from,
+              from: from,
             });
           } else {
             navigation.navigate("TravelDetailScreen", {

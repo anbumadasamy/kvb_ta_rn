@@ -66,12 +66,12 @@ export default function Navigator() {
             name="Travel Creation"
             component={TravelCreationScreen}
           />
+          <Stack.Screen name="Advance" component={AdvanceCreationScreen} />
           <Stack.Screen
-            name="Advance Creation"
-            component={AdvanceCreationScreen}
+            name="Advance Detail"
+            component={AdvanceCCBSSummaryScreen}
           />
-          <Stack.Screen name="CCBS" component={AdvanceCCBSSummaryScreen} />
-          <Stack.Screen name="Add CCBS" component={AdvanceCCBSCreationScreen} />
+          <Stack.Screen name="CCBS" component={AdvanceCCBSCreationScreen} />
           <Stack.Screen
             name="AddItineraryScreen"
             component={AddItineraryScreen}

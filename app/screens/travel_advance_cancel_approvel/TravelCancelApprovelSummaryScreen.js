@@ -74,16 +74,12 @@ export default function TravelCancelApprovelSummaryScreen({
     if (onbehalfof) {
       filterList = [
         {
-          id: 3,
-          name: "Approved List",
-        },
-        {
           id: 2,
           name: "Pending List",
         },
         {
-          id: 5,
-          name: "Returned List",
+          id: 3,
+          name: "Approved List",
         },
         {
           id: 4,
@@ -93,16 +89,12 @@ export default function TravelCancelApprovelSummaryScreen({
     } else {
       filterList = [
         {
-          id: 3,
-          name: "Approved List",
-        },
-        {
           id: 2,
           name: "Pending List",
         },
         {
-          id: 5,
-          name: "Returned List",
+          id: 3,
+          name: "Approved List",
         },
         {
           id: 4,
@@ -265,27 +257,24 @@ export default function TravelCancelApprovelSummaryScreen({
       }
 
       for (let i = 0; i < json.data.length; i++) {
-        if (json.data[i].tour_cancel_status_id != "2") {
-          const obj = {
-            id: json.data[i].tourid,
-            appGid: json.data[i].id,
-            raiserName: json.data[i].employee_name,
-            desigination: json.data[i].empdesignation,
-            requestDate: moment(json.data[i].requestdate_ms).format(
-              "DD-MM-YYYY"
-            ),
-            travelStatus: json.data[i].tour_status,
-            tourStatusId: json.data[i].tour_status_id,
-            reason: json.data[i].reason,
-          };
-          travelApprovelSummaryArray.push(obj);
-        }
+        const obj = {
+          id: json.data[i].tourid,
+          appGid: json.data[i].id,
+          raiserName: json.data[i].employee_name,
+          desigination: json.data[i].empdesignation,
+          requestDate: moment(json.data[i].requestdate_ms).format("DD-MM-YYYY"),
+          travelStatus: json.data[i].tour_cancel_status,
+          tourStatusId: json.data[i].tour_cancel_status_id,
+          reason: json.data[i].reason,
+        };
+        travelApprovelSummaryArray.push(obj);
       }
 
       setTravelApprovelSummary([
         ...travelApprovelSummary,
         ...travelApprovelSummaryArray,
       ]);
+      travelApprovelSummaryArray = [];
       setProgressBar(false);
     } catch (error) {
       console.error(error);
@@ -338,7 +327,7 @@ export default function TravelCancelApprovelSummaryScreen({
                     setPageNo(pageNo + 1);
                   }}
                   data={travelApprovelSummary}
-                  from="travel_approvel_summary"
+                  from="travel_Cancel_approvel_summary"
                   onBehalfOfEmpId={onBehalfOfEmpId}
                 />
               </View>

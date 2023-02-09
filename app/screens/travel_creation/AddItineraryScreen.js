@@ -17,7 +17,12 @@ import DateSelector from "../../components/ui/DateSelector";
 
 export default function AddItineraryScreen({ route }) {
   const navigation = useNavigation();
-  const itineraryFrom = route.params.itineraryFrom;
+  const itineraryFrom = route.params.from;
+  const [editable] = useState(
+    route.params.from == "create" || route.params.from == "update"
+      ? true
+      : false
+  );
   const [startDatePicker, setStartDatePicker] = useState(false);
   const [endDatePicker, setEndDatePicker] = useState(false);
   const [maxDate, setMaxDate] = useState();
@@ -42,6 +47,9 @@ export default function AddItineraryScreen({ route }) {
     id: null,
   });
 
+  console.log("From :>> " + JSON.stringify(route.params.from));
+  console.log("Editable :>> " + JSON.stringify(editable));
+
   useEffect(() => {
     LogBox.ignoreLogs([
       "Non-serializable values were found in the navigation state.",
@@ -54,8 +62,15 @@ export default function AddItineraryScreen({ route }) {
   }, [route]);
 
   useLayoutEffect(() => {
+    let title = "";
+
+    if (itineraryFrom == "create") {
+      title = "Add Itinerary";
+    } else {
+      title = "Itinerary";
+    }
     navigation.setOptions({
-      title: "Add Itinerary",
+      title: title,
     });
 
     if ("itineraryDetail" in route.params) {
@@ -211,24 +226,29 @@ export default function AddItineraryScreen({ route }) {
             label="Starting Point:*"
             hint="Enter Starting Point"
             value={itineraryData.startPlace}
+            editable={editable}
             onChangeValue={inputChangedHandler.bind(this, "startPlace")}
           />
           <InputTextC
             label="Place Of Visit:*"
             hint="Enter Place Of Visit"
             value={itineraryData.endPlace}
+            editable={editable}
             onChangeValue={inputChangedHandler.bind(this, "endPlace")}
           />
           <InputTextC
             label="Purpose Of Visit:*"
             hint="Enter Purpose"
             value={itineraryData.reason}
+            editable={editable}
             onChangeValue={inputChangedHandler.bind(this, "reason")}
           />
         </ScrollView>
-        <View>
-          <SubmitButton onPressEvent={AddItinerary}>Submit</SubmitButton>
-        </View>
+        {editable && (
+          <View>
+            <SubmitButton onPressEvent={AddItinerary}>Submit</SubmitButton>
+          </View>
+        )}
       </KeyboardAvoidingView>
     </View>
   );

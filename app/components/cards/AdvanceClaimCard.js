@@ -50,7 +50,7 @@ export default function AdvanceClaimCard({ data, scroll }) {
           <View style={{ flexDirection: "row" }}>
             <Pressable
               onPress={() => {
-                navigation.navigate("CCBS", {
+                navigation.navigate("Advance Detail", {
                   advanceData: itemData.item,
                   totalAmount: itemData.item.reqAmount,
                   randomAdvId: itemData.item.randomAdvId,

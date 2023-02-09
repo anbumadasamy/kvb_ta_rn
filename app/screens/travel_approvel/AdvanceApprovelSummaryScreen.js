@@ -61,16 +61,16 @@ export default function AdvanceApprovelSummaryScreen({
 
   const filterList = [
     {
-      id: 1,
-      name: "Search by Travel No or Date",
+      id: 2,
+      name: "Pending List",
     },
     {
       id: 3,
       name: "Approved List",
     },
     {
-      id: 2,
-      name: "Pending List",
+      id: 5,
+      name: "Returned List",
     },
     {
       id: 4,

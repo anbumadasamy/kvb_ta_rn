@@ -1,13 +1,7 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { CustomColors } from "../../utilities/CustomColors";
-import {
-  View,
-  StyleSheet,
-  FlatList,
-  Text,
-  Pressable,
-} from "react-native";
+import { View, StyleSheet, FlatList, Text, Pressable } from "react-native";
 
 export default function ItineraryListCard({
   data,
@@ -38,18 +32,20 @@ export default function ItineraryListCard({
           if (from === "travel_creation") {
             navigation.navigate("AddItineraryScreen", {
               itineraryDetail: itemData.item,
-              itineraryFrom: "update",
+              from: "update",
             });
-          } else if (from === "travel_update" && (status == 2 || status == 5)) {
-            navigation.navigate("Itinerary Update", {
+          } else if (
+            from === "travel_maker_summary" &&
+            (status == 2 || status == 5)
+          ) {
+            navigation.navigate("AddItineraryScreen", {
               itineraryDetail: itemData.item,
               from: "update",
             });
           } else {
-            navigation.navigate("Itinerary Detail", {
+            navigation.navigate("AddItineraryScreen", {
               itineraryDetail: itemData.item,
-              from: from,
-              bookingStatus: itemData.item.bookingStatus,
+              from: "detail",
             });
           }
         }}
@@ -64,7 +60,7 @@ export default function ItineraryListCard({
         </View>
         <View style={styles.cardRow}>
           <Text style={styles.cardText}>{itemData.item.reason}</Text>
-          {(deleteItinerary || deleteCreateItinerary) && (
+          {(from == "travel_creation" || from == "travel_maker_summary") && (
             <Pressable
               onPress={() => {
                 if (itemData.item.from == "API") {

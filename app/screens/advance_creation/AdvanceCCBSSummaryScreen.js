@@ -1,97 +1,58 @@
 import HeaderBox from "../../components/ui/HeaderBox";
+import SearchDialog from "../../components/dialog/SearchDialog";
+import { CustomColors } from "../../utilities/CustomColors";
 import { useNavigation } from "@react-navigation/native";
-import AdvanceCCBSCard from "../../components/cards/AdvanceCCBSCard";
-import DeleteDialog from "../../components/dialog/DeleteDialog";
-import SubmitButton from "../../components/ui/SubmitButton";
-import { useState, useEffect } from "react";
-import { View, StyleSheet } from "react-native";
+import CommentBox from "../../components/ui/CommentBox";
+import InputSelect from "../../components/ui/InputSelect";
 import InputText from "../../components/ui/InputText";
-
-let ccbsDataArray = [];
+import { useState, useEffect } from "react";
+import {
+  View,
+  StyleSheet,
+  KeyboardAvoidingView,
+  ScrollView,
+} from "react-native";
 
 export default function AdvanceCCBSSummaryScreen({ route }) {
   const navigation = useNavigation();
-  const [editableStatus, setEditableStatus] = useState(true);
-  const [deleteDialogStatus, setDeleteDialogStatus] = useState(false);
-  const [totalAmount, setTotalAmount] = useState();
-  const [balanceAmount, setBalanceAmount] = useState("0");
-  const [ccBsId, setCcBsId] = useState(null);
-  const [advanceCCBSData, setAdvanceCCBSData] = useState({
-    randomAdvId:
+  const [editable] = useState(true);
+  const [approverBranchDialogStatus, setApproverBranchDialogStatus] =
+    useState(false);
+  const [approverNameDialogStatus, setApproverNameDialogStatus] =
+    useState(false);
+  const [advanceData, setAdvanceData] = useState({
+    randomAadvanceId:
       Math.floor(Math.random() * 100) +
       1 +
       "" +
       Math.floor(Math.random() * 100) +
       1,
+    advanceId: "",
     reqAmount: "",
     appAmount: "",
     reason: "",
-    approver: route.params.approver,
+    comments: "",
+    approverBranch: "",
+    approverBranchId: "",
+    approverName: "",
+    approverId: "",
     ccbsData: [],
   });
 
-  // console.log("Edit data :>> " + JSON.stringify(route.params.advanceData));
+  console.log("Advance Data :>> " + JSON.stringify(advanceData));
 
   useEffect(() => {
-    if (advanceCCBSData.ccbsData.length > 0) {
-      setBalanceAmount(
-        advanceCCBSData.ccbsData.length == 1
-          ? parseFloat(totalAmount) -
-              parseFloat(
-                advanceCCBSData.ccbsData[advanceCCBSData.ccbsData.length - 1]
-                  .amount
-              )
-          : parseFloat(balanceAmount) -
-              parseFloat(
-                advanceCCBSData.ccbsData[advanceCCBSData.ccbsData.length - 1]
-                  .amount
-              )
-      );
-    }
-    //  console.log("Calculated Balance :>> " + JSON.stringify(balanceAmount));
-  }, [advanceCCBSData.ccbsData]);
-
-  useEffect(() => {
-    ccbsDataArray = [];
-
-    if ("advanceData" in route.params) {
-      inputChangedHandler("reqAmount", route.params.reqAmount);
-      inputChangedHandler("randomAdvId", route.params.randomAdvId);
-      inputChangedHandler("appAmount", route.params.appAmount);
-      inputChangedHandler("reason", route.params.reason);
-      inputChangedHandler("approver", route.params.approver);
-      inputChangedHandler("ccbsData", route.params.ccbsData);
-    }
-
-    if (route.params.ccbsData != null && "ccbsData" in route.params) {
-      let position = "NEW";
-      if (advanceCCBSData.ccbsData.length != 0) {
-        for (let i = 0; i < advanceCCBSData.ccbsData.length; i++) {
-          if (
-            advanceCCBSData.ccbsData[i].randomCcBsId ==
-            route.params.ccbsData.randomCcBsId
-          ) {
-            position = i;
-          }
+    if ("ccbsData" in route.params)
+      if (route.params.ccbsData != null) {
+        if (route.params.ccbsData.ccbsId == "NEW") {
+          inputChangedHandler("ccbsData", [...ccbsData, route.params.ccbsData]);
+        } else {
         }
-      } else {
-        position = "NEW";
       }
-
-      if (position == "NEW") {
-        ccbsDataArray.push(route.params.ccbsData);
-        inputChangedHandler("ccbsData", [
-          ...advanceCCBSData.ccbsData,
-          ...ccbsDataArray,
-        ]);
-      } else {
-        advanceCCBSData.ccbsData[position] = route.params.ccbsData;
-      }
-    }
   }, [route]);
 
   function inputChangedHandler(inputIdentifier, enteredValue) {
-    setAdvanceCCBSData((currentInputValues) => {
+    setAdvanceData((currentInputValues) => {
       return {
         ...currentInputValues,
         [inputIdentifier]: enteredValue,
@@ -99,92 +60,122 @@ export default function AdvanceCCBSSummaryScreen({ route }) {
     });
   }
 
-  function DeleteCCBS() {}
-
-  function SubmitCCBS() {
-    navigation.navigate("Advance Creation", {
-      advanceCCBSData: advanceCCBSData,
-    });
-  }
-
   return (
-    <View style={styles.screenContainer}>
-      <View style={styles.mainContainer}>
-        <InputText
-          label="Advance amount:"
-          hint="Enter Amount"
-          editable={editableStatus}
-          keyboard="numeric"
-          value={advanceCCBSData.reqAmount}
-          onChangeEvent={(value) => {
-            inputChangedHandler("reqAmount", value);
-            inputChangedHandler("appAmount", value);
-          }}
-        />
-        <InputText
-          label="Approved amount:"
-          hint="Approved amount"
-          editable={false}
-          keyboard="numeric"
-          value={advanceCCBSData.appAmount}
-          onChangeEvent={inputChangedHandler.bind(this, "appAmount")}
-        />
-        <InputText
-          label="Reason:"
-          hint="Reason"
-          editable={editableStatus}
-          value={advanceCCBSData.reason}
-          onChangeEvent={inputChangedHandler.bind(this, "reason")}
-        />
-        <HeaderBox
-          onPressEvent={() => {
-            navigation.navigate("Add CCBS", {
-              totalAmount: advanceCCBSData.reqAmount,
-              balanceAmount: advanceCCBSData.balanceAmount,
-              ccbsLength: advanceCCBSData.ccbsData.length,
-            });
-          }}
-          label="Add CCBS for Advance Amount"
-          icon={"add-circle-outline"}
-        />
-        {advanceCCBSData.ccbsData.length > 0 && (
-          <View>
-            <HeaderBox
-              onPressEvent={() => {}}
-              label="Updated CCBS"
-              icon={null}
-            />
-            <AdvanceCCBSCard
-              data={advanceCCBSData.ccbsData}
-              setDeleteDialogStatus={setDeleteDialogStatus}
-              setId={setCcBsId}
-            />
-          </View>
-        )}
-        {deleteDialogStatus && (
-          <DeleteDialog
-            dialogstatus={deleteDialogStatus}
-            setDialogstatus={setDeleteDialogStatus}
-            onPressDelete={DeleteCCBS}
+    <KeyboardAvoidingView
+      behavior={"padding"}
+      keyboardVerticalOffset="35"
+      style={styles.screenContainer}
+    >
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        overScrollMode="never"
+        bounces={false}
+      >
+        <View style={styles.mainContainer}>
+          <InputText
+            label="Advance amount:"
+            hint="Enter Amount"
+            keyboard="numeric"
+            editable={editable}
+            value={advanceData.reqAmount}
+            onChangeEvent={(value) => {
+              inputChangedHandler("reqAmount", value);
+            }}
           />
-        )}
-      </View>
-      <View style={{ paddingBottom: 10 }}>
-        <SubmitButton onPressEvent={SubmitCCBS}>Submit</SubmitButton>
-      </View>
-    </View>
+          <InputText
+            label="Approved amount:"
+            hint="Approved amount"
+            keyboard="numeric"
+            editable={editable}
+            value={advanceData.appAmount}
+            onChangeEvent={(value) => {
+              inputChangedHandler("appAmount", value);
+            }}
+          />
+          <InputText
+            label="Reason:"
+            hint="Reason"
+            editable={editable}
+            value={advanceData.reason}
+            onChangeEvent={(value) => {
+              inputChangedHandler("reason", value);
+            }}
+          />
+          <InputSelect
+            label="Approver Branch:*"
+            hint="Choose Branch"
+            selected={advanceData.approverBranch}
+            onPressEvent={() => {
+              if (editable) {
+                setApproverBranchDialogStatus(true);
+              }
+            }}
+          />
+          <InputSelect
+            label="Approver Name:*"
+            hint="Choose Name"
+            selected={advanceData.approverName}
+            onPressEvent={() => {
+              if (editable) {
+                setApproverNameDialogStatus(true);
+              }
+            }}
+          />
+
+          {approverBranchDialogStatus && (
+            <SearchDialog
+              dialogstatus={approverBranchDialogStatus}
+              setdialogstatus={setApproverBranchDialogStatus}
+              from="approver_branch"
+              setValue={inputChangedHandler.bind(this, "approverBranch")}
+              setId={(id) => {
+                inputChangedHandler("approverBranchId", id);
+              }}
+            />
+          )}
+
+          {approverNameDialogStatus && (
+            <SearchDialog
+              dialogstatus={approverNameDialogStatus}
+              setdialogstatus={setApproverNameDialogStatus}
+              branchId={advanceData.approverBranchId}
+              from="approver_name"
+              setValue={inputChangedHandler.bind(this, "approverName")}
+              setId={(id) => {
+                inputChangedHandler("approverId", id);
+              }}
+            />
+          )}
+
+          <CommentBox
+            label="Comments:"
+            hint="Leave Your Comments..."
+            editable={editable}
+            inputComment={advanceData.comments}
+            onInputCommentChanged={inputChangedHandler.bind(this, "comments")}
+          />
+          <HeaderBox
+            onPressEvent={() => {
+              navigation.navigate("CCBS", { ccbsDataLength: 0 });
+            }}
+            label={editable ? "Add CCBS here" : "CCBS detail"}
+            icon={editable ? "add-circle-outline" : nul}
+          />
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   screenContainer: {
     flex: 1,
+    backgroundColor: CustomColors.primary_white,
   },
   mainContainer: {
     flex: 1,
     marginTop: 20,
-    marginLeft: "4%",
-    marginRight: "4%",
-    marginBottom: "3%",
+    marginHorizontal: "4%",
+    paddingBottom: "3%",
   },
 });

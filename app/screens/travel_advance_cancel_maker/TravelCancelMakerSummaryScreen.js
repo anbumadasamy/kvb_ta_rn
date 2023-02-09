@@ -82,10 +82,6 @@ export default function TravelCancelMakerSummaryScreen({
           name: "Pending List",
         },
         {
-          id: 5,
-          name: "Returned List",
-        },
-        {
           id: 4,
           name: "Rejected List",
         },
@@ -99,10 +95,6 @@ export default function TravelCancelMakerSummaryScreen({
         {
           id: 2,
           name: "Pending List",
-        },
-        {
-          id: 5,
-          name: "Returned List",
         },
         {
           id: 4,
@@ -149,16 +141,16 @@ export default function TravelCancelMakerSummaryScreen({
       if (jsonDate == "" && travelNo == "") {
         url =
           URL.MAKER_TRAVEL_CANCEL_SUMMARY +
-          "AdvanceCancel" +
-          "?status=" +
+          "TourCancel" +
+          "&status=" +
           filterStatus +
           "&page=" +
           pageNo;
       } else if (jsonDate != "" && travelNo == "") {
         url =
           URL.MAKER_TRAVEL_CANCEL_SUMMARY +
-          "AdvanceCancel" +
-          "?status=" +
+          "TourCancel" +
+          "&status=" +
           filterStatus +
           "&page=" +
           pageNo +
@@ -167,8 +159,8 @@ export default function TravelCancelMakerSummaryScreen({
       } else if (travelNo != "" && jsonDate == "") {
         url =
           URL.MAKER_TRAVEL_CANCEL_SUMMARY +
-          "AdvanceCancel" +
-          "?status=" +
+          "TourCancel" +
+          "&status=" +
           filterStatus +
           "&page=" +
           pageNo +
@@ -177,8 +169,8 @@ export default function TravelCancelMakerSummaryScreen({
       } else if (jsonDate != "" && travelNo != "") {
         url =
           URL.MAKER_TRAVEL_CANCEL_SUMMARY +
-          "AdvanceCancel" +
-          "?status=" +
+          "TourCancel" +
+          "&status=" +
           filterStatus +
           "&page=" +
           pageNo +
@@ -191,8 +183,8 @@ export default function TravelCancelMakerSummaryScreen({
       if (jsonDate == "" && travelNo == "") {
         url =
           URL.MAKER_TRAVEL_CANCEL_SUMMARY +
-          "AdvanceCancel" +
-          "?status=" +
+          "TourCancel" +
+          "&status=" +
           filterStatus +
           "&onbehalf=" +
           parseInt(onBehalfOfEmpId) +
@@ -201,8 +193,8 @@ export default function TravelCancelMakerSummaryScreen({
       } else if (jsonDate != "" && travelNo == "") {
         url =
           URL.MAKER_TRAVEL_CANCEL_SUMMARY +
-          "AdvanceCancel" +
-          "?status=" +
+          "TourCancel" +
+          "&status=" +
           filterStatus +
           "&page=" +
           pageNo +
@@ -213,8 +205,8 @@ export default function TravelCancelMakerSummaryScreen({
       } else if (travelNo != "" && jsonDate == "") {
         url =
           URL.MAKER_TRAVEL_CANCEL_SUMMARY +
-          "AdvanceCancel" +
-          "?status=" +
+          "TourCancel" +
+          "&status=" +
           filterStatus +
           "&page=" +
           pageNo +
@@ -225,8 +217,8 @@ export default function TravelCancelMakerSummaryScreen({
       } else if (jsonDate != "" && travelNo != "") {
         url =
           URL.MAKER_TRAVEL_CANCEL_SUMMARY +
-          "AdvanceCancel" +
-          "?status=" +
+          "TourCancel" +
+          "&status=" +
           filterStatus +
           "&page=" +
           pageNo +
@@ -265,21 +257,17 @@ export default function TravelCancelMakerSummaryScreen({
       }
 
       for (let i = 0; i < json.data.length; i++) {
-        if (json.data[i].tour_cancel_status_id != "2") {
-          const obj = {
-            id: json.data[i].tourid,
-            appGid: json.data[i].id,
-            raiserName: json.data[i].employee_name,
-            desigination: json.data[i].empdesignation,
-            requestDate: moment(json.data[i].requestdate_ms).format(
-              "DD-MM-YYYY"
-            ),
-            travelStatus: json.data[i].tour_status,
-            tourStatusId: json.data[i].tour_status_id,
-            reason: json.data[i].reason,
-          };
-          travelApprovelSummaryArray.push(obj);
-        }
+        const obj = {
+          id: json.data[i].tourid,
+          appGid: json.data[i].id,
+          raiserName: json.data[i].employee_name,
+          desigination: json.data[i].empdesignation,
+          requestDate: moment(json.data[i].requestdate_ms).format("DD-MM-YYYY"),
+          travelStatus: json.data[i].tour_status,
+          tourStatusId: json.data[i].tour_status_id,
+          reason: json.data[i].reason,
+        };
+        travelApprovelSummaryArray.push(obj);
       }
 
       setTravelApprovelSummary([

@@ -46,16 +46,18 @@ let itineraryJsonArray = [];
 export default function TravelCreationScreen({ route }) {
   const [status] = useState(route.params.status);
   const [travelNo] = useState(route.params.travelNo);
-  const [from] = useState(route.params.summaryFrom);
+  const [from] = useState(route.params.from);
   const [appGid] = useState(
     "appGid" in route.params ? route.params.appGid : ""
   );
 
+  console.log("Screen from :>> " + JSON.stringify(from));
+
   const navigation = useNavigation();
   const authCtx = useContext(AuthContext);
   const [editable] = useState(
-    from == "travel_maker_summary" &&
-      (status == 101 || status == 2 || status == 4)
+    (from == "travel_maker_summary" || from == "travel_creation") &&
+      (status == 101 || status == 2 || status == 5)
   );
   const [minimumDate, setMinimumDate] = useState("");
   const [onBehalfofDialog, setOnbehalfOfDialog] = useState(false);
@@ -70,6 +72,7 @@ export default function TravelCreationScreen({ route }) {
   const [documentDeleteDialog, setDocumentDeleteDialog] = useState(false);
   const [randomDocumentId, setRandomDocumentId] = useState(null);
   const [randomItineraryId, setRandomItineraryId] = useState(null);
+  const [deleteFrom, setDeleteFrom] = useState(null);
   const [itineraryEligible, setItineraryEligible] = useState(true);
   const [progressBar, setProgressBar] = useState(true);
   const [startDate, setStartDate] = useState();
@@ -95,6 +98,10 @@ export default function TravelCreationScreen({ route }) {
     useState(false);
   const [approverNameDialogStatus, setApproverNameDialogStatus] =
     useState(false);
+  const [forwardApproverBranch, setForwardApproverBranch] = useState(null);
+  const [forwardApproverName, setForwardApproverName] = useState(null);
+  const [forwardApproverId, setForwardApproverId] = useState(null);
+  const [forwardApproverBranchId, setForwardApproverBranchId] = useState(null);
 
   const [travelData, setTravelData] = useState({
     startDate: "Start Date",
@@ -127,6 +134,8 @@ export default function TravelCreationScreen({ route }) {
 
   let tarvelReasonArray = [];
 
+  console.log("Travel Data :>> " + JSON.stringify(travelData));
+
   useEffect(() => {
     minimumDateValidation();
     GetTravelReason();
@@ -150,13 +159,16 @@ export default function TravelCreationScreen({ route }) {
   useEffect(() => {
     let title = "";
 
-    if (route.params.summaryFrom == "travel_maker_summary") {
+    if (route.params.from == "travel_maker_summary") {
       if (status == 2 || status == 4) {
         title = "Travel Update";
       } else if (status == 3) {
         title = "Travel Detail";
       }
-    } else if (route.params.summaryFrom == "travel_approvel") {
+    } else if (
+      route.params.from == "travel_approvel_summary" ||
+      route.params.from == "travel_Cancel_approvel_summary"
+    ) {
       title = "Travel Detail";
     } else {
       title = "eClaim Travel Creation";
@@ -252,6 +264,23 @@ export default function TravelCreationScreen({ route }) {
     setMinimumDate(new Date(miniDate));
   }
 
+  const cancelAction = [
+    {
+      text: "Approve",
+      icon: require("../../assets/icons/approve.png"),
+      name: "Approve",
+      position: 1,
+      color: CustomColors.fab_approve,
+    },
+    {
+      text: "Reject",
+      icon: require("../../assets/icons/reject.png"),
+      name: "Reject",
+      position: 4,
+      color: CustomColors.fab_reject,
+    },
+  ];
+
   const action = [
     {
       text: "Approve",
@@ -305,12 +334,30 @@ export default function TravelCreationScreen({ route }) {
     );
   }
 
+  function FloatingActionButton2() {
+    return (
+      <View>
+        <FloatingAction
+          actions={cancelAction}
+          distanceToEdge={{ vertical: 0, horizontal: 5 }}
+          onPressItem={(name) => {
+            setActionPosition(name);
+            setApprovelDialogStatus(true);
+            setButtontext(name);
+          }}
+          color="#6c3483"
+          tintColor="white"
+        />
+      </View>
+    );
+  }
+
   function MemberAction(name) {
     switch (name) {
       case "Approve":
         if (from === "travel_approvel_summary") {
           TravelApprove();
-        } else if (from === "cancel_approvel_summary") {
+        } else if (from === "travel_Cancel_approvel_summary") {
           CancelApprove();
         }
         break;
@@ -322,16 +369,94 @@ export default function TravelCreationScreen({ route }) {
       case "Reject":
         if (from === "travel_approvel_summary") {
           TravelReject();
-        } else if (from === "cancel_approvel_summary") {
+        } else if (from === "travel_Cancel_approvel_summary") {
           CancelReject();
         }
         break;
     }
   }
 
+  function ForwardActions() {
+    if (from == "travel_approvel_summary") {
+      TravelForward();
+    } else if (from == "travel_Cancel_approvel_summary") {
+      // TravelCancelForward();
+    } else if (from == "advance_approvel_summary") {
+      // AdvanceForward();
+    } else if (from == "advance_cancel_approvel_summary") {
+      // AdvanceCancelForward();
+    }
+  }
+
+  async function TravelForward() {
+    setProgressBar(true);
+    let data;
+
+    data = {
+      id: appGid,
+      tour_id: travelNo,
+      appcomment: reason,
+      applevel: "2",
+      apptype: "tour",
+      approvedby: forwardApproverId,
+    };
+
+    try {
+      const response = await fetch(URL.TRAVEL_FORWARD, {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-type": "application/json",
+          Authorization: authCtx.auth_token,
+        },
+      });
+
+      let json = await response.json();
+
+      // console.log("Forward Data :>> " + JSON.stringify(json));
+
+      if ("detail" in json) {
+        if (json.detail == "Invalid credentials/token.") {
+          AlertCredentialError(json.detail, navigation);
+        }
+      }
+
+      if (json) {
+        setProgressBar(false);
+        if (json.message) {
+          setForwardApproverBranch(null);
+          setForwardApproverBranchId(null);
+          setForwardApproverName(null);
+          setForwardApproverId(null);
+          setReason("");
+          ToastMessage(json.message);
+          navigation.goBack();
+          navigation.goBack();
+          if (
+            from == "travel_approvel_summary" ||
+            from == "advance_approvel_summary"
+          ) {
+            navigation.navigate("Checker Summary");
+          } else if (
+            from == "travel_Cancel_approvel_summary" ||
+            from == "advance_cancel_approvel_summary"
+          ) {
+            navigation.navigate("Cancel Approval");
+          }
+        } else {
+          Alert.alert(json.description);
+        }
+      }
+    } catch (error) {
+      setProgressBar(false);
+      console.error(error);
+    }
+  }
+
   async function TravelApprove() {
     setProgressBar(true);
     let data;
+
     data = {
       id: appGid,
       tourgid: travelNo,
@@ -368,7 +493,17 @@ export default function TravelCreationScreen({ route }) {
           ToastMessage(json.message);
           navigation.goBack();
           navigation.goBack();
-          navigation.navigate("Checker Summary");
+          if (
+            from == "travel_approvel_summary" ||
+            from == "advance_approvel_summary"
+          ) {
+            navigation.navigate("Checker Summary");
+          } else if (
+            from == "travel_Cancel_approvel_summary" ||
+            from == "advance_cancel_approvel_summary"
+          ) {
+            navigation.navigate("Cancel Approval");
+          }
         } else {
           Alert.alert(json.description);
         }
@@ -401,6 +536,8 @@ export default function TravelCreationScreen({ route }) {
 
       let json = await response.json();
 
+      //  console.log("Cancel Approve :>> " + JSON.stringify(json));
+
       if ("detail" in json) {
         if (json.detail == "Invalid credentials/token.") {
           AlertCredentialError(json.detail, navigation);
@@ -414,7 +551,17 @@ export default function TravelCreationScreen({ route }) {
           ToastMessage(json.message);
           navigation.goBack();
           navigation.goBack();
-          navigation.navigate("Checker Summary");
+          if (
+            from == "travel_approvel_summary" ||
+            from == "advance_approvel_summary"
+          ) {
+            navigation.navigate("Checker Summary");
+          } else if (
+            from == "travel_Cancel_approvel_summary" ||
+            from == "advance_cancel_approvel_summary"
+          ) {
+            navigation.navigate("Cancel Approval");
+          }
         } else {
           Alert.alert(json.description);
         }
@@ -462,7 +609,17 @@ export default function TravelCreationScreen({ route }) {
           ToastMessage(json.message);
           navigation.goBack();
           navigation.goBack();
-          navigation.navigate("Checker Summary");
+          if (
+            from == "travel_approvel_summary" ||
+            from == "advance_approvel_summary"
+          ) {
+            navigation.navigate("Checker Summary");
+          } else if (
+            from == "travel_Cancel_approvel_summary" ||
+            from == "advance_cancel_approvel_summary"
+          ) {
+            navigation.navigate("Cancel Approval");
+          }
         } else {
           Alert.alert(json.description);
         }
@@ -510,7 +667,17 @@ export default function TravelCreationScreen({ route }) {
           ToastMessage(json.message);
           navigation.goBack();
           navigation.goBack();
-          navigation.navigate("Checker Summary");
+          if (
+            from == "travel_approvel_summary" ||
+            from == "advance_approvel_summary"
+          ) {
+            navigation.navigate("Checker Summary");
+          } else if (
+            from == "travel_Cancel_approvel_summary" ||
+            from == "advance_cancel_approvel_summary"
+          ) {
+            navigation.navigate("Cancel Approval");
+          }
         } else {
           Alert.alert(json.description);
         }
@@ -540,6 +707,8 @@ export default function TravelCreationScreen({ route }) {
 
       let json = await response.json();
 
+      //  console.log("Cancel Reject :>> " + JSON.stringify(json));
+
       if ("detail" in json) {
         if (json.detail == "Invalid credentials/token.") {
           AlertCredentialError(json.detail, navigation);
@@ -553,7 +722,17 @@ export default function TravelCreationScreen({ route }) {
           ToastMessage(json.message);
           navigation.goBack();
           navigation.goBack();
-          navigation.navigate("Checker Summary");
+          if (
+            from == "travel_approvel_summary" ||
+            from == "advance_approvel_summary"
+          ) {
+            navigation.navigate("Checker Summary");
+          } else if (
+            from == "travel_Cancel_approvel_summary" ||
+            from == "advance_cancel_approvel_summary"
+          ) {
+            navigation.navigate("Cancel Approval");
+          }
         } else {
           Alert.alert(json.description);
         }
@@ -663,8 +842,8 @@ export default function TravelCreationScreen({ route }) {
           endDate: moment(json.detail[i].enddate).format("DD-MM-YYYY"),
           startDateMs: new Date(json.detail[i].startdate),
           endDateMs: new Date(json.detail[i].enddate),
-          startDateJson: json.detail[i].startdate,
-          endDateJson: json.detail[i].enddate,
+          startDateJson: new Date(json.detail[i].startdate),
+          endDateJson: new Date(json.detail[i].enddate),
           reason: json.detail[i].purposeofvisit,
         };
 
@@ -901,16 +1080,18 @@ export default function TravelCreationScreen({ route }) {
             minDate:
               travelData.itinerary_details[
                 travelData.itinerary_details.length - 1
-              ].endDateMs,
+              ].endDateJson,
             requirementsDetails: null,
-            itineraryFrom: "create",
+            from: "create",
+            editable: editable,
           });
         } else {
           navigation.navigate("AddItineraryScreen", {
             maxDate: endDateMs,
             minDate: startDateMs,
             requirementsDetails: null,
-            itineraryFrom: "create",
+            from: "create",
+            editable: editable,
           });
         }
       } else {
@@ -922,8 +1103,20 @@ export default function TravelCreationScreen({ route }) {
   }
 
   function DeleteItinerary() {
+    if (deleteFrom == "API") {
+      DeleteItineraryApi();
+    } else if (deleteFrom == "Create") {
+      const position = travelData.itinerary_details.filter(
+        (item) => item.randomItineraryId !== randomItineraryId
+      );
+      inputChangedHandler("itinerary_details", position);
+      setDeleteFrom(null);
+    }
+  }
+
+  function DeleteItineraryApi() {
     const position = travelData.itinerary_details.filter(
-      (item) => item.randomItineraryId !== randomItineraryId
+      (item) => item.id !== randomItineraryId
     );
     inputChangedHandler("itinerary_details", position);
   }
@@ -990,7 +1183,7 @@ export default function TravelCreationScreen({ route }) {
 
     itineraryJsonArray = [];
 
-    console.log("Travel creation post data :>> " + JSON.stringify(travelObj));
+    //  console.log("Travel creation post data :>> " + JSON.stringify(travelObj));
 
     const data = new FormData();
     data.append("data", JSON.stringify(travelObj));
@@ -1019,7 +1212,7 @@ export default function TravelCreationScreen({ route }) {
 
       let json = await response.json();
 
-      console.log("Response :>> " + JSON.stringify(json));
+      //  console.log("Response :>> " + JSON.stringify(json));
 
       if ("detail" in json) {
         if (json.detail == "Invalid token.") {
@@ -1044,6 +1237,7 @@ export default function TravelCreationScreen({ route }) {
           }
 
           if (status == 101) {
+            navigation.goBack();
             if (travelData.onBehalfOfId != "") {
               navigation.navigate("On Behalf Of");
             } else {
@@ -1397,15 +1591,16 @@ export default function TravelCreationScreen({ route }) {
               onInputCommentChanged={inputChangedHandler.bind(this, "comments")}
               editable={editable ? true : false}
             />
+
             <DocumentBox
               documentData={attachment}
-              from="create_update"
               pressCamera={OpenCamera}
               pressFolder={PickDocument}
               deleteEvent={(value) => {
                 setRandomDocumentId(value);
                 setDocumentDeleteDialog(!documentDeleteDialog);
               }}
+              editable={editable}
             />
 
             {attachmentDialogStatus && (
@@ -1435,16 +1630,18 @@ export default function TravelCreationScreen({ route }) {
               <HeaderBox
                 onPressEvent={AddItinerary}
                 label="Itinerary"
-                icon="add-circle-outline"
+                icon={editable ? "add-circle-outline" : null}
               />
             )}
             <ItineraryListCard
-              deleteCreateItinerary={(value) => {
+              deleteCreateItinerary={(value, from) => {
                 setRandomItineraryId(value);
+                setDeleteFrom(from);
                 setDeleteDialogStatus(!deleteDialogStatus);
               }}
               data={travelData.itinerary_details}
-              from="travel_creation"
+              from={from}
+              status={status}
             />
           </ScrollView>
           {deleteDialogStatus && (
@@ -1462,13 +1659,19 @@ export default function TravelCreationScreen({ route }) {
               dialogStatus={approverSelectDialogStatus}
               setDialogStatus={setApproverSelectDialogStatus}
               title=""
+              forwardApproverBranch={forwardApproverBranch}
+              forwardApproverBranchId={forwardApproverBranchId}
+              forwardApproverName={forwardApproverName}
+              setForwardApproverBranch={setForwardApproverBranch}
+              setForwardApproverBranchId={setForwardApproverBranchId}
+              setForwardApproverName={setForwardApproverName}
+              setForwardApproverId={setForwardApproverId}
+              remarks={reason}
+              setRemarks={setReason}
               buttontext={buttontext}
-              onPressEvent={() => {
-
-              }}
+              onPressEvent={ForwardActions}
             />
           )}
-
           {approvelDialogStatus && (
             <ApprovelReasonDialog
               dialogStatus={approvelDialogStatus}
@@ -1491,10 +1694,12 @@ export default function TravelCreationScreen({ route }) {
               </SubmitButton>
             )}
           </View>
-
           {from == "travel_approvel_summary" &&
             status == 2 &&
             FloatingActionButton()}
+          {from == "travel_Cancel_approvel_summary" &&
+            status == 2 &&
+            FloatingActionButton2()}
         </KeyboardAvoidingView>
       )}
     </View>

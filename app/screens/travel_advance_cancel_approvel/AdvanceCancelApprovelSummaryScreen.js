@@ -61,16 +61,12 @@ export default function AdvanceCancelApprovelSummaryScreen({
 
   const filterList = [
     {
-      id: 1,
-      name: "Search by Travel No or Date",
+      id: 2,
+      name: "Pending List",
     },
     {
       id: 3,
       name: "Approved List",
-    },
-    {
-      id: 2,
-      name: "Pending List",
     },
     {
       id: 4,

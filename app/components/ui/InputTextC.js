@@ -1,11 +1,24 @@
 import { View, Text, TextInput, StyleSheet, Alert } from "react-native";
 import { CustomColors } from "../../utilities/CustomColors";
 
-export default function InputTextC({ label, onChangeValue, hint, value }) {
+export default function InputTextC({
+  label,
+  onChangeValue,
+  hint,
+  value,
+  editable,
+}) {
   return (
     <View style={styles.inputTextContainer}>
-        <Text style={styles.label}>{label}</Text>
-        <TextInput style={styles.textInput} placeholder={hint} value={value} onChangeText={onChangeValue} keyboardType="default"></TextInput>
+      <Text style={styles.label}>{label}</Text>
+      <TextInput
+        editable={editable ? editable : false}
+        style={styles.textInput}
+        placeholder={hint}
+        value={value}
+        onChangeText={onChangeValue}
+        keyboardType="default"
+      ></TextInput>
     </View>
   );
 }
@@ -14,7 +27,7 @@ const styles = StyleSheet.create({
   inputTextContainer: {
     flexDirection: "column",
     justifyContent: "space-around",
-    marginBottom: 20
+    marginBottom: 20,
   },
   label: {
     color: CustomColors.primary_dark,
