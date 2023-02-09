@@ -11,6 +11,7 @@ import AlertCredentialError from "../../components/toast/AlertCredentialError";
 import ToastMessage from "../../components/toast/ToastMessage";
 
 export default function ExpenseList({ route }) {
+  console.log(JSON.stringify(route) + " which data came for Expense List");
   const TourId = route.params.TourId;
   const FromDate = route.params.FromDate;
   const ToDate = route.params.ToDate;
@@ -56,6 +57,9 @@ export default function ExpenseList({ route }) {
         case 6:
           deleteurl = URL.INCIDENTIAL;
           break;
+          case 7:
+            deleteurl = URL.PACKAGING;
+            break;
         case 8:
           deleteurl = URL.MISC;
           break;
@@ -117,6 +121,9 @@ export default function ExpenseList({ route }) {
           break;
         case 6:
           url = URL.INCIDENTIAL;
+          break;
+        case 7:
+          url = URL.PACKAGING;
           break;
         case 8:
           url = URL.MISC;

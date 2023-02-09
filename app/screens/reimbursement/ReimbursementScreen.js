@@ -42,6 +42,8 @@ function MyTabs({
               previous={previous}
               dialogstatus={dialogstatus}
               setdialogstatus={setdialogstatus}
+              onBehalfofDialogstatus={onbehalfdialogstatus}
+              setOnbehalfOfDialogstatus={setonbehalfdialogstatus}
             />
           );
         }}
@@ -56,8 +58,6 @@ function MyTabs({
               previous={previous}
               dialogstatus={rmdialogstatus}
               setdialogstatus={setrmdialogstatus}
-              onbehalfdialogstatus={onbehalfdialogstatus}
-              setonbehalfdialogstatus={setonbehalfdialogstatus}
             />
           );
         }}
@@ -70,7 +70,7 @@ export default function ReimbursementScreen({ navigation, route }) {
   const authCtx = useContext(AuthContext);
   const [dialogstatus, setdialogstatus] = useState(false);
   const [rmdialogstatus, setrmdialogstatus] = useState(false);
-  const [onbehalfof, setonbehalfof] = useState(false);
+  const [onbehalfof, setonbehalfof] = useState(authCtx.travelOnBehalfOf);
   const [onbehalfdialogstatus, setonbehalfdialogstatus] = useState(false);
 
   let from;
@@ -146,6 +146,18 @@ export default function ReimbursementScreen({ navigation, route }) {
                 justifyContent: "space-between",
               }}
             >
+                {onbehalfof && (
+                <View style={{ marginRight: 20 }}>
+                  <MaterialIcons
+                    name={"person-search"}
+                    size={24}
+                    color="white"
+                    onPress={() => {
+                      setonbehalfdialogstatus(!onbehalfdialogstatus);
+                    }}
+                  />
+                </View>
+              )}
               <View style={{ marginRight: 20 }}>
                 <MaterialIcons
                   name={"search"}
@@ -203,7 +215,7 @@ export default function ReimbursementScreen({ navigation, route }) {
                 justifyContent: "space-between",
               }}
             >
-              {onbehalfof && (
+           {/*    {onbehalfof && (
                 <View style={{ marginRight: 20 }}>
                   <MaterialIcons
                     name={"person-search"}
@@ -214,7 +226,7 @@ export default function ReimbursementScreen({ navigation, route }) {
                     }}
                   />
                 </View>
-              )}
+              )} */}
               <View style={{ marginRight: 20 }}>
                 <MaterialIcons
                   name={"search"}

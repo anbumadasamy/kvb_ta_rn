@@ -1,7 +1,8 @@
 import { useEffect, useState, useContext } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { View, StyleSheet, Text, ScrollView, Alert, Image } from "react-native";
-
+import SearchDialog from "../../components/dialog/SearchDialog";
+import DropDown from "../../components/ui/DropDown";
 import { MaterialIcons } from "@expo/vector-icons";
 import TourExpenseType from "../../components/ui/TourExpenseType";
 import { AuthContext } from "../../data/Auth-Context";
@@ -32,13 +33,17 @@ export default function ExpenseSubmit({ route }) {
   const [visiblestatus, setvisiblestatus] = useState(false);
   const [getstatus, setstatus] = useState("");
   const [istourended, setistourended] = useState(false);
-  const [onbehalf, setonbehalfof] = useState(false);
+  const [onbehalf, setonbehalfof] = useState(route.params.onbehalf);
   const [makercomment, setmakercomment] = useState("");
   const [progressBar, setProgressBar] = useState(true);
   const [tourexpensebutton, settourexpensebutton] = useState(true);
+  const [filemandatory, setfilemandatory] = useState(false);
+  const [branch_id, setbranch_id] = useState("");
+  const [branch_name, setbranch_name] = useState("");
+  const [approverfull_name, setapproverfull_name] = useState("");
+  const [approverid, setapproverid] = useState("");
   let previous;
 
-  console.log(JSON.stringify(route)+" Route Data")
 
   useEffect(() => {
     if ("previous" in route.params) {
@@ -48,14 +53,14 @@ export default function ExpenseSubmit({ route }) {
         previous = true;
       }
     }
-    if (
+    /*  if (
       route.params.from == "On Behalf Of" ||
       route.params.from == "backfromOnbehalf"
     ) {
       setonbehalfof(true);
     } else {
       setonbehalfof(false);
-    }
+    } */
   }, [route]);
 
   useEffect(() => {
@@ -185,6 +190,23 @@ export default function ExpenseSubmit({ route }) {
           return;
         }
       }
+      json.data.map(function (item, index, arr) {
+        if (
+          item.expensename == "Daily Diem" ||
+          item.expensename == "Lodging" ||
+          item.expensename == "Packaging/Freight"
+        ) {
+          setfilemandatory(true);
+        }
+      });
+      if ("approver_branch_data" in json) {
+        if (json.approver_branch_data.length != 0) {
+          setbranch_name(json.approver_branch_data.branch_name);
+          setbranch_id(json.approver_branch_data.branch_id);
+          setapproverfull_name(json.approver_branch_data.full_name);
+          setapproverid(json.approver_branch_data.id);
+        }
+      }
 
       setclaimamount(json.claimed_amount);
       setistourended(json.is_tour_ended);
@@ -195,7 +217,6 @@ export default function ExpenseSubmit({ route }) {
 
       for (let i = 0; i < json.data.length; i++) {
         if (json.data[i].id != null) {
-          console.log("Ulla Vanthiyaa? Varalaiyaa?");
           const obj = {
             id: json.data[i].id,
             expenseType: json.data[i].expensename,
@@ -361,6 +382,11 @@ export default function ExpenseSubmit({ route }) {
                     onbehalf: onbehalf,
                     makercomment: makercomment,
                     claim_status_id: claim_status_id,
+                    filemandatory: filemandatory,
+                    branch_name: branch_name,
+                    branch_id: branch_id,
+                    approverfull_name: approverfull_name,
+                    approverid: approverid,
                   });
                 }}
               >

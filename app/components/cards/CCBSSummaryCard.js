@@ -23,15 +23,16 @@ export default function CCBSSummaryCard({
     />
   );
   function renderItem({ ...itemData }) {
+    
     function editccbs() {
       navigation.navigate("ExpenseAddCCBS", {
         data: data,
-        id: itemData.item.id,
+        id: itemData.item.id, 
         claimamount: itemData.item.claimamount,
         TourId: itemData.item.TourId,
         FromDate: itemData.item.FromDate,
         ToDate: itemData.item.ToDate,
-        ReqDate: itemData.item.ReqDate,
+        ReqDate: itemData.item.ReqDate
       });
     }
 

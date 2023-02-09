@@ -44,6 +44,7 @@ export default function ExpenseListCard({
   );
   function renderLocationsItem({ ...itemData }) {
     function List() {
+      console.log("Anbuuuuuuuuuuuuuu");
       let from;
       if ("from" in itemData.item) {
         from = itemData.item.from;
@@ -133,6 +134,17 @@ export default function ExpenseListCard({
             ReqDate: itemData.item.Req,
             Comments: reason,
             IncidentialExpenseId: itemData.item.id,
+            from: from,
+          });
+          break;
+        case 7:
+          navigation.navigate("Packing Expense", {
+            TourId: itemData.item.tour_id,
+            FromDate: itemData.item.fromdate,
+            ToDate: itemData.item.todate,
+            ReqDate: itemData.item.Req,
+            Comments: reason,
+            PackingExpenseId: itemData.item.id,
             from: from,
           });
           break;

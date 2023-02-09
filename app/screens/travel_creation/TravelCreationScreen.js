@@ -41,7 +41,6 @@ import DocumentBox from "../../components/ui/DocumentBox";
 
 let itineraryArray = [];
 let attachmentArray = [];
-
 let itineraryJsonArray = [];
 
 export default function TravelCreationScreen({ route }) {

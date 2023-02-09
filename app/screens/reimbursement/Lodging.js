@@ -83,18 +83,14 @@ export default function Lodging({ route }) {
   const [bank_gstno, setbank_gstno] = useState("");
   const [bank_dialogstatus, setbank_dialogststus] = useState(false);
   const [lodge_gstno, setlodge_gstno] = useState("");
-  const [igst, setigst] = useState("");
-  const [cgst, setcgst] = useState("");
-  const [sgst, setsgst] = useState("");
+  const [igst, setigst] = useState("0");
+  const [cgst, setcgst] = useState("0");
+  const [sgst, setsgst] = useState("0");
   const [is_igst, setis_igst] = useState(true);
   const navigation = useNavigation();
+  
   const authCtx = useContext(AuthContext);
 
-  const [subcategory, setsubcategory] = useState("Lodging");
-  const [subcategorydata, setsubcategorydata] = useState();
-  const [dialogstatus, setdialogstatus] = useState(false);
-  const [remarks, setremarks] = useState("");
-  const [remarkslabel, setremarkslabel] = useState("Remarks :");
 
   useEffect(() => {
     navigation.setOptions({
@@ -258,6 +254,10 @@ export default function Lodging({ route }) {
         },
       });
       let json = await response.json();
+
+      console.log(JSON.stringify(json)+ " Response From API")
+
+
       if ("detail" in json) {
         if (json.detail == "Invalid credentials/token.") {
           AlertCredentialError(json.detail, navigation);
@@ -273,8 +273,14 @@ export default function Lodging({ route }) {
             let uniqoutdate = outdatewithtime[0].split("-");
             let uniqouttime = outdatewithtime[1];
 
+            let lodgcheckoutdatewithtime = json.data[i].lodgcheckoutdate.split(" ");
+            let lodgcheckoutdate = lodgcheckoutdatewithtime[0].split("-");
+            let lodgcheckouttime = lodgcheckoutdatewithtime[1];
+
             setCheckingTime(uniqtime);
             setcheckoutTime(uniqouttime);
+            setLcheckoutTime(lodgcheckouttime)
+            
 
             setjsonCheckingDate(
               moment(
@@ -286,6 +292,20 @@ export default function Lodging({ route }) {
                     uniqdate[0] +
                     " " +
                     uniqtime +
+                    ":00"
+                )
+              ).format("YYYY-MM-DD")
+            );
+            setLjsoncheckoutDate(
+              moment(
+                new Date(
+                  lodgcheckoutdate[1] +
+                    " " +
+                    lodgcheckoutdate[2] +
+                    ", " +
+                    lodgcheckoutdate[0] +
+                    " " +
+                    lodgcheckouttime +
                     ":00"
                 )
               ).format("YYYY-MM-DD")
@@ -335,18 +355,59 @@ export default function Lodging({ route }) {
               ).format("DD-MM-YYYY")
             );
 
-            setsubcategory(json.data[i].Lodge_Homestay);
+            setLcheckoutDate(
+              moment(
+                new Date(
+                  lodgcheckoutdate[1] +
+                    " " +
+                    lodgcheckoutdate[2] +
+                    ", " +
+                    lodgcheckoutdate[0] +
+                    " " +
+                    lodgcheckouttime +
+                    ":00"
+                )
+              ).format("DD-MM-YYYY")
+            );
             setcity(json.data[i].city);
-            setbillno(json.data[i].billno);
-            settotalbillamount(json.data[i].Billamountexculdingtax + "");
-            setclaimamount(json.data[i].claimedamount + "");
-            settaxamount(json.data[i].taxonly + "");
-            setvendorname(json.data[i].vendorname);
-            setremarks(json.data[i].remarks);
-            seteligibleamount(json.data[i].eligibleamount);
+            setCenter_Classification_id(json.data[i].centreclassification);
+
+           if(json.data[i].centreclassification == "0"){
+            setCenter_Classification("New")
+             }
+             else{
+              setCenter_Classification("Existing")
+             }
+             setactualplace(json.data[i].placeofactualstay)
+             setnodays(json.data[i].noofdays+"")
+             setaccomodation_id(json.data[i].accbybank.value)
+             setaccomodation(json.data[i].accbybank.name)
+             setac_refno(json.data[i].acrefno+"")
+             setis_bill(json.data[i].billavailable.name)
+             setis_bill_id(json.data[i].billavailable.value)
+             settotalbillamount(json.data[i].totalbillamount+"")
+             setclaimamount(json.data[i].claimedamount+"")
+             seteligibleamount(json.data[i].eligibleamount+"");
+             settaxamount(json.data[i].taxonly+"");
+             setvendorname(json.data[i].vendorname);
+             setlodge_gstno(json.data[i].vendorgstno);
+
+             if (json.data[i].bankgstno != "0") {
+              setbank_gstno(json.data[i].bankgstno);
+            }
+            if (json.data[i].hsncode.code != null) {
+              setHSN_number(json.data[i].hsncode.code);
+            }
+            if (json.data[i].igst == 0) {
+              setcgst(json.data[i].cgst + "");
+              setsgst(json.data[i].sgst + "");
+              setis_igst(false);
+            } else {
+              setigst(json.data[i].igst + "");
+              setis_igst(true);
+            }
             setrequestercomment(json.requestercomment);
             setProgressBar(false);
-
             break;
           }
         }
@@ -485,7 +546,7 @@ export default function Lodging({ route }) {
       city: city,
       centreclassification: Center_Classification_id,
       placeofactualstay: actualplace,
-      noofdays: nodays,
+      noofdays: parseInt(nodays),
       accbybank: accomodation_id,
       acrefno: ac_refno,
       billavailable: is_bill_id,
@@ -494,14 +555,27 @@ export default function Lodging({ route }) {
       hsncode: HSN_number,
       taxonly: parseInt(taxamount),
       vendorname: vendorname,
-      bankgstno: bank_gstno,
+     
       vendorgstno: lodge_gstno,
       approvedamount: parseInt(eligibleamount),
-      igst: igst,
-      cgst: cgst,
-      sgst: sgst,
+      
       mobile: 1,
     };
+    if (bank_gstno != "") {
+      obj["bankgstno"] = bank_gstno;
+    } else {
+      obj["bankgstno"] = 0;
+    }
+
+    if (is_igst) {
+      obj["igst"] = parseFloat(igst);
+      obj["cgst"] = 0;
+      obj["sgst"] = 0;
+    } else {
+      obj["igst"] = 0;
+      obj["cgst"] = parseFloat(cgst);
+      obj["sgst"] = parseFloat(sgst);
+    }
 
     if (LodgingId != "") {
       obj["id"] = LodgingId;
@@ -942,9 +1016,9 @@ export default function Lodging({ route }) {
               setfirst(false);
             }}
           ></Inputtextrow>
-          {HSN_number != "" &&
+           {HSN_number != "" &&
             bank_gstno != "" &&
-            lodge_gstno != "" &&
+            vendor_gstno != "" &&
             is_igst && (
               <LabelTextColumnView
                 label="IGST Percentage:"
@@ -952,20 +1026,26 @@ export default function Lodging({ route }) {
                 value={igst}
               ></LabelTextColumnView>
             )}
-          {!is_igst && (
-            <LabelTextColumnView
-              label="CGST Percentage:"
-              hint="CGST Percentage"
-              value={cgst}
-            ></LabelTextColumnView>
-          )}
-          {!is_igst && (
-            <LabelTextColumnView
-              label="SGST Percentage:"
-              hint="SGST Percentage"
-              value={sgst}
-            ></LabelTextColumnView>
-          )}
+          {!is_igst &&
+            HSN_number != "" &&
+            bank_gstno != "" &&
+            vendor_gstno != "" && (
+              <LabelTextColumnView
+                label="CGST Percentage:"
+                hint="CGST Percentage"
+                value={cgst}
+              ></LabelTextColumnView>
+            )}
+          {!is_igst &&
+            HSN_number != "" &&
+            bank_gstno != "" &&
+            vendor_gstno != "" && (
+              <LabelTextColumnView
+                label="SGST Percentage:"
+                hint="SGST Percentage"
+                value={sgst}
+              ></LabelTextColumnView>
+            )}
         </ScrollView>
       )}
       {editable && !progressBar && (
