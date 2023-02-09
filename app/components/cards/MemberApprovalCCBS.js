@@ -29,8 +29,8 @@ export default function MemberApprovalCCBS({ data, scroll }) {
     />
   );
   function renderLocationsItem({ ...itemData }) {
+    console.log(JSON.stringify(itemData) + "Item Data Member Approval");
     function expensecall() {
-      console.log(itemData.item.reqdate + "Req Date");
       let Position;
       let title;
       let from = "Approver";
@@ -43,6 +43,10 @@ export default function MemberApprovalCCBS({ data, scroll }) {
           Position = 1;
           title = "Daily Reimbursement List";
           break;
+        case 3:
+          Position = 6;
+          title = "Incidential Expense List";
+          break;
         case 4:
           Position = 2;
           title = "Local Conveyance List";
@@ -51,6 +55,14 @@ export default function MemberApprovalCCBS({ data, scroll }) {
           Position = 3;
           title = "Lodging Expenses List";
           break;
+        case 6:
+          Position = 8;
+          title = "Miscellaneous Charges List";
+          break;
+          case 7:
+            Position = 7;
+            title = "Packaging Charges List";
+            break;
         case 9:
           Position = 5;
           title = "Associated Expenses List";

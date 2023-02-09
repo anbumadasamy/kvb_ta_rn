@@ -37,13 +37,15 @@ export default function PackingExpenses({ route }) {
   const ReqDate = route.params.ReqDate;
   let PackingExpenseId = route.params.PackingExpenseId;
 
+  console.log(JSON.stringify(route) + " Route Data");
+
   const [progressBar, setProgressBar] = useState(true);
   const [is_twowheeler, setis_twowheeler] = useState("Yes");
   const [is_twowheeler_dstatus, setis_twowheeler_dstatus] = useState(false);
   const [is_twowheeler_id, setis_twowheeler_id] = useState("1");
   const [is_household, setis_household] = useState("Yes");
   const [is_household_dstatus, setis_household_dstatus] = useState(false);
-  const [is_household_id, setis_household_id] = useState("0");
+  const [is_household_id, setis_household_id] = useState("1");
 
   const [twowheelerby, settwowheelerby] = useState();
   const [twowheelerby_id, settwowheelerby_id] = useState();
@@ -58,8 +60,8 @@ export default function PackingExpenses({ route }) {
   const [householdbillamount, sethouseholdbillamount] = useState("");
   const [eligibletransportation, seteligibletransportation] = useState("");
   const [transportationcharge, settransportationcharge] = useState("");
-  const [is_driver, setis_driver] = useState("No");
-  const [is_driver_id, setis_driver_id] = useState("0");
+  const [is_driver, setis_driver] = useState("Yes");
+  const [is_driver_id, setis_driver_id] = useState("1");
   const [is_driver_dstatus, setis_driver_dstatus] = useState(false);
   const [traveltime, settraveltime] = useState("");
   const [noofdaysengaged, setnoofdaysengaged] = useState("");
@@ -88,46 +90,10 @@ export default function PackingExpenses({ route }) {
   const [sgst, setsgst] = useState("0");
   const [is_igst, setis_igst] = useState(true);
 
-  const [checkingDate, setCheckingDate] = useState("");
-  const [checkoutDate, setcheckoutDate] = useState("");
-  const [checkingTime, setCheckingTime] = useState("");
-  const [checkoutTime, setcheckoutTime] = useState("");
-  const [jsoncheckingDate, setjsonCheckingDate] = useState("");
-  const [jsoncheckoutDate, setjsoncheckoutDate] = useState("");
-  const [checkingdateStatus, setcheckingDateStatus] = useState(false);
-  const [checkoutDateStatus, setcheckoutDateStatus] = useState(false);
-  const [checkingTimeStatus, setcheckingTimeStatus] = useState(false);
-  const [checkoutTimeStatus, setcheckoutTimeStatus] = useState(false);
-  const [departureplace, setdepartureplace] = useState("");
-  const [placeofvisit, setplaceofvisit] = useState("");
-  const [totaltkttamt, settotaltkttamt] = useState("");
-  const [tkt_bybank, settkt_bybank] = useState(false);
-  const [tkt_refno, settkt_refno] = useState("");
-  const [actualmodeoftravel, setactualmodeoftravel] = useState();
-  const [actualmodedata, setactualmodedata] = useState();
-  const [actualmodestatus, setactualmodestatus] = useState();
-  const [classoftravel, setclassoftravel] = useState("");
-  const [classoftraveldata, setclassoftraveldata] = useState("");
-  const [classoftravelstatus, setclassoftravelstatus] = useState(false);
-  const [eligiblemodeoftravel, seteligiblemodeoftravel] = useState(false);
-  const [highermode, sethighermode] = useState(false);
-  const [priority, setpriority] = useState(false);
-  const [who_higher, setwho_higher] = useState("");
-  const [no_of_dependent, setno_of_dependent] = useState("");
-  const [dependent, setdependent] = useState("");
-  const [dependentstatus, setdependentstatus] = useState(false);
-  const [billno, setbillno] = useState("");
-  const [remarks, setremarks] = useState("");
-  const [traveltype, settraveltype] = useState("");
-  const [traveldata, settraveldata] = useState();
-  const [traveltraindata, settraveltraindata] = useState();
-  const [travelairdata, settravelairdata] = useState();
-  const [dialogstatus, setdialogstatus] = useState(false);
-  const [modedialogstatus, setmodedialogstatus] = useState(false);
-  const [modeoftravel, setmodeoftravel] = useState("");
-  const [classoftravellabel, setclassoftravellabel] = useState(false);
-  const [tittle, settittle] = useState();
+  
   const [claimamount, setclaimamount] = useState("");
+
+  console.log(is_household_id + " is_household_id");
 
   useEffect(() => {
     navigation.setOptions({
@@ -141,9 +107,9 @@ export default function PackingExpenses({ route }) {
       seteditable(true);
     }
   }, [route]);
+
   useEffect(() => {
     if (!first) {
-      console.log("Inga vanthiyada mandaya");
       if (HSN_number != "" && bank_gstno != "" && vendor_gstno.length >= 2) {
         if (
           bank_gstno[0] + bank_gstno[1] + "" ==
@@ -151,17 +117,14 @@ export default function PackingExpenses({ route }) {
         ) {
           setcgst(parseFloat(igst / 2) + "");
           setsgst(parseFloat(igst / 2) + "");
-       
+
           setis_igst(false);
         } else {
-          
           setis_igst(true);
-         
         }
       }
     }
   }, [HSN_number, bank_gstno, vendor_gstno]);
-
   async function getdata(getparam, id) {
     let array = [];
     try {
@@ -190,7 +153,7 @@ export default function PackingExpenses({ route }) {
           setyesornodata(array);
           break;
         case 1:
-          console.log(JSON.stringify(array)+" Transport of data")
+          console.log(JSON.stringify(array) + " Transport of data");
           settwowheelerdata(array);
           break;
       }
@@ -222,15 +185,15 @@ export default function PackingExpenses({ route }) {
   async function EligibleAmountCalculation() {
     let eligible;
     eligible = {
-      tourgid:TourId,
-      totaldisttrans:parseInt(totaldistance),
+      tourgid: TourId,
+      totaldisttrans: parseInt(totaldistance),
       twowheelertrans: is_twowheeler_id,
       expense_id: 7,
-      tonnagehhgood:parseInt(tonnageofhousehold),
-      receipt_loss:have_receipt_id,
-      distinhilly:parseInt(hillyterraindistance),
-      traveltime:parseInt(traveltime),
-      vehicletransbydriver:is_driver_id,
+      tonnagehhgood: parseInt(tonnageofhousehold),
+      receipt_loss: have_receipt_id,
+      distinhilly: parseInt(hillyterraindistance),
+      traveltime: parseInt(traveltime),
+      vehicletransbydriver: is_driver_id,
     };
 
     try {
@@ -249,11 +212,10 @@ export default function PackingExpenses({ route }) {
         AlertCredentialError(json.detail, navigation);
         return;
       }
-      seteligibletransportation(json.transportation_amount+"")
-      setdriverbattas(json.driverbatta+"")
-      seteligiblebreakupcharges(json.breakagecharge+"")
-      settotaleligibleamount(json.Eligible_amount+"")
-
+      seteligibletransportation(json.transportation_amount + "");
+      setdriverbattas(json.driverbatta + "");
+      seteligiblebreakupcharges(json.breakagecharge + "");
+      settotaleligibleamount(json.Eligible_amount + "");
     } catch (error) {}
   }
 
@@ -273,7 +235,7 @@ export default function PackingExpenses({ route }) {
         AlertCredentialError(json.detail, navigation);
         return;
       }
-      seteligibletonnage(json.maxtonnage+"")
+      seteligibletonnage(json.maxtonnage + "");
 
       // seteligiblemodeoftravel(json.travelclass);
     } catch (error) {}
@@ -296,14 +258,16 @@ export default function PackingExpenses({ route }) {
 
   async function get() {
     setProgressBar(true);
+    console.log(URL.PACKAGING + "/tour/" + TourId + "Packaging get Url");
     try {
-      const response = await fetch(URL.TRAVELING_EXPENSES + "/tour/" + TourId, {
+      const response = await fetch(URL.PACKAGING + "/tour/" + TourId, {
         headers: {
           "Content-Type": "application/json",
           Authorization: authCtx.auth_token,
         },
       });
       let json = await response.json();
+      console.log(JSON.stringify(json) + "Packing Expense Get");
       if ("detail" in json) {
         if (json.detail == "Invalid credentials/token.") {
           AlertCredentialError(json.detail, navigation);
@@ -311,109 +275,50 @@ export default function PackingExpenses({ route }) {
       } else {
         for (let i = 0; i < json.data.length; i++) {
           if (json.data[i].id == PackingExpenseId) {
-            let datewithtime = json.data[i].fromdate.split(" ");
-            let uniqdate = datewithtime[0].split("-");
-            let uniqtime = datewithtime[1];
-
-            let outdatewithtime = json.data[i].todate.split(" ");
-            let uniqoutdate = outdatewithtime[0].split("-");
-            let uniqouttime = outdatewithtime[1];
-
-            setCheckingDate(uniqdate);
-            setcheckoutDate(uniqoutdate);
-            setCheckingTime(uniqtime);
-            setcheckoutTime(uniqouttime);
-
-            setjsonCheckingDate(
-              moment(
-                new Date(
-                  uniqdate[1] +
-                    " " +
-                    uniqdate[2] +
-                    ", " +
-                    uniqdate[0] +
-                    " " +
-                    uniqtime +
-                    ":00"
-                )
-              ).format("YYYY-MM-DD")
-            );
-
-            setCheckingDate(
-              moment(
-                new Date(
-                  uniqdate[1] +
-                    " " +
-                    uniqdate[2] +
-                    ", " +
-                    uniqdate[0] +
-                    " " +
-                    uniqtime +
-                    ":00"
-                )
-              ).format("DD-MM-YYYY")
-            );
-
-            setjsoncheckoutDate(
-              moment(
-                new Date(
-                  uniqoutdate[1] +
-                    " " +
-                    uniqoutdate[2] +  
-                    ", " +
-                    uniqoutdate[0] +
-                    " " +
-                    uniqtime +
-                    ":00"
-                )
-              ).format("YYYY-MM-DD")
-            );
-
-            setcheckoutDate(
-              moment(
-                new Date(
-                  uniqoutdate[1] +
-                    " " +
-                    uniqoutdate[2] +
-                    ", " +
-                    uniqoutdate[0] +
-                    " " +
-                    uniqtime +
-                    ":00"
-                )
-              ).format("DD-MM-YYYY")
-            );
-
-            settraveltype(json.data[i].traveltype);
-            setdepartureplace(json.data[i].fromplace);
-            setmodeoftravel(json.data[i].actualmode);
-            setplaceofvisit(json.data[i].toplace);
-
-            if (
-              json.data[i].actualmode == "Train" ||
-              json.data[i].actualmode == "Air"
-            ) {
-              setclassoftravellabel(!classoftravellabel);
-              setclassoftravel(json.data[i].travelclass);
-            }
-
-            if (json.data[i].prior_permission == "YES") {
-              setpriority(true);
-            } else {
-              setpriority(false);
-            }
-            if (json.data[i].highermodereason == "YES") {
-              sethighermode(true);
-            } else {
-              sethighermode(false);
-            }
-
+            setis_twowheeler(json.data[i].twowheelertrans.name);
+            setis_twowheeler_id(json.data[i].twowheelertrans.value);
+            setis_household(json.data[i].hhgoodstrans.name);
+            setis_household_id(json.data[i].hhgoodstrans.value);
+            settwowheelerby(json.data[i].transtwowheelerby.name);
+            settwowheelerby_id(json.data[i].transtwowheelerby.value);
             setvendorname(json.data[i].vendorname);
-            setclaimamount(json.data[i].claimedamount + "");
-            setbillno(json.data[i].billno);
-            setremarks(json.data[i].remarks);
+            setvendorcode(json.data[i].vendorcode);
+            settotaldistance(json.data[i].totaldisttrans + "");
+            sethillyterraindistance(json.data[i].distinhilly + "");
+            settonnageofhousehold(json.data[i].tonnagehhgood + "");
+            sethouseholdbillamount(json.data[i].billedamthhgoodstrans + "");
+            seteligibletransportation(json.data[i].eligtransamt + "");
+            settransportationcharge(json.data[i].transchargesvehicle + "");
+            setis_driver(json.data[i].vehicletransbydriver.name);
+            setis_driver_id(json.data[i].vehicletransbydriver.value);
+            settraveltime(json.data[i].traveltime + "");
+            setnoofdaysengaged(json.data[i].daysdrivereng + "");
+            setdriverbattas(json.data[i].driverbatta + "");
+            setoctroicharges(json.data[i].octroivehicle + "");
+            setbreakupcharges(json.data[i].breakagecharges + "");
+            sethave_receipt(json.data[i].receipt_loss.name);
+            sethave_receipt_id(json.data[i].receipt_loss.value);
+            seteligiblebreakupcharges(json.data[i].eligbreakagecharge + "");
+            settotaleligibleamount(json.data[i].eligibleamount + "");
+            setvendor_gstno(json.data[i].vendorgstno);
+            if (json.data[i].bankgstno != "0") {
+              setbank_gstno(json.data[i].bankgstno);
+            }
+            if (json.data[i].hsncode.code != null) {
+              setHSN_number(json.data[i].hsncode.code);
+            }
+            if (json.data[i].igst == 0) {
+              setcgst(json.data[i].cgst + "");
+              setsgst(json.data[i].sgst + "");
+              setis_igst(false);
+            } else {
+              setigst(json.data[i].igst + "");
+              setis_igst(true);
+            }
             setrequestercomment(json.requestercomment);
+            setclaimamount(json.data[i].claimedamount + "");
             setProgressBar(false);
+
             break;
           }
         }
@@ -423,28 +328,9 @@ export default function PackingExpenses({ route }) {
     }
   }
 
-  const onStartDate = (selectedDate) => {
-    setcheckingDateStatus(false);
-    setjsonCheckingDate(moment(selectedDate).format("YYYY-MM-DD"));
-    setCheckingDate(moment(selectedDate).format("DD-MM-YYYY"));
-  };
-
-  const onEndDate = (selectedDate) => {
-    setcheckoutDateStatus(false);
-    setjsoncheckoutDate(moment(selectedDate).format("YYYY-MM-DD"));
-    setcheckoutDate(moment(selectedDate).format("DD-MM-YYYY"));
-  };
-  const onStartTime = (selectedDate) => {
-    setcheckingTimeStatus(false);
-    setCheckingTime(moment(selectedDate).format("HH:mm"));
-  };
-  const onEndTime = (selectedDate) => {
-    setcheckoutTimeStatus(false);
-    setcheckoutTime(moment(selectedDate).format("HH:mm"));
-  };
+  
 
   function validation() {
-
     if (twowheelerby == "") {
       Alert.alert("Choose Transport by");
       return;
@@ -469,11 +355,11 @@ export default function PackingExpenses({ route }) {
       Alert.alert("Enter Tonnage of Household Goods");
       return;
     }
-    if (householdbillamount == "") {
+    if (parseInt(is_household_id) == 1 && householdbillamount == "") {
       Alert.alert("Enter Billed Amount of Household Transport");
       return;
     }
-    if (transportationcharge == "") {
+    if (parseInt(is_twowheeler_id) == 1 && transportationcharge == "") {
       Alert.alert("Enter Transportation Charges for vehicle");
       return;
     }
@@ -497,7 +383,57 @@ export default function PackingExpenses({ route }) {
       Alert.alert("Enter Claim Amount");
       return;
     }
-    PackagingExpensePost(); 
+    if (diverbattas == "") {
+      Alert.alert("Enter Driver Batta");
+      return;
+    }
+    if (octroicharges == "") {
+      Alert.alert("Enter Octroi Batta");
+      return;
+    }
+    if (parseInt(totaldistance) < parseInt(hillyterraindistance)) {
+      Alert.alert("Check Total Distance");
+      return;
+    }
+    if (is_driver_id == 1) {
+      if (noofdaysengaged == "" || noofdaysengaged == "0") {
+        Alert.alert("Check  Number of days driver Engaged");
+        return;
+      }
+    } else if (is_driver_id == 0 && noofdaysengaged != "") {
+      if (noofdaysengaged != "0") {
+        Alert.alert("Check Valid Number of days driver Engaged");
+        return;
+      }
+    }
+    if (parseInt(is_twowheeler_id) == 1) {
+      if (
+        transportationcharge == "" ||
+        transportationcharge == "1" ||
+        transportationcharge == "0"
+      ) {
+        Alert.alert("Enter Valid Transportation Charge");
+        return;
+      }
+    } else if (parseInt(is_twowheeler_id) == 0 && transportationcharge != "") {
+      if (transportationcharge != "0") {
+        Alert.alert("Enter Valid Transportation Charge");
+        return;
+      }
+    }
+    if (parseInt(is_household_id) == 1) {
+      if (householdbillamount == "" || householdbillamount == "0") {
+        Alert.alert("Enter Valid household bill amount");
+        return;
+      }
+    } else if (parseInt(is_household_id) == 0 && householdbillamount != "") {
+      if (householdbillamount != "0") {
+        Alert.alert("Enter Valid household bill amount");
+        return;
+      }
+    }
+
+    PackagingExpensePost();
   }
   async function PackagingExpensePost() {
     setProgressBar(true);
@@ -506,37 +442,57 @@ export default function PackingExpenses({ route }) {
     obj = {
       tourgid: TourId,
       expense_id: 7,
-      claimedamount:parseInt(claimamount),
-      requestercomment:requestercomment,
-      twowheelertrans:is_twowheeler_id,
-      hhgoodstrans:is_household_id,
-      transtwowheelerby:twowheelerby_id,
-      ibaappvendor:vendorname,
-      totaldisttrans:parseInt(totaldistance),
-      distinhilly:parseInt(hillyterraindistance),
-      daysdrivereng:parseInt(noofdaysengaged),
-      driverbatta:parseInt(diverbattas),
-      tonnagehhgood:parseInt(tonnageofhousehold),
-      maxeligton:parseInt(eligibletonnage),
-      billedamthhgoodstrans:parseInt(householdbillamount),
-      eligtransamt:parseFloat(eligibletransportation),
-      maxeligibletonnage:parseFloat(eligibletonnage),
-      transchargesvehicle:parseInt(transportationcharge),
-      vehicletransbydriver:is_driver_id,
-      traveltime:traveltime,
-      octroivehicle:octroicharges,
-      breakagecharges:breakupcharges,
-      receipt_loss:have_receipt_id,
-      eligbreakagecharge:parseFloat(eligiblebreakupcharges),
-      eligibleamount:parseFloat(totaleligibleamount),
-      vendorname:vendorname,
-      vendortype:"",
-      vendorcode:vendorcode,
-      bankgstno:parseInt(bank_gstno),
-      vendorgstno:vendor_gstno,
-      approvedamount:0,  
-      hsncode:HSN_number,
+      claimedamount: parseInt(claimamount),
+      requestercomment: requestercomment,
+      twowheelertrans: parseInt(is_twowheeler_id),
+      hhgoodstrans: parseInt(is_household_id),
+      transtwowheelerby: parseInt(twowheelerby_id),
+      ibaappvendor: vendorname,
+      totaldisttrans: parseInt(totaldistance),
+      distinhilly: parseInt(hillyterraindistance),
+      driverbatta: parseInt(diverbattas),
+      tonnagehhgood: parseInt(tonnageofhousehold),
+      maxeligton: parseInt(eligibletonnage),
+      eligtransamt: parseFloat(eligibletransportation),
+      maxeligibletonnage: parseFloat(eligibletonnage) + "",
+      vehicletransbydriver: parseInt(is_driver_id),
+      traveltime: parseInt(traveltime),
+      octroivehicle: parseInt(octroicharges),
+      breakagecharges: parseInt(breakupcharges),
+      receipt_loss: have_receipt_id,
+      eligbreakagecharge: parseFloat(eligiblebreakupcharges),
+      eligibleamount: parseFloat(totaleligibleamount),
+      vendorname: vendorname,
+      vendortype: "",
+      vendorcode: vendorcode,
+      vendorgstno: vendor_gstno,
+      approvedamount: 0,
+      hsncode: HSN_number,
     };
+
+    if (householdbillamount == "") {
+      obj["billedamthhgoodstrans"] = 0;
+    } else {
+      obj["billedamthhgoodstrans"] = parseInt(householdbillamount);
+    }
+
+    if (transportationcharge == "") {
+      obj["transchargesvehicle"] = 0;
+    } else {
+      obj["transchargesvehicle"] = parseInt(transportationcharge);
+    }
+
+    if (noofdaysengaged == "") {
+      obj["daysdrivereng"] = 0;
+    } else {
+      obj["daysdrivereng"] = parseInt(noofdaysengaged);
+    }
+
+    if (bank_gstno == "") {
+      obj["bankgstno"] = "0";
+    } else {
+      obj["bankgstno"] = parseInt(bank_gstno);
+    }
 
     if (is_igst) {
       obj["igst"] = parseFloat(igst);
@@ -547,7 +503,6 @@ export default function PackingExpenses({ route }) {
       obj["cgst"] = parseFloat(cgst);
       obj["sgst"] = parseFloat(sgst);
     }
-  
 
     if (PackingExpenseId != "") {
       obj["id"] = PackingExpenseId;
@@ -651,8 +606,7 @@ export default function PackingExpenses({ route }) {
               from="0"
             ></DropDownDialog>
           )}
-          
-           
+
           <DropDown
             label="Household Goods Transport*"
             hint="Household Goods Transport"
@@ -674,17 +628,17 @@ export default function PackingExpenses({ route }) {
               from="0"
             ></DropDownDialog>
           )}
-           <DropDown
-              label="TransportTwo Wheeler by*"
-              hint="Transport of Two Wheeler by"
-              indata={twowheelerby}
-              ontouch={() => {
-                if (editable) {
-                  settwowheelerstatus(!twowheelerstatus);
-                }
-              }}
-            ></DropDown>
-          
+          <DropDown
+            label="TransportTwo Wheeler by*"
+            hint="Transport of Two Wheeler by"
+            indata={twowheelerby}
+            ontouch={() => {
+              if (editable) {
+                settwowheelerstatus(!twowheelerstatus);
+              }
+            }}
+          ></DropDown>
+
           {twowheelerstatus && (
             <DropDownDialog
               dialogstatus={twowheelerstatus}
@@ -733,7 +687,7 @@ export default function PackingExpenses({ route }) {
             value={hillyterraindistance}
             onChangeEvent={(updated) => {
               sethillyterraindistance(updated);
-              setfirst(false)
+              setfirst(false);
             }}
           ></InputNumberrow>
           <InputNumberrow
@@ -743,7 +697,7 @@ export default function PackingExpenses({ route }) {
             value={tonnageofhousehold}
             onChangeEvent={(updated) => {
               settonnageofhousehold(updated);
-              setfirst(false)
+              setfirst(false);
             }}
           ></InputNumberrow>
           <LabelTextColumnView
@@ -805,7 +759,7 @@ export default function PackingExpenses({ route }) {
             value={traveltime}
             onChangeEvent={(updated) => {
               settraveltime(updated);
-              setfirst(false)
+              setfirst(false);
             }}
           ></InputNumberrow>
           <InputNumberrow
@@ -883,7 +837,7 @@ export default function PackingExpenses({ route }) {
             }}
           ></InputNumberrow>
 
-<DropDown
+          <DropDown
             label="HSN Code*"
             hint="HSN Code"
             indata={HSN_number}

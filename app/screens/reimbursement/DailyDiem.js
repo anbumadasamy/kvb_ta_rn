@@ -115,7 +115,8 @@ export default function DailyDiem({ route }) {
 
   useEffect(() => {
     // return () => {
-      console.log(first+ "Yenda inga vanthaaaa")
+      
+     
     if (!first) {
       if (
         city != "" &&
@@ -124,6 +125,7 @@ export default function DailyDiem({ route }) {
         checkingDate != "" &&
         checkoutDate != ""
       ) {
+        console.log("Inga Vanthutten")
         EligibleAmountCalculation();
       }
     } /* else {
@@ -164,7 +166,7 @@ export default function DailyDiem({ route }) {
         checkingTime +
         ":00",
       todate:
-        moment(dailydiemdatems).format("YYYY-MM-DD") +
+        moment(dailydiemtodatems).format("YYYY-MM-DD") +
         " " +
         checkoutTime +
         ":00",
@@ -189,6 +191,9 @@ export default function DailyDiem({ route }) {
       eligible["declaration"] = 0;
     }
 
+    console.log(JSON.stringify(eligible)+" Eligible")
+    console.log(JSON.stringify(URL.DAILY_DIEM_ElIGIBLE)+" Eligible")
+
     try {
       const response = await fetch(URL.DAILY_DIEM_ElIGIBLE, {
         method: "POST",
@@ -198,6 +203,7 @@ export default function DailyDiem({ route }) {
           Authorization: authCtx.auth_token,
         },
       });
+      console.log(JSON.stringify(response) + " response.status");
       let json = await response.json();
 
       console.log(JSON.stringify(json) + " Eligible Amount Data");
@@ -210,7 +216,7 @@ export default function DailyDiem({ route }) {
 
       seteligibleamount(json.Eligible_amount + "");
       setnoofhour(json.sys_hours + "");
-      setenternoofhour("");
+      // setenternoofhour("");
     } catch (error) {}
   }
 

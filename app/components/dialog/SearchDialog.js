@@ -105,7 +105,7 @@ export default function SearchDialog({
         url = URL.ON_BEHALF_OF_EMPLOYEE_GET + search + "&page=" + count;
         break;
       case "OnBehalfOfEmpclaim":
-        url = URL.ON_BEHALF_OF_EMPLOYEE_GET + search + "&page=" + count;
+        url = URL.ON_BEHALF_OF_EMPLOYEE_GET + "/" + onBehalOfId;
         break;
       case "entity":
         url = URL.ENTITY_LIST;
@@ -263,9 +263,10 @@ export default function SearchDialog({
           break;
         case "OnBehalfOfEmpclaim":
           for (let i = 0; i < json.data.length; i++) {
+            console.log(json.data[i].employeegid + " Employye gid");
             obj = {
-              name: json.data[i].full_name,
-              id: json.data[i].id,
+              name: json.data[i].employee_name,
+              id: json.data[i].employeegid,
             };
             dataArray.push(obj);
           }
@@ -434,7 +435,8 @@ export default function SearchDialog({
                       from == "approver_branch" ||
                       from == "approver_name" ||
                       from == "BS" ||
-                      from == "CC"
+                      from == "CC" ||
+                      from == "OnBehalfOfEmpclaim"
                     ) {
                       setId("");
                     }
@@ -470,6 +472,7 @@ export default function SearchDialog({
   function renderLocationsItem({ ...itemData }) {
     const clickmethod = () => {
       setValue(itemData.item.name);
+
       if (
         from == "client" ||
         from == "BS" ||
@@ -479,8 +482,11 @@ export default function SearchDialog({
         from == "permitted_by" ||
         from == "approver_branch" ||
         from == "approver_name" ||
-        from == "CC"
+        from == "CC" ||
+        from == "BR" ||
+        from == "OnBehalfOfEmpclaim"
       ) {
+        console.log("abc");
         setId(itemData.item.id);
       }
       if (from == "LODGING") {
@@ -488,10 +494,6 @@ export default function SearchDialog({
       }
       if (from == "HSN_Code") {
         setigst(itemData.item.igstrate + "");
-      }
-      if (from == "OnBehalfOfEmpclaim") {
-        setId(itemData.item.id);
-        apicall();
       }
 
       setModalVisible(!isModalVisible);

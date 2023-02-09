@@ -121,6 +121,7 @@ export default function LoginScreen({ navigation }) {
   }
 
   async function login() {
+    console.log("Anbuuuuuuuuuu")
     if (getCredential.username.length == 0) {
       Alert.alert("Please check your username");
       return;
@@ -255,6 +256,7 @@ export default function LoginScreen({ navigation }) {
             </View>
           <LoginButton
             onPressEvent={() => {
+              console.log("Login")
               login();
             }}
           >
